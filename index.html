@@ -1058,8 +1058,9 @@
                     vehicleIdFilter = [];
                 }
             }
+            // Corrected Query: Removed the new columns that don't exist in the DB yet.
             let query = sb.from('reports').select(`
-                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone, customer_feedback_text, customer_feedback_audio,
+                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone,
                 vehicles!inner(*, vehicle_models!inner(brand, model)), 
                 users!inner(username)
             `).order('created_at', { ascending: false });
@@ -2047,27 +2048,47 @@
                 showError('Please save the suggestions before sending a link.');
                 return;
             }
+            // It's crucial to save any pending changes first, as this updates the `suggested` list for the link.
             await saveVehicleUpdate();
             
-            const { data: reportData, error: fetchError } = await sb
+            // Step 1: Fetch the report to get its client_phone and vehicle_id.
+            const { data: reportData, error: reportError } = await sb
                 .from('reports')
-                .select('client_phone, vehicles(client_phone)')
+                .select('client_phone, vehicle_id')
                 .eq('id', currentReportId)
                 .single();
 
-            if (fetchError) {
-                console.error("Error fetching phone number:", fetchError);
+            if (reportError) {
+                console.error("Error fetching report:", reportError);
                 showError("Could not fetch report details to send link.");
                 return;
             }
-            
-            const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
 
+            let clientPhone = reportData.client_phone;
+
+            // Step 2: If the phone number is not on the report, fetch it from the vehicle as a fallback.
+            if (!clientPhone && reportData.vehicle_id) {
+                const { data: vehicleData, error: vehicleError } = await sb
+                    .from('vehicles')
+                    .select('client_phone')
+                    .eq('id', reportData.vehicle_id)
+                    .single();
+
+                if (vehicleError) {
+                    console.error("Error fetching vehicle phone number:", vehicleError);
+                    showError("Found report, but could not fetch the vehicle's phone number.");
+                    return;
+                }
+                clientPhone = vehicleData?.client_phone;
+            }
+
+            // Step 3: Check if we have a phone number from either source.
             if (!clientPhone) {
-                showError("Could not find the client's phone number for this report.");
+                showError("Could not find a client phone number in the report or the vehicle record.");
                 return;
             }
-            
+
+            // Step 4: Proceed with sending the link.
             const clientPhoneWithCountryCode = `91${clientPhone}`;
             const approvalUrl = `${window.location.href.split('?')[0]}?report_id=${currentReportId}`;
             
@@ -2178,3 +2199,4 @@
     </script>
 </body>
 </html>
+
