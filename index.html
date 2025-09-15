@@ -190,6 +190,8 @@
                                     <th>Approved</th>
                                     <th>Materials Required</th>
                                     <th>Marks</th>
+                                    <th>Customer Feedback</th>
+                                    <th>Customer Voice Note</th>
                                 </tr>
                             </thead>
                             <tbody id="admin-report-table-body"></tbody>
@@ -383,11 +385,11 @@
                             <button type="submit" class="btn-secondary">
                                 <span class="material-symbols-outlined">save</span>Save Selections
                             </button>
-                            <button type="button" onclick="sendSuggestionsViaWhatsApp()" class="btn-whatsapp">
+                            <button type="button" onclick="sendApprovalLink()" class="btn-whatsapp">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.269.655 4.505 1.905 6.344l-1.225 4.485 4.635-1.218z"/>
                                 </svg>
-                                <span>Send via WhatsApp</span>
+                                <span>Send Approval Link</span>
                             </button>
                         </div>
                     </form>
@@ -445,6 +447,8 @@
                                     <th>Approved</th>
                                     <th>Materials Required</th>
                                     <th>Marks</th>
+                                    <th>Customer Feedback</th>
+                                    <th>Customer Voice Note</th>
                                 </tr>
                             </thead>
                             <tbody id="report-table-body"></tbody>
@@ -496,6 +500,69 @@
         </footer>
     </div>
     
+    <!-- This is the new screen for customer approvals -->
+    <div id="customer-approval-screen" class="screen">
+        <header class="app-header">
+            <div class="app-header-content">
+                 <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">minor_crash</span> AutoFix Service Approval
+                </h1>
+            </div>
+        </header>
+        <main id="customer-approval-main" class="app-main max-w-2xl mx-auto">
+            <div id="customer-loading" class="text-center py-10">
+                <p class="flex items-center justify-center gap-2 text-lg text-gray-600">
+                    <svg class="animate-spin h-6 w-6 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    Loading your service details...
+                </p>
+            </div>
+            <div id="customer-approval-content" class="hidden space-y-6">
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-3">Vehicle Details</h2>
+                    <div class="grid grid-cols-2 gap-4 border-t pt-3">
+                        <div><p class="text-sm text-gray-500">Vehicle Number</p><p id="cust-vehicle-no" class="font-bold"></p></div>
+                        <div><p class="text-sm text-gray-500">Vehicle Name</p><p id="cust-vehicle-name" class="font-bold"></p></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-3">Please Approve Repairs</h2>
+                    <p class="text-sm text-gray-500 -mt-2 mb-4">Select the services you would like to approve from the list below.</p>
+                    <div id="cust-approval-list" class="space-y-3 border-t pt-4">
+                        <!-- Items will be injected here by JS -->
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-3">Additional Comments or Suggestions</h2>
+                     <textarea id="customer-feedback-text" class="form-input" rows="4" placeholder="If you have any other concerns or requests, please write them here..."></textarea>
+                </div>
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-3">Record a Voice Note</h2>
+                    <p class="text-sm text-gray-500 -mt-2 mb-4">If it's easier, you can record a voice message for our team.</p>
+                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                        <button id="record-btn" onclick="toggleRecording()" class="flex items-center justify-center gap-2 w-full rounded-lg bg-red-600 text-white font-bold py-3 px-4 shadow-sm hover:bg-red-700 transition-colors">
+                            <span class="material-symbols-outlined">mic</span>
+                            <span id="record-btn-text">Start Recording</span>
+                        </button>
+                        <audio id="audio-playback" controls class="hidden w-full"></audio>
+                    </div>
+                     <p id="recording-status" class="text-xs text-center mt-2 text-gray-500"></p>
+                </div>
+                <div id="customer-submit-section">
+                    <button onclick="submitCustomerApproval()" class="btn-primary">
+                        <span class="material-symbols-outlined">task_alt</span>
+                        Submit Approval
+                    </button>
+                </div>
+            </div>
+             <div id="customer-thank-you" class="hidden card text-center py-10">
+                <span class="material-symbols-outlined text-6xl text-green-500">check_circle</span>
+                <h2 class="text-2xl font-bold mt-4">Thank You!</h2>
+                <p class="text-gray-600 mt-1">Your approval has been submitted. Our team will get in touch with you shortly.</p>
+            </div>
+        </main>
+    </div>
+
+
     <div id="success-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">check_circle</span><span id="success-text"></span></div>
     <div id="error-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">error</span><span id="error-text"></span></div>
     
@@ -713,6 +780,10 @@
         let damageMarks = [];
         let uploadedImageFile = null;
         let currentMaterials = [];
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordedAudioBlob = null;
+
         
         // --- UI Element References ---
         const vehicleDetailsSection = document.getElementById('vehicle-details-section'), createVehicleSection = document.getElementById('create-vehicle-section'), newComplaintSection = document.getElementById('new-complaint-section'), searchError = document.getElementById('search-error');
@@ -988,7 +1059,7 @@
                 }
             }
             let query = sb.from('reports').select(`
-                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone, 
+                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone, customer_feedback_text, customer_feedback_audio,
                 vehicles!inner(*, vehicle_models!inner(brand, model)), 
                 users!inner(username)
             `).order('created_at', { ascending: false });
@@ -1032,6 +1103,10 @@
                 const tr = document.createElement('tr');
                 let marksButton = 'N/A';
                 if (row.marks && row.marks.length > 2) marksButton = `<button onclick='openMarksModal(${JSON.stringify(row.marks)})' class="px-2 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 text-xs">View</button>`;
+                let voiceNotePlayer = 'N/A';
+                if(row.customer_feedback_audio) {
+                    voiceNotePlayer = `<audio controls src="${row.customer_feedback_audio}" class="w-48 h-8"></audio>`;
+                }
                 tr.innerHTML = `
                     <td class="flex items-center gap-x-2"><button onclick='printJobCardById(${row.id})' class="text-gray-500 hover:text-green-600 p-1 rounded-full shrink-0"><span class="material-symbols-outlined">download</span></button><span>${row.vehicles.vehicle_no}</span></td>
                     <td>${row.vehicles.vehicle_name || 'N/A'}</td>
@@ -1051,6 +1126,8 @@
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.approved)}">${formatArrayCell(row.approved)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.materials_required)}">${formatArrayCell(row.materials_required)}</td>
                     <td>${marksButton}</td>
+                    <td class="whitespace-normal max-w-xs truncate" title="${row.customer_feedback_text || ''}">${row.customer_feedback_text || 'N/A'}</td>
+                    <td>${voiceNotePlayer}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -1125,7 +1202,6 @@
                 return;
             }
 
-            // First, get the vehicle's base details
             const { data: vehicleData, error: vehicleError } = await sb
                 .from('vehicles')
                 .select(`id, vehicle_no, fuel_type, odometer, client_name, client_phone, vehicle_name, color, engine_no, chassis_no, vehicle_models(brand, model)`)
@@ -1133,7 +1209,6 @@
                 .single();
 
             if (vehicleError) {
-                // Vehicle not found, show the creation form
                 currentVehicleId = null;
                 currentOdometer = 0;
                 document.getElementById('new-vehicle-number').value = vehicleNumber;
@@ -1142,7 +1217,6 @@
                 return;
             }
             
-            // If vehicle is found, get its most recent report to fetch the latest details
             const { data: lastReport, error: reportError } = await sb
                 .from('reports')
                 .select('client_name, client_phone, odometer_reading')
@@ -1153,12 +1227,11 @@
 
             currentVehicleId = vehicleData.id;
             
-            // Use the latest data from the report if available, otherwise use data from the vehicle table itself.
             const displayClientName = lastReport?.client_name || vehicleData.client_name;
             const displayClientPhone = lastReport?.client_phone || vehicleData.client_phone;
             const displayOdometer = lastReport?.odometer_reading || vehicleData.odometer;
 
-            currentOdometer = displayOdometer; // Set this for the odometer check
+            currentOdometer = displayOdometer;
             originalClientName = displayClientName;
             originalClientPhone = displayClientPhone;
 
@@ -1175,7 +1248,7 @@
             document.getElementById('client-phone-wrapper').innerHTML = `<input type="tel" id="detail-client-phone-input" class="form-input" value="${displayClientPhone || ''}" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">`;
             document.getElementById('odometer-display-wrapper').innerHTML = `<input type="number" id="detail-odometer-input" class="form-input" value="${displayOdometer || 0}">`;
             
-            document.getElementById('detail-odometer-input').addEventListener('blur', checkOdometer);
+            document.getElementById('detail-odometer-input').addEventListener('input', checkOdometer);
             
             vehicleDetailsSection.classList.remove('hidden');
             newComplaintSection.classList.remove('hidden');
@@ -1219,20 +1292,16 @@
             const warningSpan = document.getElementById('odometer-warning');
             const newOdometerValue = parseInt(newOdometerInput.value, 10);
 
-            // Only trigger the warning if there is a value entered and it's lower than the previous reading.
             if (newOdometerInput.value && newOdometerValue < currentOdometer) {
                 warningSpan.textContent = 'Reading is lower than last service!';
                 warningSpan.classList.remove('hidden');
                 newOdometerInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
                 
-                // Set a timeout to hide the warning text after 4 seconds.
-                // The red border will remain until a valid value is entered.
                 setTimeout(() => {
                     warningSpan.classList.add('hidden');
                 }, 4000);
 
             } else {
-                // If the value is valid or the field is cleared, remove all warning indicators.
                 warningSpan.textContent = '';
                 warningSpan.classList.add('hidden');
                 newOdometerInput.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
@@ -1312,9 +1381,7 @@
             }
             const updates = {};
             const newOdometer = parseInt(serviceOdometer);
-            // Only update if the new value is higher than the last known value.
             if (newOdometer > currentOdometer) updates.odometer = newOdometer;
-            // Always update client details in the main table to keep them fresh.
             updates.client_name = serviceClientName;
             updates.client_phone = serviceClientPhone;
 
@@ -1331,7 +1398,7 @@
         
         async function handleReportUpdateSearch() {
             const inputVal = document.getElementById('update-search-input').value;
-            const input = normalizeVehicleNumber(inputVal); // Standardize search input
+            const input = normalizeVehicleNumber(inputVal);
             predictionList.innerHTML = '';
             if (!input) {
                 predictionList.classList.add('hidden');
@@ -1379,7 +1446,8 @@
 
             try {
                 originalComplaintsForUpdate = JSON.parse(fullReport.complaint || '[]');
-                newSuggestions = JSON.parse(fullReport.suggested || '[]').filter(s => !originalComplaintsForUpdate.includes(s));
+                const suggested = JSON.parse(fullReport.suggested || '[]');
+                newSuggestions = suggested.filter(s => !originalComplaintsForUpdate.includes(s));
                 currentMaterials = JSON.parse(fullReport.materials_required || '[]');
             } catch (e) {
                 console.error("Could not parse data:", e);
@@ -1453,7 +1521,6 @@
             }
         }
         
-        // --- NEW FUNCTIONS FOR MATERIALS ---
         function addMaterial() {
             const input = document.getElementById('material-input');
             const materialText = input.value.trim();
@@ -1490,8 +1557,7 @@
                 list.appendChild(item);
             });
         }
-        // --- END OF NEW FUNCTIONS FOR MATERIALS ---
-
+        
         async function saveVehicleUpdate() {
             if(!currentReportId) return showError('No report selected for update.');
 
@@ -1522,46 +1588,6 @@
             resetVehicleUpdateScreen();
         }
         
-        async function sendSuggestionsViaWhatsApp() {
-            if (!currentReportId) {
-                showError('No report selected.');
-                return;
-            }
-
-            const allSuggestions = [];
-            document.querySelectorAll('#customer-approval-list span').forEach(span => {
-                allSuggestions.push(span.textContent.trim());
-            });
-
-            if (allSuggestions.length === 0) {
-                showError('Please add at least one suggestion to send.');
-                return;
-            }
-
-            const { data: reportData, error: fetchError } = await sb
-                .from('reports')
-                .select('client_phone')
-                .eq('id', currentReportId)
-                .single();
-
-            if (fetchError || !reportData.client_phone) {
-                showError("Could not find the client's phone number for this report.");
-                return;
-            }
-            const clientPhoneWithCountryCode = `91${reportData.client_phone}`;
-
-            let messageText = `Hi from AutoFix! Please review the following suggested repairs for your vehicle:\n\n`;
-            allSuggestions.forEach((item, index) => {
-                messageText += `${index + 1}. ${item}\n`;
-            });
-            messageText += `\nPlease reply with the numbers of the items you'd like to approve.`;
-
-            const encodedText = encodeURIComponent(messageText);
-            const whatsappUrl = `https://wa.me/${clientPhoneWithCountryCode}?text=${encodedText}`;
-
-            window.open(whatsappUrl, '_blank');
-        }
-
         // --- EXECUTIVE: DUE DATES ---
         async function populateDueDateScreen() {
             const listContainer = document.getElementById('due-date-list');
@@ -1817,42 +1843,226 @@
             setTimeout(() => el.classList.add('hidden'), 4000);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedUser = sessionStorage.getItem('currentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                if (currentUser.role === 'admin') showAdminScreen('admin-dashboard-screen');
-                else if (currentUser.role === 'executive') {
-                    document.getElementById('profile-username').textContent = currentUser.username;
-                    document.getElementById('profile-role').textContent = currentUser.role;
-                    showExecutiveScreen('job-card-screen');
+        
+        // --- CUSTOMER APPROVAL PAGE FUNCTIONS ---
+
+        async function initializeCustomerView(reportId) {
+            // Hide all other primary screens
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-screens').style.display = 'none';
+            document.getElementById('executive-screens').style.display = 'none';
+            
+            // Show the customer approval screen
+            const customerScreen = document.getElementById('customer-approval-screen');
+            customerScreen.classList.add('active-screen');
+
+            const { data, error } = await sb.from('reports')
+                .select(`*, vehicles(*, vehicle_models(brand, model))`)
+                .eq('id', reportId)
+                .single();
+
+            if (error || !data) {
+                document.getElementById('customer-loading').innerHTML = `<p class="text-red-500 font-bold">Error: Could not load report details. The link may be invalid.</p>`;
+                return;
+            }
+
+            // Populate vehicle details
+            document.getElementById('cust-vehicle-no').textContent = data.vehicles.vehicle_no;
+            document.getElementById('cust-vehicle-name').textContent = `${data.vehicles.vehicle_models.brand} ${data.vehicles.vehicle_models.model}`;
+            
+            // Populate approval list
+            const approvalList = document.getElementById('cust-approval-list');
+            approvalList.innerHTML = '';
+            try {
+                const suggested = JSON.parse(data.suggested || '[]');
+                if (suggested.length > 0) {
+                    suggested.forEach(item => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors';
+                        label.innerHTML = `<input type="checkbox" value="${item}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><span class="flex-1">${item}</span>`;
+                        approvalList.appendChild(label);
+                    });
+                } else {
+                     approvalList.innerHTML = '<p class="text-sm text-gray-500">No specific suggestions were added by the mechanic.</p>';
+                }
+            } catch (e) {
+                approvalList.innerHTML = '<p class="text-sm text-red-500">Could not parse suggestions list.</p>';
+            }
+
+            document.getElementById('customer-loading').style.display = 'none';
+            document.getElementById('customer-approval-content').classList.remove('hidden');
+        }
+
+        async function toggleRecording() {
+            const recordBtn = document.getElementById('record-btn');
+            const recordBtnText = document.getElementById('record-btn-text');
+            const audioPlayback = document.getElementById('audio-playback');
+            const recordingStatus = document.getElementById('recording-status');
+
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                recordBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                recordBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                recordBtnText.textContent = 'Start Recording';
+                recordingStatus.textContent = "Recording stopped. You can play it back before submitting.";
+            } else {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    audioChunks = [];
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(recordedAudioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.classList.remove('hidden');
+                        recordBtn.classList.add('hidden'); // Hide record button after recording
+                        // Get the audio tracks to stop the mic light
+                        stream.getTracks().forEach(track => track.stop());
+                    });
+                    
+                    recordBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    recordBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+                    recordBtnText.textContent = 'Stop Recording';
+                    recordingStatus.textContent = "Recording in progress...";
+                    audioPlayback.classList.add('hidden');
+                } catch (err) {
+                    console.error("Error accessing microphone:", err);
+                    showError("Could not access microphone. Please grant permission.");
+                    recordingStatus.textContent = "Microphone access denied.";
                 }
             }
-            carImage = document.getElementById("carImage");
-            damageCanvas = document.getElementById("damageCanvas");
-            checkCanvas = document.getElementById("checkCanvas");
-            if (carImage && damageCanvas && checkCanvas) {
-                damageCtx = damageCanvas.getContext("2d");
-                checkCtx = checkCanvas.getContext("2d");
-                carImage.onload = resizeCanvas;
-                window.addEventListener("resize", resizeCanvas);
-                damageCanvas.addEventListener("click", (e) => {
-                    if (!checkCtx) return;
-                    const rect = damageCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const pixel = checkCtx.getImageData(x, y, 1, 1).data;
-                    const alpha = pixel[3];
-                    if (alpha > 0) {
-                        damageCtx.fillStyle = "red";
-                        damageCtx.beginPath();
-                        damageCtx.arc(x, y, 5, 0, Math.PI * 2);
-                        damageCtx.fill();
-                        damageMarks.push({ x, y });
+        }
+        
+        function blobToBase64(blob) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        async function submitCustomerApproval() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reportId = urlParams.get('report_id');
+            if (!reportId) return showError('Invalid report ID.');
+
+            const approvedItems = [];
+            document.querySelectorAll('#cust-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+                approvedItems.push(checkbox.value);
+            });
+
+            const feedbackText = document.getElementById('customer-feedback-text').value.trim();
+            let feedbackAudioBase64 = null;
+            
+            if (recordedAudioBlob) {
+                feedbackAudioBase64 = await blobToBase64(recordedAudioBlob);
+            }
+            
+            const updateData = {
+                approved: JSON.stringify(approvedItems),
+                customer_feedback_text: feedbackText || null
+            };
+
+            if (feedbackAudioBase64) {
+                updateData.customer_feedback_audio = feedbackAudioBase64;
+            }
+
+            const { error } = await sb.from('reports').update(updateData).eq('id', reportId);
+
+            if (error) {
+                showError(`Failed to submit approval: ${error.message}`);
+                return;
+            }
+            
+            document.getElementById('customer-approval-content').classList.add('hidden');
+            document.getElementById('customer-thank-you').classList.remove('hidden');
+        }
+
+
+        // --- MAIN INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reportIdFromUrl = urlParams.get('report_id');
+            
+            // If a report_id is in the URL, we're in customer view.
+            if (reportIdFromUrl) {
+                initializeCustomerView(reportIdFromUrl);
+            } else {
+                // Otherwise, proceed with the normal app logic.
+                const savedUser = sessionStorage.getItem('currentUser');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                    if (currentUser.role === 'admin') showAdminScreen('admin-dashboard-screen');
+                    else if (currentUser.role === 'executive') {
+                        document.getElementById('profile-username').textContent = currentUser.username;
+                        document.getElementById('profile-role').textContent = currentUser.role;
+                        showExecutiveScreen('job-card-screen');
                     }
-                });
+                }
+                
+                carImage = document.getElementById("carImage");
+                damageCanvas = document.getElementById("damageCanvas");
+                checkCanvas = document.getElementById("checkCanvas");
+                if (carImage && damageCanvas && checkCanvas) {
+                    damageCtx = damageCanvas.getContext("2d");
+                    checkCtx = checkCanvas.getContext("2d");
+                    carImage.onload = resizeCanvas;
+                    window.addEventListener("resize", resizeCanvas);
+                    damageCanvas.addEventListener("click", (e) => {
+                        if (!checkCtx) return;
+                        const rect = damageCanvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        const pixel = checkCtx.getImageData(x, y, 1, 1).data;
+                        const alpha = pixel[3];
+                        if (alpha > 0) {
+                            damageCtx.fillStyle = "red";
+                            damageCtx.beginPath();
+                            damageCtx.arc(x, y, 5, 0, Math.PI * 2);
+                            damageCtx.fill();
+                            damageMarks.push({ x, y });
+                        }
+                    });
+                }
             }
         });
+        
+        async function sendApprovalLink() {
+            if (!currentReportId) {
+                showError('Please save the suggestions before sending a link.');
+                return;
+            }
+            // First, save any pending changes
+            await saveVehicleUpdate();
+            
+            const { data: reportData, error: fetchError } = await sb
+                .from('reports')
+                .select('client_phone')
+                .eq('id', currentReportId)
+                .single();
+
+            if (fetchError || !reportData.client_phone) {
+                showError("Could not find the client's phone number for this report.");
+                return;
+            }
+            
+            const clientPhoneWithCountryCode = `91${reportData.client_phone}`;
+            const approvalUrl = `${window.location.href.split('?')[0]}?report_id=${currentReportId}`;
+            
+            let messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+
+            const encodedText = encodeURIComponent(messageText);
+            const whatsappUrl = `https://wa.me/${clientPhoneWithCountryCode}?text=${encodedText}`;
+
+            window.open(whatsappUrl, '_blank');
+        }
 		
         function printJobCardById(reportId) {
             const reportData = reportsDataStore[reportId];
@@ -1934,6 +2144,7 @@
                 for (let j = 0; j < cols.length; j++) {
                     if (j === 0) row.push(formatCell(cols[j].querySelector('span:last-child').textContent.trim()));
                     else if (cols[j].querySelector('button')) row.push('See in App');
+                    else if (cols[j].querySelector('audio')) row.push('Has Voice Note');
                     else row.push(formatCell(cols[j].textContent.trim()));
                 }
                 csv.push(row.join(','));
