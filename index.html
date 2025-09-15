@@ -1058,12 +1058,13 @@
                     vehicleIdFilter = [];
                 }
             }
-            // Corrected Query: Removed the new columns that don't exist in the DB yet.
+            
             let query = sb.from('reports').select(`
-                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone,
+                id, created_at, status, complaint, suggested, approved, marks, materials_required, odometer_reading, client_name, client_phone, customer_feedback_text, customer_feedback_audio,
                 vehicles!inner(*, vehicle_models!inner(brand, model)), 
                 users!inner(username)
             `).order('created_at', { ascending: false });
+
             if (vehicleIdFilter !== null) {
                 if (vehicleIdFilter.length === 0) {
                     tableBody.innerHTML = '';
@@ -2045,10 +2046,11 @@
         
         async function sendApprovalLink() {
             if (!currentReportId) {
-                showError('Please save the suggestions before sending a link.');
+                showError('No report is currently selected.');
                 return;
             }
-            // It's crucial to save any pending changes first, as this updates the `suggested` list for the link.
+            
+            // Save any changes before sending the link.
             await saveVehicleUpdate();
             
             // Step 1: Fetch the report to get its client_phone and vehicle_id.
@@ -2059,8 +2061,8 @@
                 .single();
 
             if (reportError) {
-                console.error("Error fetching report:", reportError);
-                showError("Could not fetch report details to send link.");
+                console.error("Error fetching report details:", reportError);
+                showError("Could not fetch report details to send the link.");
                 return;
             }
 
@@ -2075,8 +2077,8 @@
                     .single();
 
                 if (vehicleError) {
-                    console.error("Error fetching vehicle phone number:", vehicleError);
-                    showError("Found report, but could not fetch the vehicle's phone number.");
+                    console.error("Error fetching vehicle's phone number:", vehicleError);
+                    showError("Could not fetch the vehicle's primary phone number.");
                     return;
                 }
                 clientPhone = vehicleData?.client_phone;
@@ -2084,11 +2086,11 @@
 
             // Step 3: Check if we have a phone number from either source.
             if (!clientPhone) {
-                showError("Could not find a client phone number in the report or the vehicle record.");
+                showError("A client phone number could not be found for this report or vehicle.");
                 return;
             }
 
-            // Step 4: Proceed with sending the link.
+            // Step 4: Proceed with building and opening the WhatsApp link.
             const clientPhoneWithCountryCode = `91${clientPhone}`;
             const approvalUrl = `${window.location.href.split('?')[0]}?report_id=${currentReportId}`;
             
@@ -2098,6 +2100,7 @@
             const whatsappUrl = `https://wa.me/${clientPhoneWithCountryCode}?text=${encodedText}`;
 
             window.open(whatsappUrl, '_blank');
+            showSuccessMessage("Approval link is being prepared...");
         }
 		
         function printJobCardById(reportId) {
@@ -2199,4 +2202,3 @@
     </script>
 </body>
 </html>
-
