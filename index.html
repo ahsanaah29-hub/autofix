@@ -1323,13 +1323,21 @@
             };
             if (!newVehicle.model_id || !newVehicle.fuel_type || !newVehicle.odometer || !newVehicle.client_name || !newVehicle.client_phone || !newVehicle.engine_no || !newVehicle.chassis_no) return showError('Please fill all mandatory vehicle details.');
             if (!/^\d{10}$/.test(newVehicle.client_phone)) return showError('Please enter a valid 10-digit phone number.');
+            
             const { data, error } = await sb.from('vehicles').insert(newVehicle).select().single();
-            if (error) return showError(`Failed to create vehicle: ${error.message}`);
+            
+            if (error) {
+                console.error("Error creating vehicle:", error);
+                return showError(`Failed to create vehicle: ${error.message}`);
+            }
+
             currentVehicleId = data.id;
             document.getElementById('create-vehicle-form').reset();
             createVehicleSection.classList.add('hidden');
-            showSuccessMessage('Vehicle created successfully!');
-            searchVehicle();
+            showSuccessMessage('Vehicle created successfully! Loading complaint form...');
+            
+            // Await the search to ensure the UI is fully updated before the user can proceed.
+            await searchVehicle();
         }
 
         function addComplaint() {
@@ -2039,21 +2047,28 @@
                 showError('Please save the suggestions before sending a link.');
                 return;
             }
-            // First, save any pending changes
             await saveVehicleUpdate();
             
             const { data: reportData, error: fetchError } = await sb
                 .from('reports')
-                .select('client_phone')
+                .select('client_phone, vehicles(client_phone)')
                 .eq('id', currentReportId)
                 .single();
 
-            if (fetchError || !reportData.client_phone) {
+            if (fetchError) {
+                console.error("Error fetching phone number:", fetchError);
+                showError("Could not fetch report details to send link.");
+                return;
+            }
+            
+            const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
+
+            if (!clientPhone) {
                 showError("Could not find the client's phone number for this report.");
                 return;
             }
             
-            const clientPhoneWithCountryCode = `91${reportData.client_phone}`;
+            const clientPhoneWithCountryCode = `91${clientPhone}`;
             const approvalUrl = `${window.location.href.split('?')[0]}?report_id=${currentReportId}`;
             
             let messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
