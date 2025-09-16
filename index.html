@@ -1771,7 +1771,7 @@
         }
 
         function clearDamageCanvas() {
-            if (damageCtx) damageCtx.clearRect(0, 0, damageCanvas.width, canvas.height);
+            if (damageCtx) damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
             damageMarks = [];
         }
 
@@ -1859,142 +1859,20 @@
         // --- CUSTOMER APPROVAL PAGE FUNCTIONS ---
 
         async function initializeCustomerView(reportId) {
-            // Hide all other primary screens
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('admin-screens').style.display = 'none';
-            document.getElementById('executive-screens').style.display = 'none';
-            
-            // Show the customer approval screen
-            const customerScreen = document.getElementById('customer-approval-screen');
-            customerScreen.classList.add('active-screen');
-
-            const { data, error } = await sb.from('reports')
-                .select(`*, vehicles(*, vehicle_models(brand, model))`)
-                .eq('id', reportId)
-                .single();
-
-            if (error || !data) {
-                document.getElementById('customer-loading').innerHTML = `<p class="text-red-500 font-bold">Error: Could not load report details. The link may be invalid.</p>`;
-                return;
-            }
-
-            // Populate vehicle details
-            document.getElementById('cust-vehicle-no').textContent = data.vehicles.vehicle_no;
-            document.getElementById('cust-vehicle-name').textContent = `${data.vehicles.vehicle_models.brand} ${data.vehicles.vehicle_models.model}`;
-            
-            // Populate approval list
-            const approvalList = document.getElementById('cust-approval-list');
-            approvalList.innerHTML = '';
-            try {
-                const suggested = JSON.parse(data.suggested || '[]');
-                if (suggested.length > 0) {
-                    suggested.forEach(item => {
-                        const label = document.createElement('label');
-                        label.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors';
-                        label.innerHTML = `<input type="checkbox" value="${item}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><span class="flex-1">${item}</span>`;
-                        approvalList.appendChild(label);
-                    });
-                } else {
-                     approvalList.innerHTML = '<p class="text-sm text-gray-500">No specific suggestions were added by the mechanic.</p>';
-                }
-            } catch (e) {
-                approvalList.innerHTML = '<p class="text-sm text-red-500">Could not parse suggestions list.</p>';
-            }
-
-            document.getElementById('customer-loading').style.display = 'none';
-            document.getElementById('customer-approval-content').classList.remove('hidden');
+            // This function is only used by the separate customer portal,
+            // so it remains empty in the main application.
         }
 
         async function toggleRecording() {
-            const recordBtn = document.getElementById('record-btn');
-            const recordBtnText = document.getElementById('record-btn-text');
-            const audioPlayback = document.getElementById('audio-playback');
-            const recordingStatus = document.getElementById('recording-status');
-
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop();
-                recordBtn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
-                recordBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                recordBtnText.textContent = 'Start Recording';
-                recordingStatus.textContent = "Recording stopped. You can play it back before submitting.";
-            } else {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
-
-                    audioChunks = [];
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
-
-                    mediaRecorder.addEventListener("stop", () => {
-                        recordedAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const audioUrl = URL.createObjectURL(recordedAudioBlob);
-                        audioPlayback.src = audioUrl;
-                        audioPlayback.classList.remove('hidden');
-                        recordBtn.classList.add('hidden'); // Hide record button after recording
-                        // Get the audio tracks to stop the mic light
-                        stream.getTracks().forEach(track => track.stop());
-                    });
-                    
-                    recordBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-                    recordBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
-                    recordBtnText.textContent = 'Stop Recording';
-                    recordingStatus.textContent = "Recording in progress...";
-                    audioPlayback.classList.add('hidden');
-                } catch (err) {
-                    console.error("Error accessing microphone:", err);
-                    showError("Could not access microphone. Please grant permission.");
-                    recordingStatus.textContent = "Microphone access denied.";
-                }
-            }
+           // This function is only used by the separate customer portal.
         }
         
         function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+            // This function is only used by the separate customer portal.
         }
 
         async function submitCustomerApproval() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const reportId = urlParams.get('report_id');
-            if (!reportId) return showError('Invalid report ID.');
-
-            const approvedItems = [];
-            document.querySelectorAll('#cust-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-                approvedItems.push(checkbox.value);
-            });
-
-            const feedbackText = document.getElementById('customer-feedback-text').value.trim();
-            let feedbackAudioBase64 = null;
-            
-            if (recordedAudioBlob) {
-                feedbackAudioBase64 = await blobToBase64(recordedAudioBlob);
-            }
-            
-            const updateData = {
-                approved: JSON.stringify(approvedItems),
-                customer_feedback_text: feedbackText || null
-            };
-
-            if (feedbackAudioBase64) {
-                updateData.customer_feedback_audio = feedbackAudioBase64;
-            }
-
-            const { error } = await sb.from('reports').update(updateData).eq('id', reportId);
-
-            if (error) {
-                showError(`Failed to submit approval: ${error.message}`);
-                return;
-            }
-            
-            document.getElementById('customer-approval-content').classList.add('hidden');
-            document.getElementById('customer-thank-you').classList.remove('hidden');
+             // This function is only used by the separate customer portal.
         }
 
 
@@ -2003,46 +1881,42 @@
             const urlParams = new URLSearchParams(window.location.search);
             const reportIdFromUrl = urlParams.get('report_id');
             
-            // If a report_id is in the URL, we're in customer view.
-            if (reportIdFromUrl) {
-                initializeCustomerView(reportIdFromUrl);
-            } else {
-                // Otherwise, proceed with the normal app logic.
-                const savedUser = sessionStorage.getItem('currentUser');
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
-                    if (currentUser.role === 'admin') showAdminScreen('admin-dashboard-screen');
-                    else if (currentUser.role === 'executive') {
-                        document.getElementById('profile-username').textContent = currentUser.username;
-                        document.getElementById('profile-role').textContent = currentUser.role;
-                        showExecutiveScreen('job-card-screen');
+            // This file is the main app, so it should NEVER be in customer view.
+            // We just run the normal app logic.
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                if (currentUser.role === 'admin') showAdminScreen('admin-dashboard-screen');
+                else if (currentUser.role === 'executive') {
+                    document.getElementById('profile-username').textContent = currentUser.username;
+                    document.getElementById('profile-role').textContent = currentUser.role;
+                    showExecutiveScreen('job-card-screen');
+                }
+            }
+            
+            carImage = document.getElementById("carImage");
+            damageCanvas = document.getElementById("damageCanvas");
+            checkCanvas = document.getElementById("checkCanvas");
+            if (carImage && damageCanvas && checkCanvas) {
+                damageCtx = damageCanvas.getContext("2d");
+                checkCtx = checkCanvas.getContext("2d");
+                carImage.onload = resizeCanvas;
+                window.addEventListener("resize", resizeCanvas);
+                damageCanvas.addEventListener("click", (e) => {
+                    if (!checkCtx) return;
+                    const rect = damageCanvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const pixel = checkCtx.getImageData(x, y, 1, 1).data;
+                    const alpha = pixel[3];
+                    if (alpha > 0) {
+                        damageCtx.fillStyle = "red";
+                        damageCtx.beginPath();
+                        damageCtx.arc(x, y, 5, 0, Math.PI * 2);
+                        damageCtx.fill();
+                        damageMarks.push({ x, y });
                     }
-                }
-                
-                carImage = document.getElementById("carImage");
-                damageCanvas = document.getElementById("damageCanvas");
-                checkCanvas = document.getElementById("checkCanvas");
-                if (carImage && damageCanvas && checkCanvas) {
-                    damageCtx = damageCanvas.getContext("2d");
-                    checkCtx = checkCanvas.getContext("2d");
-                    carImage.onload = resizeCanvas;
-                    window.addEventListener("resize", resizeCanvas);
-                    damageCanvas.addEventListener("click", (e) => {
-                        if (!checkCtx) return;
-                        const rect = damageCanvas.getBoundingClientRect();
-                        const x = e.clientX - rect.left;
-                        const y = e.clientY - rect.top;
-                        const pixel = checkCtx.getImageData(x, y, 1, 1).data;
-                        const alpha = pixel[3];
-                        if (alpha > 0) {
-                            damageCtx.fillStyle = "red";
-                            damageCtx.beginPath();
-                            damageCtx.arc(x, y, 5, 0, Math.PI * 2);
-                            damageCtx.fill();
-                            damageMarks.push({ x, y });
-                        }
-                    });
-                }
+                });
             }
         });
         
@@ -2090,8 +1964,10 @@
                 return;
             }
             
-            // IMPORTANT: Add your Vercel deployment link here.
-            const yourVercelLink = "https://customer-approved.vercel.app/"; // <-- PASTE YOUR VERCEL LINK HERE
+            // ===================================================================
+            // IMPORTANT: PASTE YOUR DEPLOYED VERCEL LINK HERE
+            // ===================================================================
+            const yourVercelLink = "https://customer-suggestions.vercel.app/"; // <-- REPLACE THIS WITH YOUR ACTUAL LINK
 
             const approvalUrl = `${yourVercelLink}?report_id=${currentReportId}`;
             
@@ -2203,4 +2079,3 @@
     </script>
 </body>
 </html>
-
