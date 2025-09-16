@@ -362,7 +362,7 @@
                     </div>
                 </div>
                 <div id="update-form-section" class="card hidden">
-                    <form onsubmit="event.preventDefault(); saveVehicleUpdate();" class="space-y-6">
+                    <form onsubmit="event.preventDefault(); saveVehicleUpdate(true);" class="space-y-6">
                         <div><label class="form-label">Suggested Repair (from Executive)</label><div class="flex items-center gap-2"><input id="suggestion-input" type="text" class="form-input flex-grow" placeholder="e.g., Change engine oil"><button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><span class="material-symbols-outlined">add</span></button></div><div id="executive-suggestions-list" class="mt-3 space-y-2"></div></div>
                         <div><h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved Suggestions</h3><div id="customer-approval-list" class="space-y-2"><p class="text-sm text-gray-500">Add suggestions above to see them here for approval.</p></div></div>
                         
@@ -1568,7 +1568,7 @@
             });
         }
         
-        async function saveVehicleUpdate() {
+        async function saveVehicleUpdate(resetAfterSave = true) {
             if(!currentReportId) return showError('No report selected for update.');
 
             const deliveryDate = document.getElementById('delivery-date').value;
@@ -1594,8 +1594,10 @@
                 return showError(`Failed to save update: ${error.message}`);
             }
 
-            showSuccessMessage('Update saved successfully!');
-            resetVehicleUpdateScreen();
+            if (resetAfterSave) {
+                showSuccessMessage('Update saved successfully!');
+                resetVehicleUpdateScreen();
+            }
         }
         
         // --- EXECUTIVE: DUE DATES ---
@@ -1769,7 +1771,7 @@
         }
 
         function clearDamageCanvas() {
-            if (damageCtx) damageCtx.clearRect(0, 0, damageCanvas.width, damageCanvas.height);
+            if (damageCtx) damageCtx.clearRect(0, 0, damageCanvas.width, canvas.height);
             damageMarks = [];
         }
 
@@ -2050,10 +2052,10 @@
                 return;
             }
             
-            // Save any changes before sending the link.
-            await saveVehicleUpdate();
+            // Save any changes WITHOUT clearing the form.
+            await saveVehicleUpdate(false); 
             
-            // Step 1: Fetch the report to get its client_phone and vehicle_id.
+            // Now that changes are saved and currentReportId is still set, fetch the phone number.
             const { data: reportData, error: reportError } = await sb
                 .from('reports')
                 .select('client_phone, vehicle_id')
@@ -2068,7 +2070,6 @@
 
             let clientPhone = reportData.client_phone;
 
-            // Step 2: If the phone number is not on the report, fetch it from the vehicle as a fallback.
             if (!clientPhone && reportData.vehicle_id) {
                 const { data: vehicleData, error: vehicleError } = await sb
                     .from('vehicles')
@@ -2084,20 +2085,20 @@
                 clientPhone = vehicleData?.client_phone;
             }
 
-            // Step 3: Check if we have a phone number from either source.
             if (!clientPhone) {
                 showError("A client phone number could not be found for this report or vehicle.");
                 return;
             }
+            
+            // IMPORTANT: Add your Vercel deployment link here.
+            const yourVercelLink = "https://customer-approved.vercel.app/"; // <-- PASTE YOUR VERCEL LINK HERE
 
-            // Step 4: Proceed with building and opening the WhatsApp link.
-            const clientPhoneWithCountryCode = `91${clientPhone}`;
-            const approvalUrl = `${window.location.href.split('?')[0]}?report_id=${currentReportId}`;
+            const approvalUrl = `${yourVercelLink}?report_id=${currentReportId}`;
             
             let messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
 
             const encodedText = encodeURIComponent(messageText);
-            const whatsappUrl = `https://wa.me/${clientPhoneWithCountryCode}?text=${encodedText}`;
+            const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
             window.open(whatsappUrl, '_blank');
             showSuccessMessage("Approval link is being prepared...");
@@ -2202,3 +2203,4 @@
     </script>
 </body>
 </html>
+
