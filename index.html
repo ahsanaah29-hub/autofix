@@ -1933,70 +1933,99 @@
             }
         }
 
-        async function saveVehicleUpdate(shouldReset = true) {
-            if(!currentReportId) return showError('No report selected for update.');
+        // REPLACE the existing saveVehicleUpdate function
+async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
+    if (!currentReportId) {
+        return showError('No report selected for update.');
+    }
 
-            const deliveryDate = document.getElementById('delivery-date').value;
-            if(!deliveryDate) return showError('Please select an expected delivery date.');
+    const deliveryDate = document.getElementById('delivery-date').value;
+    if (!deliveryDate) {
+        return showError('Please select an expected delivery date.');
+    }
 
-            const approvedItems = [];
-            document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-                approvedItems.push(checkbox.nextElementSibling.textContent);
-            });
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        approvedItems.push(checkbox.nextElementSibling.textContent);
+    });
 
-            const allSuggestions = [...new Set(newSuggestions)];
+    const allSuggestions = [...new Set(newSuggestions)];
 
-            const updateData = {
-                suggested: JSON.stringify(allSuggestions),
-                approved: JSON.stringify(approvedItems),
-                materials_required: JSON.stringify(requiredMaterials),
-                expected_delivery: deliveryDate,
-                status: 'Ongoing'
-            };
+    // Set the status based on whether the WhatsApp link is being sent.
+    let reportStatus = 'Ongoing';
+    if (isForWhatsapp) {
+        reportStatus = 'Awaiting Customer';
+    }
 
-            const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-            if(error) return showError(`Failed to save update: ${error.message}`);
+    const updateData = {
+        suggested: JSON.stringify(allSuggestions),
+        approved: JSON.stringify(approvedItems),
+        materials_required: JSON.stringify(requiredMaterials),
+        expected_delivery: deliveryDate,
+        status: reportStatus // Use the new dynamic status here
+    };
 
-            showSuccessMessage('Update saved successfully!');
-            if (shouldReset) {
-                resetVehicleUpdateScreen();
-            }
-        }
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if (error) {
+        return showError(`Failed to save update: ${error.message}`);
+    }
+
+    showSuccessMessage('Update saved successfully!');
+    if (shouldReset) {
+        resetVehicleUpdateScreen();
+    }
+}
         
-        async function sendApprovalLink() {
-            if (!currentReportId) { showError('No report is currently selected.'); return; }
-            await saveVehicleUpdate(false); // Save current state before sending
-            const { data: reportData, error: reportError } = await sb
-                .from('reports')
-                .select('client_phone, vehicle_id')
-                .eq('id', currentReportId)
-                .single();
+        // REPLACE the existing sendApprovalLink function
+async function sendApprovalLink() {
+    if (!currentReportId) {
+        showError('No report is currently selected.');
+        return;
+    }
 
-            if (reportError) { console.error("Error fetching report details:", reportError); showError("Could not fetch report details to send the link."); return; }
-            
-            let clientPhone = reportData.client_phone;
-            if (!clientPhone && reportData.vehicle_id) {
-                const { data: vehicleData, error: vehicleError } = await sb
-                    .from('vehicles')
-                    .select('client_phone')
-                    .eq('id', reportData.vehicle_id)
-                    .single();
-                if (vehicleError) { console.error("Error fetching vehicle's phone number:", vehicleError); showError("Could not fetch the vehicle's primary phone number."); return; }
-                clientPhone = vehicleData?.client_phone;
-            }
+    // This line is the key fix. It saves the update AND sets the status.
+    await saveVehicleUpdate(false, true);
 
-            if (!clientPhone) { showError("A client phone number could not be found for this report or vehicle."); return; }
-            
-            const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
-            const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
-            
-            const encodedText = encodeURIComponent(messageText);
-            const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
-            
-            window.open(whatsappUrl, '_blank');
+    const { data: reportData, error: reportError } = await sb
+        .from('reports')
+        .select('client_phone, vehicle_id')
+        .eq('id', currentReportId)
+        .single();
+
+    if (reportError) {
+        console.error("Error fetching report details:", reportError);
+        showError("Could not fetch report details to send the link.");
+        return;
+    }
+
+    let clientPhone = reportData.client_phone;
+    if (!clientPhone && reportData.vehicle_id) {
+        const { data: vehicleData, error: vehicleError } = await sb
+            .from('vehicles')
+            .select('client_phone')
+            .eq('id', reportData.vehicle_id)
+            .single();
+        if (vehicleError) {
+            console.error("Error fetching vehicle's phone number:", vehicleError);
+            showError("Could not fetch the vehicle's primary phone number.");
+            return;
         }
+        clientPhone = vehicleData?.client_phone;
+    }
 
+    if (!clientPhone) {
+        showError("A client phone number could not be found for this report or vehicle.");
+        return;
+    }
 
+    const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
+    const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+
+    const encodedText = encodeURIComponent(messageText);
+    const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
+
+    window.open(whatsappUrl, '_blank');
+}
 		// REPLACE the existing populateNotStartedJobs function with this one
 async function populateNotStartedJobs() {
     const listContainer = document.getElementById('not-started-jobs-list');
