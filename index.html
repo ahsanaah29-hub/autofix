@@ -74,6 +74,13 @@
         .due-date-item.expanded .due-date-header .material-symbols-outlined {
             transform: rotate(180deg);
         }
+	/* ADD THIS CSS */
+	.tab-button {
+   	 @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
+	}
+	.tab-button.active-tab {
+  	 @apply border-blue-600 text-blue-600;
+	}
 		/* Styles for Printing */
         .printable-area {
             display: none;
@@ -378,33 +385,39 @@
 
 
 			<main class="app-main">
-<div id="update-main-view" class="space-y-4">
     <div class="card relative">
         <h2 class="text-xl font-bold mb-4">Search Report to Update</h2>
         <input id="update-search-input" type="text" placeholder="Start typing vehicle number..." class="form-input" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')" onkeyup="handleReportUpdateSearch()">
         <div id="prediction-list" class="absolute top-full left-5 right-5 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a href="javascript:void(0)" onclick="showUpdateSubView('pending-jobs-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-            <span class="material-symbols-outlined text-5xl text-red-600">pending_actions</span>
-            <h2 class="text-lg font-bold mt-2">Pending Jobs</h2>
-            <p class="text-sm text-[var(--text-secondary)]">Jobs not yet started</p>
-        </a>
-        
-        <a href="javascript:void(0)" onclick="showUpdateSubView('awaiting-response-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-            <span class="material-symbols-outlined text-5xl text-blue-600">hourglass_top</span>
-            <h2 class="text-lg font-bold mt-2">Awaiting Response</h2>
-            <p class="text-sm text-[var(--text-secondary)]">Approvals sent to customer</p>
-        </a>
-
-        <a href="javascript:void(0)" onclick="showUpdateSubView('customer-response-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-            <span class="material-symbols-outlined text-5xl text-green-600">rate_review</span>
-            <h2 class="text-lg font-bold mt-2">Responses Received</h2>
-            <p class="text-sm text-[var(--text-secondary)]">Act on received approvals</p>
-        </a>
+    <div id="update-tab-container" class="card !p-0">
+        <div class="flex border-b border-gray-200 px-5">
+            <button id="tab-btn-pending" class="tab-button active-tab" onclick="showUpdateTab('pending')">Pending Jobs</button>
+            <button id="tab-btn-awaiting" class="tab-button" onclick="showUpdateTab('awaiting')">Awaiting Response</button>
+            <button id="tab-btn-responses" class="tab-button" onclick="showUpdateTab('responses')">Responses Received</button>
+        </div>
+        <div class="p-5">
+            <div id="pending-jobs-panel" class="tab-panel">
+                <div id="not-started-jobs-list" class="space-y-3"></div>
+                <p id="no-pending-jobs-message" class="text-center text-gray-500 py-8 hidden">No pending job cards found.</p>
+            </div>
+            <div id="awaiting-response-panel" class="tab-panel hidden">
+                <div id="awaiting-response-list" class="space-y-3"></div>
+                <p id="no-awaiting-response-message" class="text-center text-gray-500 py-8 hidden">No jobs are currently awaiting a customer response.</p>
+            </div>
+            <div id="responses-received-panel" class="tab-panel hidden">
+                <div id="customer-response-list" class="space-y-3"></div>
+                <p id="no-customer-response-message" class="text-center text-gray-500 py-8 hidden">No new customer responses found.</p>
+            </div>
+        </div>
     </div>
-</div>
+
+    <div id="update-details-section" class="card hidden space-y-4">
+        </div>
+    <div id="update-form-section" class="card hidden">
+        </div>
+</main>
 <div id="awaiting-response-view" class="update-sub-view hidden">
     <div class="card">
         <div class="flex items-center mb-4">
@@ -2060,26 +2073,25 @@ card.innerHTML = `
 
 		// ADD THIS NEW FUNCTION
 // REPLACE THIS ENTIRE FUNCTION
-function showUpdateSubView(viewId) {
-    // Hide all main views within the update screen
-    document.getElementById('update-main-view').classList.add('hidden');
-    document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
-
-    // Show the requested view
-    const viewToShow = document.getElementById(viewId);
-    if (viewToShow) {
-        viewToShow.classList.remove('hidden');
-    }
+// ADD THIS NEW FUNCTION
+function showUpdateTab(tabName) {
+    // Manage active state for tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active-tab'));
     
-    // Populate the list when its view is shown
-    if (viewId === 'pending-jobs-view') {
+    // Manage visibility for tab content panels
+    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
+
+    if (tabName === 'pending') {
+        document.getElementById('tab-btn-pending').classList.add('active-tab');
+        document.getElementById('pending-jobs-panel').classList.remove('hidden');
         populateNotStartedJobs();
-    }
-    // ADD THIS 'if' BLOCK
-    if (viewId === 'awaiting-response-view') {
+    } else if (tabName === 'awaiting') {
+        document.getElementById('tab-btn-awaiting').classList.add('active-tab');
+        document.getElementById('awaiting-response-panel').classList.remove('hidden');
         populateAwaitingResponseJobs();
-    }
-    if (viewId === 'customer-response-view') {
+    } else if (tabName === 'responses') {
+        document.getElementById('tab-btn-responses').classList.add('active-tab');
+        document.getElementById('responses-received-panel').classList.remove('hidden');
         populateCustomerResponseJobs();
     }
 }
@@ -2393,13 +2405,13 @@ async function populateAwaitingResponseJobs() {
         }
 
 // REPLACE the existing selectReportForUpdate function
+// REPLACE the existing selectReportForUpdate function
 function selectReportForUpdate(report) {
-    // Hide the main dashboard and list views
-    document.getElementById('update-main-view').classList.add('hidden');
-    document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
+    // Hide the tab interface and search bar to show the form
+    document.getElementById('update-tab-container').classList.add('hidden');
+    document.querySelector('#update-main-view .card.relative').classList.add('hidden'); // Hides search
 
     currentReportId = report.id;
-    document.getElementById('update-search-input').value = report.vehicles.vehicle_no;
     predictionList.classList.add('hidden');
     document.getElementById('update-detail-number').textContent = report.vehicles.vehicle_no;
     updateDetailsSection.classList.remove('hidden');
@@ -2408,22 +2420,20 @@ function selectReportForUpdate(report) {
     try {
         originalComplaintsForUpdate = JSON.parse(report.complaint || '[]');
     } catch (e) {
-        console.error("Could not parse complaints:", e);
         originalComplaintsForUpdate = [];
     }
-     try {
+    try {
         newSuggestions = report.suggested ? JSON.parse(report.suggested) : [];
-    } catch(e) {
-        console.error("Could not parse suggestions:", e);
+    } catch (e) {
         newSuggestions = [];
     }
     requiredMaterials = [];
-    
+
     const complaintDisplayList = document.getElementById('original-complaints-list');
     const complaintSummaryP = document.getElementById('update-detail-complaint');
     const complaintDisplayDiv = document.getElementById('original-complaints-display');
     complaintDisplayList.innerHTML = '';
-    
+
     if (originalComplaintsForUpdate.length > 0) {
         complaintSummaryP.textContent = `${originalComplaintsForUpdate.length} issue(s) registered.`;
         originalComplaintsForUpdate.forEach(complaint => {
@@ -2433,8 +2443,8 @@ function selectReportForUpdate(report) {
         });
         complaintDisplayDiv.classList.remove('hidden');
     } else {
-         complaintSummaryP.textContent = 'No complaints registered.';
-         complaintDisplayDiv.classList.add('hidden');
+        complaintSummaryP.textContent = 'No complaints registered.';
+        complaintDisplayDiv.classList.add('hidden');
     }
 
     const feedbackDisplay = document.getElementById('customer-feedback-display');
@@ -2466,26 +2476,23 @@ function selectReportForUpdate(report) {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('delivery-date').setAttribute('min', today);
 
-	// ADD THIS LOGIC AT THE END OF THE FUNCTION
-const whatsappButton = document.getElementById('send-whatsapp-btn');
-if (report.approved !== null) {
-    // If a response has been received, forcefully hide the button.
-    whatsappButton.style.display = 'none';
-} else {
-    // Otherwise, make sure it's visible as a flex item.
-    whatsappButton.style.display = 'flex';
-}
+    const whatsappButton = document.getElementById('send-whatsapp-btn');
+    if (report.approved !== null) {
+        whatsappButton.style.display = 'none';
+    } else {
+        whatsappButton.style.display = 'flex';
+    }
 }
 
 // REPLACE the existing resetVehicleUpdateScreen function
 function resetVehicleUpdateScreen() {
-    // Hide update form and sub-views
+    // Hide update form sections
     document.getElementById('update-details-section').classList.add('hidden');
     document.getElementById('update-form-section').classList.add('hidden');
-    document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
 
-    // Show the main dashboard view
-    document.getElementById('update-main-view').classList.remove('hidden');
+    // Show the tab interface and search bar
+    document.getElementById('update-tab-container').classList.remove('hidden');
+    document.querySelector('#update-main-view .card.relative').classList.remove('hidden'); // Shows search
 
     // Clear old data
     document.getElementById('update-search-input').value = '';
@@ -2496,10 +2503,10 @@ function resetVehicleUpdateScreen() {
     currentReportId = null;
     renderSuggestions();
     renderMaterials();
-
-
+    
+    // Set the default view to the 'pending' tab
+    showUpdateTab('pending');
 }
-
         // --- Damage Marking Functions ---
         function resizeCanvas() {
             if (!carImage || !damageCanvas || !checkCanvas) return;
