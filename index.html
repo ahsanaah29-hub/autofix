@@ -2031,6 +2031,7 @@ async function sendApprovalLink() {
 }
 
 // Function to populate the awaiting jobs dashboard
+// REPLACE the existing populateAwaitingCustomerJobs function
 async function populateAwaitingCustomerJobs() {
     const listContainer = document.getElementById('awaiting-customer-list');
     const noJobsMsg = document.getElementById('no-awaiting-jobs-message');
@@ -2040,7 +2041,8 @@ async function populateAwaitingCustomerJobs() {
     const { data: reports, error } = await sb.from('reports')
         .select(`id, complaint, suggested, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
-        .eq('status', 'Awaiting Customer') // Changed filter to the new status
+        .not('suggested', 'is', null) // Check if suggestions have been added
+        .is('approved', null) // Check if the customer has NOT approved yet
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -2139,17 +2141,22 @@ card.innerHTML = `
 
 		// ADD THIS NEW FUNCTION
 // REPLACE the existing showUpdateSubView function
+// REPLACE the existing showUpdateSubView function
 function showUpdateSubView(viewId) {
-    // Hide all main views within the update screen
-    document.getElementById('update-main-view').classList.add('hidden');
+    // Hide all sub-views first
     document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
+
+    // Hide the main dashboard view if a sub-view is being shown
+    if (viewId !== 'update-main-view') {
+        document.getElementById('update-main-view').classList.add('hidden');
+    }
 
     // Show the requested view
     const viewToShow = document.getElementById(viewId);
     if (viewToShow) {
         viewToShow.classList.remove('hidden');
     }
-    
+
     // Populate the list when its view is shown
     if (viewId === 'pending-jobs-view') {
         populateNotStartedJobs();
@@ -2157,7 +2164,6 @@ function showUpdateSubView(viewId) {
     if (viewId === 'customer-response-view') {
         populateCustomerResponseJobs();
     }
-    // NEW condition for the awaiting view
     if (viewId === 'awaiting-customer-view') {
         populateAwaitingCustomerJobs();
     }
