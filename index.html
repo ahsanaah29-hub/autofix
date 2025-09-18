@@ -2145,7 +2145,7 @@ async function populateAwaitingResponseJobs() {
         .eq('executive_id', currentUser.id)
         .eq('status', 'Ongoing')
         .not('suggested', 'is', null)
-        .is('approved', null) // This is the key filter
+        .or('approved.is.null,approved.eq.[]') // This is the key fix
         .order('created_at', { ascending: false });
 
     if (error) {
