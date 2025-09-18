@@ -1933,7 +1933,7 @@
             }
         }
 
-        // REPLACE the existing saveVehicleUpdate function
+// REPLACE the existing saveVehicleUpdate function
 async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
     if (!currentReportId) {
         return showError('No report selected for update.');
@@ -1951,7 +1951,8 @@ async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
 
     const allSuggestions = [...new Set(newSuggestions)];
 
-    // Set the status based on whether the WhatsApp link is being sent.
+    // This is the fix: It correctly sets the status to 'Awaiting Customer'
+    // when the function is called for sending a WhatsApp link.
     let reportStatus = 'Ongoing';
     if (isForWhatsapp) {
         reportStatus = 'Awaiting Customer';
@@ -1962,7 +1963,7 @@ async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
         approved: JSON.stringify(approvedItems),
         materials_required: JSON.stringify(requiredMaterials),
         expected_delivery: deliveryDate,
-        status: reportStatus // Use the new dynamic status here
+        status: reportStatus // This now uses the correct status
     };
 
     const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
@@ -1975,15 +1976,16 @@ async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
         resetVehicleUpdateScreen();
     }
 }
-        
-        // REPLACE the existing sendApprovalLink function
+
+// REPLACE the existing sendApprovalLink function
 async function sendApprovalLink() {
     if (!currentReportId) {
         showError('No report is currently selected.');
         return;
     }
 
-    // This line is the key fix. It saves the update AND sets the status.
+    // This line is the key fix. It saves the update and sets the status
+    // to 'Awaiting Customer' before the WhatsApp link is generated.
     await saveVehicleUpdate(false, true);
 
     const { data: reportData, error: reportError } = await sb
