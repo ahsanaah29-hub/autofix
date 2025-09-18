@@ -373,119 +373,119 @@
                 </div>
             </main>
         </div>
-
-        <div id="vehicle-update-screen" class="executive-screen" style="display: none;">
-
-
-			<main class="app-main">
-<main class="app-main">
-    <div id="update-main-view" class="space-y-4">
-        <div class="card relative">
-            <h2 class="text-xl font-bold mb-4">Search Report to Update</h2>
-            <input id="update-search-input" type="text" placeholder="Start typing vehicle number..." class="form-input" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')" onkeyup="handleReportUpdateSearch()">
-            <div id="prediction-list" class="absolute top-full left-5 right-5 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden"></div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <a href="javascript:void(0)" onclick="showUpdateSubView('pending-jobs-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-                <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">pending_actions</span>
-                <h2 class="text-lg font-bold mt-2">Pending Jobs</h2>
-                <p class="text-sm text-[var(--text-secondary)]">View jobs that are not started</p>
-            </a>
-            <a href="javascript:void(0)" onclick="showUpdateSubView('customer-response-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-                <span class="material-symbols-outlined text-5xl text-green-600">rate_review</span>
-                <h2 class="text-lg font-bold mt-2">Customer Responses</h2>
-                <p class="text-sm text-[var(--text-secondary)]">Act on received approvals</p>
-            </a>
-            <a href="javascript:void(0)" onclick="showUpdateSubView('awaiting-customer-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
-                <span class="material-symbols-outlined text-5xl text-orange-600">hourglass_top</span>
-                <h2 class="text-lg font-bold mt-2">Awaiting Customer Response</h2>
-                <p class="text-sm text-[var(--text-secondary)]">Track jobs sent for approval</p>
-            </a>
-        </div>
-    </div>
-
-    <div id="awaiting-customer-view" class="update-sub-view hidden">
-        <div class="card">
-            <div class="flex items-center mb-4">
-                <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
-                <h2 class="text-xl font-bold">Awaiting Customer Response</h2>
+<div id="vehicle-update-screen" class="executive-screen" style="display: none;">
+    <main class="app-main">
+        <div id="update-main-view" class="space-y-4">
+            <div class="card relative">
+                <h2 class="text-xl font-bold mb-4">Search Report to Update</h2>
+                <input id="update-search-input" type="text" placeholder="Start typing vehicle number..." class="form-input" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')" onkeyup="handleReportUpdateSearch()">
+                <div id="prediction-list" class="absolute top-full left-5 right-5 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden"></div>
             </div>
-            <div id="awaiting-customer-list" class="space-y-3 border-t pt-4"></div>
-            <p id="no-awaiting-jobs-message" class="text-center text-gray-500 py-8 hidden">No jobs are currently awaiting a customer response.</p>
-        </div>
-    </div>
 
-    <div id="pending-jobs-view" class="update-sub-view hidden">
-        <div class="card">
-            <div class="flex items-center mb-4">
-                <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
-                <h2 class="text-xl font-bold">Pending Jobs (Not Started)</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="javascript:void(0)" onclick="showUpdateSubView('pending-jobs-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
+                    <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">pending_actions</span>
+                    <h2 class="text-lg font-bold mt-2">Pending Jobs</h2>
+                    <p class="text-sm text-[var(--text-secondary)]">View jobs that are not started</p>
+                </a>
+                <a href="javascript:void(0)" onclick="showUpdateSubView('customer-response-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
+                    <span class="material-symbols-outlined text-5xl text-green-600">rate_review</span>
+                    <h2 class="text-lg font-bold mt-2">Customer Responses</h2>
+                    <p class="text-sm text-[var(--text-secondary)]">Act on received approvals</p>
+                </a>
+                <a href="javascript:void(0)" onclick="showUpdateSubView('awaiting-customer-view')" class="card text-center items-center flex flex-col justify-center p-6 transition-all hover:shadow-xl hover:-translate-y-1">
+                    <span class="material-symbols-outlined text-5xl text-orange-600">hourglass_top</span>
+                    <h2 class="text-lg font-bold mt-2">Awaiting Customer Response</h2>
+                    <p class="text-sm text-[var(--text-secondary)]">Track jobs sent for approval</p>
+                </a>
             </div>
-            <div id="not-started-jobs-list" class="space-y-3 border-t pt-4"></div>
-            <p id="no-pending-jobs-message" class="text-center text-gray-500 py-8 hidden">No pending job cards found.</p>
         </div>
-    </div>
-    
-    <div id="customer-response-view" class="update-sub-view hidden">
-        <div class="card">
-            <div class="flex items-center mb-4">
-                <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
-                <h2 class="text-xl font-bold">Customer Responses Received</h2>
-            </div>
-            <div id="customer-response-list" class="space-y-3 border-t pt-4"></div>
-            <p id="no-customer-response-message" class="text-center text-gray-500 py-8 hidden">No new customer responses found.</p>
-        </div>
-    </div>
 
-    <div id="update-details-section" class="card hidden space-y-4">
-        <h2 class="text-xl font-bold flex items-center gap-2 text-green-600"><span class="material-symbols-outlined">check_circle</span> Selected Report</h2>
-        <div class="grid grid-cols-2 gap-4 text-base border-t pt-4">
-            <div><p class="font-medium text-[var(--text-secondary)]">Vehicle Number</p><p id="update-detail-number" class="font-bold text-lg"></p></div>
-            <div><p class="font-medium text-[var(--text-secondary)]">Total Complaints</p><p id="update-detail-complaint" class="font-semibold"></p></div>
+        <div id="pending-jobs-view" class="update-sub-view hidden">
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
+                    <h2 class="text-xl font-bold">Pending Jobs (Not Started)</h2>
+                </div>
+                <div id="not-started-jobs-list" class="space-y-3 border-t pt-4"></div>
+                <p id="no-pending-jobs-message" class="text-center text-gray-500 py-8 hidden">No pending job cards found.</p>
+            </div>
         </div>
-        <div id="original-complaints-display" class="border-t pt-4 hidden">
-            <h3 class="font-bold text-gray-700 mb-2">Registered Complaints:</h3>
-            <ul id="original-complaints-list" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+
+        <div id="customer-response-view" class="update-sub-view hidden">
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
+                    <h2 class="text-xl font-bold">Customer Responses Received</h2>
+                </div>
+                <div id="customer-response-list" class="space-y-3 border-t pt-4"></div>
+                <p id="no-customer-response-message" class="text-center text-gray-500 py-8 hidden">No new customer responses found.</p>
+            </div>
         </div>
-        <div id="customer-feedback-display" class="border-t pt-4 hidden">
-            <h3 class="font-bold text-green-700 mb-2 flex items-center gap-2"><span class="material-symbols-outlined">rate_review</span> Customer Feedback Received:</h3>
-            <div id="customer-feedback-text-display" class="text-gray-600 bg-gray-50 p-3 rounded-lg hidden"></div>
-            <div id="customer-feedback-audio-display" class="mt-2 hidden"></div>
+
+        <div id="awaiting-customer-view" class="update-sub-view hidden">
+            <div class="card">
+                <div class="flex items-center mb-4">
+                    <button onclick="showUpdateSubView('update-main-view')" class="mr-3 text-[var(--text-secondary)] hover:text-[var(--primary-color)]"><span class="material-symbols-outlined">arrow_back_ios_new</span></button>
+                    <h2 class="text-xl font-bold">Awaiting Customer Response</h2>
+                </div>
+                <div id="awaiting-customer-list" class="space-y-3 border-t pt-4"></div>
+                <p id="no-awaiting-jobs-message" class="text-center text-gray-500 py-8 hidden">No jobs are currently awaiting a customer response.</p>
+            </div>
         </div>
-    </div>
-    <div id="update-form-section" class="card hidden">
-        <form onsubmit="event.preventDefault(); saveVehicleUpdate();" class="space-y-6">
-            <div><label class="form-label">Suggested Repair (from Mechanic)</label><div class="flex items-center gap-2"><input id="suggestion-input" type="text" class="form-input flex-grow" placeholder="e.g., Change engine oil"><button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><span class="material-symbols-outlined">add</span></button></div><div id="executive-suggestions-list" class="mt-3 space-y-2"></div></div>
-            <div><h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved Suggestions</h3><div id="customer-approval-list" class="space-y-2"><p class="text-sm text-gray-500">Add suggestions above to see them here for approval.</p></div></div>
-            
-            <div>
-                <label class="form-label border-t pt-4">Materials Required for Service</label>
-                <div class="flex items-center gap-2">
-                    <input id="material-input" type="text" class="form-input flex-grow" placeholder="e.g., 1L Engine Oil, 4 Spark Plugs">
-                    <button type="button" onclick="addMaterial()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
-                        <span class="material-symbols-outlined">add</span>
+
+        <div id="update-details-section" class="card hidden space-y-4">
+            <h2 class="text-xl font-bold flex items-center gap-2 text-green-600"><span class="material-symbols-outlined">check_circle</span> Selected Report</h2>
+            <div class="grid grid-cols-2 gap-4 text-base border-t pt-4">
+                <div><p class="font-medium text-[var(--text-secondary)]">Vehicle Number</p><p id="update-detail-number" class="font-bold text-lg"></p></div>
+                <div><p class="font-medium text-[var(--text-secondary)]">Total Complaints</p><p id="update-detail-complaint" class="font-semibold"></p></div>
+            </div>
+            <div id="original-complaints-display" class="border-t pt-4 hidden">
+                <h3 class="font-bold text-gray-700 mb-2">Registered Complaints:</h3>
+                <ul id="original-complaints-list" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+            </div>
+            <div id="customer-feedback-display" class="border-t pt-4 hidden">
+                <h3 class="font-bold text-green-700 mb-2 flex items-center gap-2"><span class="material-symbols-outlined">rate_review</span> Customer Feedback Received:</h3>
+                <div id="customer-feedback-text-display" class="text-gray-600 bg-gray-50 p-3 rounded-lg hidden"></div>
+                <div id="customer-feedback-audio-display" class="mt-2 hidden"></div>
+            </div>
+        </div>
+        <div id="update-form-section" class="card hidden">
+            <form onsubmit="event.preventDefault(); saveVehicleUpdate();" class="space-y-6">
+                <div><label class="form-label">Suggested Repair (from Mechanic)</label><div class="flex items-center gap-2"><input id="suggestion-input" type="text" class="form-input flex-grow" placeholder="e.g., Change engine oil"><button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200"><span class="material-symbols-outlined">add</span></button></div><div id="executive-suggestions-list" class="mt-3 space-y-2"></div></div>
+                <div><h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved Suggestions</h3><div id="customer-approval-list" class="space-y-2"><p class="text-sm text-gray-500">Add suggestions above to see them here for approval.</p></div></div>
+                
+                <div>
+                    <label class="form-label border-t pt-4">Materials Required for Service</label>
+                    <div class="flex items-center gap-2">
+                        <input id="material-input" type="text" class="form-input flex-grow" placeholder="e.g., 1L Engine Oil, 4 Spark Plugs">
+                        <button type="button" onclick="addMaterial()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                    <div id="materials-required-list" class="mt-3 space-y-2"></div>
+                </div>
+
+                <div><label for="delivery-date" class="form-label border-t pt-4">Expected Delivery Date</label><input id="delivery-date" type="date" class="form-input" required></div>
+                
+                <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined">save</span>Save Update
+                    </button>
+                    <button type="button" id="send-whatsapp-btn" onclick="sendApprovalLink()" class="btn-whatsapp">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path>
+                        </svg>
+                        Send Approval via WhatsApp
                     </button>
                 </div>
-                <div id="materials-required-list" class="mt-3 space-y-2"></div>
-            </div>
-
-            <div><label for="delivery-date" class="form-label border-t pt-4">Expected Delivery Date</label><input id="delivery-date" type="date" class="form-input" required></div>
-            
-            <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button type="submit" class="btn-primary">
-                    <span class="material-symbols-outlined">save</span>Save Update
-                </button>
-                <button type="button" id="send-whatsapp-btn" onclick="sendApprovalLink()" class="btn-whatsapp">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path>
-                    </svg>
-                    Send Approval via WhatsApp
-                </button>
-            </div>
-        </form>
-    </div>
-</main>
+            </form>
+        </div>
+    </main>
+</div>
+       
+			
+       
         
         <div id="report-screen" class="executive-screen" style="display: none;">
             <main class="app-main">
@@ -1933,153 +1933,70 @@
             }
         }
 
-        // Function to save vehicle updates, now with an added 'status' for "Awaiting"
-async function saveVehicleUpdate(shouldReset = true, isForWhatsapp = false) {
-    if (!currentReportId) {
-        return showError('No report selected for update.');
-    }
+        async function saveVehicleUpdate(shouldReset = true) {
+            if(!currentReportId) return showError('No report selected for update.');
 
-    const deliveryDate = document.getElementById('delivery-date').value;
-    if (!deliveryDate) {
-        return showError('Please select an expected delivery date.');
-    }
+            const deliveryDate = document.getElementById('delivery-date').value;
+            if(!deliveryDate) return showError('Please select an expected delivery date.');
 
-    const approvedItems = [];
-    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-        approvedItems.push(checkbox.nextElementSibling.textContent);
-    });
+            const approvedItems = [];
+            document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+                approvedItems.push(checkbox.nextElementSibling.textContent);
+            });
 
-    const allSuggestions = [...new Set(newSuggestions)];
+            const allSuggestions = [...new Set(newSuggestions)];
 
-    // Set the status based on whether the WhatsApp link is being sent.
-    let reportStatus = 'Ongoing';
-    if (isForWhatsapp) {
-        reportStatus = 'Awaiting Customer'; 
-    }
+            const updateData = {
+                suggested: JSON.stringify(allSuggestions),
+                approved: JSON.stringify(approvedItems),
+                materials_required: JSON.stringify(requiredMaterials),
+                expected_delivery: deliveryDate,
+                status: 'Ongoing'
+            };
 
-    const updateData = {
-        suggested: JSON.stringify(allSuggestions),
-        approved: JSON.stringify(approvedItems),
-        materials_required: JSON.stringify(requiredMaterials),
-        expected_delivery: deliveryDate,
-        status: reportStatus // Use the new dynamic status here
-    };
+            const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+            if(error) return showError(`Failed to save update: ${error.message}`);
 
-    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-    if (error) {
-        return showError(`Failed to save update: ${error.message}`);
-    }
-
-    showSuccessMessage('Update saved successfully!');
-    if (shouldReset) {
-        resetVehicleUpdateScreen();
-    }
-}
-
-// Function to send approval link, now explicitly setting the status
-async function sendApprovalLink() {
-    if (!currentReportId) {
-        showError('No report is currently selected.');
-        return;
-    }
-    
-    // Pass 'true' to saveVehicleUpdate to indicate it's for WhatsApp, which will set the new status.
-    await saveVehicleUpdate(false, true); 
-    
-    // The rest of the function remains the same.
-    const { data: reportData, error: reportError } = await sb
-        .from('reports')
-        .select('client_phone, vehicle_id')
-        .eq('id', currentReportId)
-        .single();
-
-    if (reportError) {
-        console.error("Error fetching report details:", reportError);
-        showError("Could not fetch report details to send the link.");
-        return;
-    }
-
-    let clientPhone = reportData.client_phone;
-    if (!clientPhone && reportData.vehicle_id) {
-        const { data: vehicleData, error: vehicleError } = await sb
-            .from('vehicles')
-            .select('client_phone')
-            .eq('id', reportData.vehicle_id)
-            .single();
-        if (vehicleError) {
-            console.error("Error fetching vehicle's phone number:", vehicleError);
-            showError("Could not fetch the vehicle's primary phone number.");
-            return;
+            showSuccessMessage('Update saved successfully!');
+            if (shouldReset) {
+                resetVehicleUpdateScreen();
+            }
         }
-        clientPhone = vehicleData?.client_phone;
-    }
+        
+        async function sendApprovalLink() {
+            if (!currentReportId) { showError('No report is currently selected.'); return; }
+            await saveVehicleUpdate(false); // Save current state before sending
+            const { data: reportData, error: reportError } = await sb
+                .from('reports')
+                .select('client_phone, vehicle_id')
+                .eq('id', currentReportId)
+                .single();
 
-    if (!clientPhone) {
-        showError("A client phone number could not be found for this report or vehicle.");
-        return;
-    }
+            if (reportError) { console.error("Error fetching report details:", reportError); showError("Could not fetch report details to send the link."); return; }
+            
+            let clientPhone = reportData.client_phone;
+            if (!clientPhone && reportData.vehicle_id) {
+                const { data: vehicleData, error: vehicleError } = await sb
+                    .from('vehicles')
+                    .select('client_phone')
+                    .eq('id', reportData.vehicle_id)
+                    .single();
+                if (vehicleError) { console.error("Error fetching vehicle's phone number:", vehicleError); showError("Could not fetch the vehicle's primary phone number."); return; }
+                clientPhone = vehicleData?.client_phone;
+            }
 
-    const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
-    const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+            if (!clientPhone) { showError("A client phone number could not be found for this report or vehicle."); return; }
+            
+            const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
+            const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+            
+            const encodedText = encodeURIComponent(messageText);
+            const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
 
-    const encodedText = encodeURIComponent(messageText);
-    const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
-    window.open(whatsappUrl, '_blank');
-}
-
-// Function to populate the awaiting jobs dashboard
-// REPLACE the existing populateAwaitingCustomerJobs function
-// REPLACE the existing populateAwaitingCustomerJobs function
-async function populateAwaitingCustomerJobs() {
-    const listContainer = document.getElementById('awaiting-customer-list');
-    const noJobsMsg = document.getElementById('no-awaiting-jobs-message');
-    listContainer.innerHTML = '';
-    noJobsMsg.classList.add('hidden');
-
-    const { data: reports, error } = await sb.from('reports')
-        .select(`id, complaint, suggested, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
-        .eq('executive_id', currentUser.id)
-        .not('suggested', 'is', null) // Jobs where suggestions have been created
-        .is('approved', null) // Jobs where the customer has NOT responded yet
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error("Error fetching awaiting customer jobs:", error);
-        return showError('Could not fetch jobs awaiting a customer response.');
-    }
-
-    if (!reports || reports.length === 0) {
-        noJobsMsg.classList.remove('hidden');
-        return;
-    }
-
-    reports.forEach(report => {
-        const card = document.createElement('div');
-        const vehicle = report.vehicles;
-        const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
-        const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
-        const vehicleName = vehicle.vehicle_name || '';
-        const color = vehicle.color || '';
-
-        const descriptionParts = [vehicleName, `${brand} ${model}`.trim(), color].filter(part => part);
-        const description = descriptionParts.join(' &bull; ');
-
-        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-orange-500 cursor-pointer transition-all flex justify-between items-center';
-        card.innerHTML = `
-            <div class="flex-grow">
-                <div class="flex justify-between items-center">
-                    <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
-                    <p class="text-xs text-gray-500 italic">${brand} ${model}</p>
-                </div>
-                <p class="text-sm text-gray-600 font-semibold mt-1">Awaiting approval on ${JSON.parse(report.suggested || '[]').length} items</p>
-            </div>
-            <span class="material-symbols-outlined text-gray-400 ml-2">chevron_right</span>
-        `;
-        card.onclick = () => selectReportForUpdate(report);
-        listContainer.appendChild(card);
-    });
-}
 		// REPLACE the existing populateNotStartedJobs function with this one
 async function populateNotStartedJobs() {
     const listContainer = document.getElementById('not-started-jobs-list');
@@ -2139,23 +2056,21 @@ card.innerHTML = `
 }
 
 		// ADD THIS NEW FUNCTION
-// REPLACE the existing showUpdateSubView function
-// REPLACE the existing showUpdateSubView function
 function showUpdateSubView(viewId) {
-    // Hide all sub-views first
-    document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
-
     // Hide the main dashboard view if a sub-view is being shown
     if (viewId !== 'update-main-view') {
         document.getElementById('update-main-view').classList.add('hidden');
     }
+
+    // Hide all sub-views first
+    document.querySelectorAll('.update-sub-view').forEach(v => v.classList.add('hidden'));
 
     // Show the requested view
     const viewToShow = document.getElementById(viewId);
     if (viewToShow) {
         viewToShow.classList.remove('hidden');
     }
-
+    
     // Populate the list when its view is shown
     if (viewId === 'pending-jobs-view') {
         populateNotStartedJobs();
@@ -2167,6 +2082,7 @@ function showUpdateSubView(viewId) {
         populateAwaitingCustomerJobs();
     }
 }
+
 // ADD THIS NEW FUNCTION
 async function populateCustomerResponseJobs() {
     const listContainer = document.getElementById('customer-response-list');
@@ -2671,6 +2587,56 @@ function showExecutiveScreen(screenId) {
             el.classList.remove('hidden');
             setTimeout(() => el.classList.add('hidden'), 4000);
         }
+// Function to populate the awaiting jobs dashboard
+async function populateAwaitingCustomerJobs() {
+    const listContainer = document.getElementById('awaiting-customer-list');
+    const noJobsMsg = document.getElementById('no-awaiting-jobs-message');
+    listContainer.innerHTML = '';
+    noJobsMsg.classList.add('hidden');
+
+    const { data: reports, error } = await sb.from('reports')
+        .select(`id, complaint, suggested, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
+        .eq('executive_id', currentUser.id)
+        .not('suggested', 'is', null) // Jobs where suggestions have been created
+        .is('approved', null) // Jobs where the customer has NOT responded yet
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching awaiting customer jobs:", error);
+        return showError('Could not fetch jobs awaiting a customer response.');
+    }
+
+    if (!reports || reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
+
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        const vehicle = report.vehicles;
+        const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
+        const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
+        const vehicleName = vehicle.vehicle_name || '';
+        const color = vehicle.color || '';
+
+        const descriptionParts = [vehicleName, `${brand} ${model}`.trim(), color].filter(part => part);
+        const description = descriptionParts.join(' &bull; ');
+
+        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-orange-500 cursor-pointer transition-all flex justify-between items-center';
+        card.innerHTML = `
+            <div class="flex-grow">
+                <div class="flex justify-between items-center">
+                    <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
+                    <p class="text-xs text-gray-500 italic">${brand} ${model}</p>
+                </div>
+                <p class="text-sm text-gray-600 font-semibold mt-1">Awaiting approval on ${JSON.parse(report.suggested || '[]').length} items</p>
+            </div>
+            <span class="material-symbols-outlined text-gray-400 ml-2">chevron_right</span>
+        `;
+        card.onclick = () => selectReportForUpdate(report);
+        listContainer.appendChild(card);
+    });
+}
 
         // --- Google Drive API Functions ---
         
