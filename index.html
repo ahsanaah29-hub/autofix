@@ -385,11 +385,7 @@
 
 
 			<main class="app-main">
-    <div class="card relative">
-        <h2 class="text-xl font-bold mb-4">Search Report to Update</h2>
-        <input id="update-search-input" type="text" placeholder="Start typing vehicle number..." class="form-input" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')" onkeyup="handleReportUpdateSearch()">
-        <div id="prediction-list" class="absolute top-full left-5 right-5 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden"></div>
-    </div>
+  
 
     <div id="update-tab-container" class="card !p-0">
         <div class="flex border-b border-gray-200 px-5">
@@ -1797,37 +1793,7 @@
             resetJobCardState();
         }
         
-        async function handleReportUpdateSearch() {
-            const input = document.getElementById('update-search-input').value.trim().toUpperCase();
-            predictionList.innerHTML = '';
-            if (!input) {
-                predictionList.classList.add('hidden');
-                return;
-            }
-
-            const { data: vehiclesData } = await sb.from('vehicles').select('id').ilike('vehicle_no', `%${input}%`);
-            if (!vehiclesData || vehiclesData.length === 0) {
-                predictionList.classList.add('hidden');
-                return;
-            }
-
-            const vehicleIds = vehiclesData.map(v => v.id);
-
-            const { data } = await sb.from('reports').select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no)`).in('vehicle_id', vehicleIds).neq('status', 'Completed').limit(5);
-            if (!data || data.length === 0) {
-                predictionList.classList.add('hidden');
-                return;
-            }
-            
-            data.forEach(report => {
-                const item = document.createElement('div');
-                item.className = 'p-3 hover:bg-gray-100 cursor-pointer';
-                item.textContent = `${report.vehicles.vehicle_no} - ${formatArrayCell(report.complaint)}`;
-                item.onclick = () => selectReportForUpdate(report);
-                predictionList.appendChild(item);
-            });
-            predictionList.classList.remove('hidden');
-        }
+        
 
 
         
@@ -2370,7 +2336,7 @@ async function populateAwaitingResponseJobs() {
 function selectReportForUpdate(report) {
     // Hide the tab interface and search bar to show the form
     document.getElementById('update-tab-container').classList.add('hidden');
-    document.querySelector('#vehicle-update-screen .card.relative').classList.add('hidden');
+    
 
     currentReportId = report.id;
     predictionList.classList.add('hidden');
@@ -2454,10 +2420,10 @@ function resetVehicleUpdateScreen() {
 
     // Show the tab interface and search bar
     document.getElementById('update-tab-container').classList.remove('hidden');
-    document.querySelector('#vehicle-update-screen .card.relative').classList.remove('hidden');
+    
 
     // Clear old data
-    document.getElementById('update-search-input').value = '';
+    
     predictionList.classList.add('hidden');
     document.getElementById('delivery-date').value = '';
     newSuggestions = [];
@@ -2994,6 +2960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
+
 
 
 
