@@ -1794,7 +1794,30 @@
         }
         
         
+// ADD THIS NEW FUNCTION to your script in abcd.html
+async function saveSuggestionsForApproval() {
+    if (!currentReportId) {
+        showError('No report selected.');
+        return false; // Indicate failure
+    }
 
+    // Ensure the most recent suggestions are captured
+    const allSuggestions = [...new Set(newSuggestions)];
+
+    const updateData = {
+        suggested: JSON.stringify(allSuggestions),
+    };
+
+    // Update the report in the database with the latest suggestions
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if (error) {
+        showError(`Failed to save suggestions: ${error.message}`);
+        return false; // Indicate failure
+    }
+    
+    console.log('Suggestions saved for approval link.');
+    return true; // Indicate success
+}
 
         
         // REPLACE the existing addSuggestion function
@@ -1942,38 +1965,50 @@ async function saveVehicleUpdate(shouldReset = true) {
     }
 }
         
-        async function sendApprovalLink() {
-            if (!currentReportId) { showError('No report is currently selected.'); return; }
-            await saveVehicleUpdate(false); // Save current state before sending
-            const { data: reportData, error: reportError } = await sb
-                .from('reports')
-                .select('client_phone, vehicle_id')
-                .eq('id', currentReportId)
-                .single();
+       // REPLACE your existing sendApprovalLink function in abcd.html with this one.
+async function sendApprovalLink() {
+    if (!currentReportId) { 
+        showError('No report is currently selected.'); 
+        return; 
+    }
+    
+    // Step 1: Save the current suggestions without requiring a date.
+    const savedSuccessfully = await saveSuggestionsForApproval();
+    if (!savedSuccessfully) {
+        showError('Could not save suggestions before sending. Please try again.');
+        return;
+    }
 
-            if (reportError) { console.error("Error fetching report details:", reportError); showError("Could not fetch report details to send the link."); return; }
-            
-            let clientPhone = reportData.client_phone;
-            if (!clientPhone && reportData.vehicle_id) {
-                const { data: vehicleData, error: vehicleError } = await sb
-                    .from('vehicles')
-                    .select('client_phone')
-                    .eq('id', reportData.vehicle_id)
-                    .single();
-                if (vehicleError) { console.error("Error fetching vehicle's phone number:", vehicleError); showError("Could not fetch the vehicle's primary phone number."); return; }
-                clientPhone = vehicleData?.client_phone;
-            }
+    // Step 2: Fetch the client's phone number from the report or the vehicle record.
+    const { data: reportData, error: reportError } = await sb
+        .from('reports')
+        .select('client_phone, vehicles(client_phone)') // Efficiently gets phone from report or vehicle
+        .eq('id', currentReportId)
+        .single();
 
-            if (!clientPhone) { showError("A client phone number could not be found for this report or vehicle."); return; }
-            
-            const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
-            const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
-            
-            const encodedText = encodeURIComponent(messageText);
-            const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
-            
-            window.open(whatsappUrl, '_blank');
-        }
+    if (reportError) { 
+        console.error("Error fetching report details:", reportError); 
+        showError("Could not fetch report details to send the link."); 
+        return; 
+    }
+    
+    // Prioritize the phone number saved with the report, but fall back to the vehicle's main number.
+    const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
+
+    if (!clientPhone) { 
+        showError("A client phone number could not be found for this report or vehicle."); 
+        return; 
+    }
+    
+    // Step 3: Construct the WhatsApp message and URL, then open it.
+    const approvalUrl = `https://customer-suggestions.vercel.app/?report_id=${currentReportId}`;
+    const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+    
+    const encodedText = encodeURIComponent(messageText);
+    const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
+    
+    window.open(whatsappUrl, '_blank');
+}
 
 
 		// REPLACE the existing populateNotStartedJobs function with this one
