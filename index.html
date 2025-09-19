@@ -2030,6 +2030,13 @@ async function sendApprovalLink() {
 
 		// REPLACE the existing populateNotStartedJobs function with this one
 async function populateNotStartedJobs() {
+    // Add this check at the very beginning of the function
+    if (!currentUser) {
+        console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
+        document.getElementById('no-pending-jobs-message').classList.remove('hidden');
+        return; 
+    }
+
     const listContainer = document.getElementById('not-started-jobs-list');
     const noJobsMsg = document.getElementById('no-pending-jobs-message');
     listContainer.innerHTML = '';
@@ -2038,7 +2045,7 @@ async function populateNotStartedJobs() {
     // Updated query to fetch vehicle_name, color, and brand
     const { data: reports, error } = await sb.from('reports')
         .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
-        .eq('executive_id', currentUser.id)
+        .eq('executive_id', currentUser.id) // This is the line that was failing
         .eq('status', 'Not Started')
         .order('created_at', { ascending: false });
 
