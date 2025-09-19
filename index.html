@@ -1797,53 +1797,86 @@
 
 
         
-        function addSuggestion() {
-            const input = document.getElementById('suggestion-input');
-            const suggestionText = input.value.trim();
-            if (suggestionText) {
-                if (!newSuggestions.includes(suggestionText)) {
-                    newSuggestions.push(suggestionText);
-                }
-                input.value = '';
-                renderSuggestions();
-            }
+        // REPLACE the existing addSuggestion function
+function addSuggestion() {
+    const input = document.getElementById('suggestion-input');
+    const suggestionText = input.value.trim();
+    if (suggestionText) {
+        if (!newSuggestions.includes(suggestionText)) {
+            newSuggestions.push(suggestionText);
         }
-        function deleteSuggestion(index) {
-            newSuggestions.splice(index, 1);
-            renderSuggestions();
-        }
+        input.value = '';
+        
+        // Re-render the lists, preserving the current approved state.
+        const approvedItems = [];
+        document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+            approvedItems.push(checkbox.value);
+        });
+        renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+    }
+}
 
-        function renderSuggestions(approvedItems = []) {
-            const executiveList = document.getElementById('executive-suggestions-list');
-            const customerList = document.getElementById('customer-approval-list');
-            executiveList.innerHTML = '';
-            customerList.innerHTML = '';
+// REPLACE the existing deleteSuggestion function
+function deleteSuggestion(index) {
+    newSuggestions.splice(index, 1);
+    
+    // Re-render the lists, preserving the current approved state.
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        approvedItems.push(checkbox.value);
+    });
+    renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+}
 
-            if (newSuggestions.length > 0) {
-                newSuggestions.forEach((text, index) => {
-                    const isApproved = approvedItems.includes(text);
-                    
-                    const execItem = document.createElement('div');
-                    execItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm';
-                    execItem.innerHTML = `
-                        <p class="flex-1 mr-2">${text}</p>
-                        <button type="button" onclick="deleteSuggestion(${index})" class="text-red-500 hover:text-red-700 shrink-0">
-                            <span class="material-symbols-outlined">delete</span>
-                        </button>
-                    `;
-                    executiveList.appendChild(execItem);
+       // REPLACE your existing renderSuggestions function in abcd.html with this one.
+function renderSuggestions(complaints = [], suggestions = [], approved = []) {
+    const executiveList = document.getElementById('executive-suggestions-list');
+    const customerList = document.getElementById('customer-approval-list');
+    
+    // --- 1. Render the list for the executive to manage (add/delete suggestions) ---
+    executiveList.innerHTML = '';
+    if (suggestions.length > 0) {
+        suggestions.forEach((text, index) => {
+            const execItem = document.createElement('div');
+            execItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm';
+            execItem.innerHTML = `
+                <p class="flex-1 mr-2">${text}</p>
+                <button type="button" onclick="deleteSuggestion(${index})" class="text-red-500 hover:text-red-700 shrink-0">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            `;
+            executiveList.appendChild(execItem);
+        });
+    }
 
-                    const customerItem = document.createElement('label');
-                    customerItem.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100';
-                    customerItem.innerHTML = `<input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${isApproved ? 'checked' : ''}><span class="flex-1">${text}</span>`;
-                    customerList.appendChild(customerItem);
-                });
-            }
+    // --- 2. Render the combined list for approval (complaints + suggestions) ---
+    customerList.innerHTML = '';
+    const allItems = [...new Set([...complaints, ...suggestions])];
 
-            if (customerList.innerHTML === '') {
-                customerList.innerHTML = '<p class="text-sm text-gray-500">Add suggestions above to see them here for approval.</p>';
-            }
-        }
+    if (allItems.length > 0) {
+        allItems.forEach(item => {
+            const isApproved = approved.includes(item);
+            const isOriginalComplaint = complaints.includes(item);
+
+            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
+            const tag = isOriginalComplaint
+                ? `<span class="text-xs text-gray-500">(Customer Request)</span>`
+                : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
+
+            const customerItem = document.createElement('label');
+            customerItem.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
+            
+            customerItem.innerHTML = `
+                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value="${item}" ${isApproved ? 'checked' : ''}>
+                <span class="flex-1 font-medium">${item}</span>
+                ${tag}
+            `;
+            customerList.appendChild(customerItem);
+        });
+    } else {
+        customerList.innerHTML = '<p class="text-sm text-gray-500">Add suggestions above to see them here for approval.</p>';
+    }
+}
 
         function addMaterial() {
             const input = document.getElementById('material-input');
@@ -1877,35 +1910,37 @@
             }
         }
 
-        async function saveVehicleUpdate(shouldReset = true) {
-            if(!currentReportId) return showError('No report selected for update.');
+       // REPLACE the existing saveVehicleUpdate function in abcd.html with this one.
+async function saveVehicleUpdate(shouldReset = true) {
+    if(!currentReportId) return showError('No report selected for update.');
 
-            const deliveryDate = document.getElementById('delivery-date').value;
-            if(!deliveryDate) return showError('Please select an expected delivery date.');
+    const deliveryDate = document.getElementById('delivery-date').value;
+    if(!deliveryDate) return showError('Please select an expected delivery date.');
 
-            const approvedItems = [];
-            document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-                approvedItems.push(checkbox.nextElementSibling.textContent);
-            });
+    // This is the key change: Read the approved items directly from the checkboxes
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        approvedItems.push(checkbox.value); // Use .value which was set during rendering
+    });
 
-            const allSuggestions = [...new Set(newSuggestions)];
+    const allSuggestions = [...new Set(newSuggestions)];
 
-            const updateData = {
-                suggested: JSON.stringify(allSuggestions),
-                approved: JSON.stringify(approvedItems),
-                materials_required: JSON.stringify(requiredMaterials),
-                expected_delivery: deliveryDate,
-                status: 'Ongoing'
-            };
+    const updateData = {
+        suggested: JSON.stringify(allSuggestions),
+        approved: JSON.stringify(approvedItems),
+        materials_required: JSON.stringify(requiredMaterials),
+        expected_delivery: deliveryDate,
+        status: 'Ongoing'
+    };
 
-            const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-            if(error) return showError(`Failed to save update: ${error.message}`);
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if(error) return showError(`Failed to save update: ${error.message}`);
 
-            showSuccessMessage('Update saved successfully!');
-            if (shouldReset) {
-                resetVehicleUpdateScreen();
-            }
-        }
+    showSuccessMessage('Update saved successfully!');
+    if (shouldReset) {
+        resetVehicleUpdateScreen();
+    }
+}
         
         async function sendApprovalLink() {
             if (!currentReportId) { showError('No report is currently selected.'); return; }
@@ -2333,11 +2368,11 @@ async function populateAwaitingResponseJobs() {
 
 // REPLACE the existing selectReportForUpdate function
 // REPLACE the existing selectReportForUpdate function
+// REPLACE the existing selectReportForUpdate function in abcd.html with this one.
 function selectReportForUpdate(report) {
     // Hide the tab interface and search bar to show the form
     document.getElementById('update-tab-container').classList.add('hidden');
     
-
     currentReportId = report.id;
     
     document.getElementById('update-detail-number').textContent = report.vehicles.vehicle_no;
@@ -2355,6 +2390,14 @@ function selectReportForUpdate(report) {
         newSuggestions = [];
     }
     requiredMaterials = report.materials_required ? JSON.parse(report.materials_required) : [];
+
+    const approvedItems = report.approved ? JSON.parse(report.approved) : [];
+    
+    // This is the key change: Call the modified renderSuggestions with all the necessary data
+    renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+    
+    // The rest of the function remains the same, handling display of other elements.
+    renderMaterials();
 
     const complaintDisplayList = document.getElementById('original-complaints-list');
     const complaintSummaryP = document.getElementById('update-detail-complaint');
@@ -2396,22 +2439,17 @@ function selectReportForUpdate(report) {
         }
     }
 
-    const approvedItems = report.approved ? JSON.parse(report.approved) : [];
-    renderSuggestions(approvedItems);
-    renderMaterials();
-
     document.getElementById('delivery-date').value = report.expected_delivery || '';
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('delivery-date').setAttribute('min', today);
 
     const whatsappButton = document.getElementById('send-whatsapp-btn');
-    if (report.approved !== null) {
+    if (report.approved !== null && report.approved !== '[]') { // Check if approved has content
         whatsappButton.style.display = 'none';
     } else {
         whatsappButton.style.display = 'flex';
     }
 }
-
 // REPLACE the existing resetVehicleUpdateScreen function
 function resetVehicleUpdateScreen() {
     // Hide update form sections
@@ -2960,7 +2998,6 @@ document.addEventListener('DOMContentLoaded', () => {
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
-
 
 
 
