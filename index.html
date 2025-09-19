@@ -2339,7 +2339,7 @@ function selectReportForUpdate(report) {
     
 
     currentReportId = report.id;
-    predictionList.classList.add('hidden');
+    
     document.getElementById('update-detail-number').textContent = report.vehicles.vehicle_no;
     updateDetailsSection.classList.remove('hidden');
     updateFormSection.classList.remove('hidden');
@@ -2424,7 +2424,7 @@ function resetVehicleUpdateScreen() {
 
     // Clear old data
     
-    predictionList.classList.add('hidden');
+    
     document.getElementById('delivery-date').value = '';
     newSuggestions = [];
     requiredMaterials = [];
