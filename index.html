@@ -1086,27 +1086,44 @@
         
         // --- Media Upload & Recording Functions ---
 
-        function handlePhotoUploads(event) {
-            const files = event.target.files;
-            if (!files) return;
+function handlePhotoUploads(event) {
+    const newFiles = event.target.files;
+    if (!newFiles) return;
+    // Add the newly selected files to our existing array
+    capturedPhotos.push(...Array.from(newFiles));
+    renderPhotoPreviews();
+    // Reset the input so the user can add the same file again if they remove it
+    event.target.value = '';
+}
+// ADD this new function to render the photo previews
+function renderPhotoPreviews() {
+    const previewsContainer = document.getElementById('photo-previews');
+    previewsContainer.innerHTML = ''; // Clear all previews to re-render
+    if (capturedPhotos.length === 0) return;
+    capturedPhotos.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'relative aspect-square group';
+            previewWrapper.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
+                <button onclick="removePhoto(${index})" class="absolute top-1 right-1 bg-red-600/80 text-white rounded-full h-6 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            `;
+            previewsContainer.appendChild(previewWrapper);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+// ADD this new function to handle removing a photo
+function removePhoto(indexToRemove) {
+    // Remove the photo from our array at the specified index
+    capturedPhotos.splice(indexToRemove, 1);
+    // Re-render the previews to reflect the change
+    renderPhotoPreviews();
+}
 
-            const previewsContainer = document.getElementById('photo-previews');
-            previewsContainer.innerHTML = ''; // Clear existing previews
-            capturedPhotos = Array.from(files); // Store the file objects
-
-            for (const file of capturedPhotos) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewWrapper = document.createElement('div');
-                    previewWrapper.className = 'relative aspect-square';
-                    previewWrapper.innerHTML = `
-                        <img src="${e.target.result}" class="w-full h-full object-cover rounded-lg">
-                    `;
-                    previewsContainer.appendChild(previewWrapper);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
 
         async function startRecording(context = 'executive') {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
