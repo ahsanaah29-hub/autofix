@@ -35,7 +35,34 @@
         .screen { display: none; }
         .active-screen { display: block; }
         .modal-hidden { display: none; }
-        
+        /* Add this keyframes rule for the pulsing animation */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.75;
+    }
+    70% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+}
+
+/* This class will be toggled by JavaScript to activate the animation */
+.is-recording::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px; /* rounded-full */
+    background-color: #38bdf8; /* sky-400 */
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
         /* Component Styles */
         .form-input { @apply w-full rounded-lg border-[var(--border-color)] text-base shadow-sm transition-colors focus:border-[var(--primary-color)] focus:ring focus:ring-[var(--primary-color)] focus:ring-opacity-50; }
         .form-label { @apply block text-sm font-medium text-[var(--text-secondary)] mb-1; }
@@ -368,18 +395,19 @@
                                 <div id="photo-previews" class="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
                             </div>
                             <!-- Voice Note -->
-                            <div>
-                                <div class="flex items-center gap-3">
-                                    <button id="record-btn" type="button" onclick="startRecording()" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
-                                        <span class="material-symbols-outlined">mic</span> Record Note
-                                    </button>
-                                    <button id="stop-record-btn" type="button" onclick="stopRecording()" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
-                                        <span class="material-symbols-outlined">stop_circle</span> Stop
-                                    </button>
-                                </div>
-                                <div id="audio-playback" class="mt-3"></div>
-                                 <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
-                            </div>
+<div>
+    <div class="flex items-center gap-4">
+        <!-- New single, modern button -->
+        <button id="toggle-record-btn" type="button" onclick="toggleRecording('executive')" class="relative w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+            <span id="record-btn-icon" class="material-symbols-outlined text-3xl">mic</span>
+        </button>
+        <!-- Audio playback and status are now next to the button -->
+        <div class="flex-grow">
+            <div id="audio-playback"></div>
+            <p id="recording-status" class="text-sm text-gray-500"></p>
+        </div>
+    </div>
+</div>
                         </div>
 
                         <div class="mt-6">
@@ -949,6 +977,7 @@
         let voiceNoteBlob = null;
         let mediaRecorder;
         let audioChunks = [];
+		let isRecording = false;
         
         // --- UI Element References ---
         const vehicleDetailsSection = document.getElementById('vehicle-details-section'), createVehicleSection = document.getElementById('create-vehicle-section'), newComplaintSection = document.getElementById('new-complaint-section'), searchError = document.getElementById('search-error');
@@ -1181,54 +1210,89 @@ function removePhoto(indexToRemove) {
     renderPhotoPreviews();
 }
 
+	// ADD THIS NEW FUNCTION
+function toggleRecording(context = 'executive') {
+    if (isRecording) {
+        stopRecording(context);
+    } else {
+        startRecording(context);
+    }
+}
+        // REPLACE your existing startRecording function
+async function startRecording(context = 'executive') {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('Audio recording is not supported on this browser.');
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        isRecording = true; // Set recording state
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
 
-        async function startRecording(context = 'executive') {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showError('Audio recording is not supported on this browser.');
-                return;
-            }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
+        mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
+        });
 
-                mediaRecorder.addEventListener("dataavailable", event => {
-                    audioChunks.push(event.data);
-                });
+        mediaRecorder.addEventListener("stop", () => {
+            voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+            const audioUrl = URL.createObjectURL(voiceNoteBlob);
+            const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+            document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full h-9"></audio>`;
+        });
 
-                mediaRecorder.addEventListener("stop", () => {
-                    voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(voiceNoteBlob);
-                    const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
-                    document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
-                });
+        mediaRecorder.start();
+        
+        // --- NEW UI LOGIC ---
+        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
+        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
+        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        
+        const recordBtn = document.getElementById(buttonId);
+        const recordIcon = document.getElementById(iconId);
 
-                mediaRecorder.start();
-                const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
-
-                document.getElementById(recordBtnId).classList.add('hidden');
-                document.getElementById(stopBtnId).classList.remove('hidden');
-                document.getElementById(statusId).textContent = 'Recording...';
-            } catch (err) {
-                showError('Microphone access was denied.');
-                console.error("Mic Error:", err);
-            }
+        recordBtn.classList.add('is-recording'); // Add class to trigger animation
+        recordBtn.classList.remove('bg-red-600'); // Change color from red...
+        recordBtn.classList.add('bg-sky-500'); // ...to blue
+        
+        recordIcon.textContent = 'stop';
+        document.getElementById(statusId).textContent = 'Recording...';
+        
+        // Clear any previous audio playback
+        const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+        if (document.getElementById(audioPlaybackEl)) {
+             document.getElementById(audioPlaybackEl).innerHTML = '';
         }
+       
+    } catch (err) {
+        isRecording = false; // Reset state on error
+        showError('Microphone access was denied.');
+        console.error("Mic Error:", err);
+    }
+}
 
-        function stopRecording(context = 'executive') {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-                 const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+// REPLACE your existing stopRecording function
+function stopRecording(context = 'executive') {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false; // Update state
 
-                document.getElementById(recordBtnId).classList.remove('hidden');
-                document.getElementById(stopBtnId).classList.add('hidden');
-                document.getElementById(statusId).textContent = 'Recording stopped.';
-            }
-        }
+        // --- NEW UI LOGIC ---
+        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
+        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
+        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        
+        const recordBtn = document.getElementById(buttonId);
+        const recordIcon = document.getElementById(iconId);
+
+        recordBtn.classList.remove('is-recording'); // Remove animation class
+        recordBtn.classList.remove('bg-sky-500'); // Change color from blue...
+        recordBtn.classList.add('bg-red-600'); // ...back to red
+        
+        recordIcon.textContent = 'mic';
+        document.getElementById(statusId).textContent = 'Recording saved.';
+    }
+}
 
 // --- AUTHENTICATION & UTILITIES ---
         const normalizeVehicleNumber = (num) => {
