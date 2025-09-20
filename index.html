@@ -61,6 +61,7 @@
         .report-table td { @apply px-4 py-4 whitespace-nowrap text-sm; }
         .report-table tbody tr:nth-child(even) { @apply bg-white; }
         .report-table tbody tr:nth-child(odd) { @apply bg-gray-50; }
+		
         
         /* Styles for the accordion list in Due Date page */
         .due-date-details {
@@ -78,6 +79,34 @@
         .printable-area {
             display: none;
         }
+		/* Add this keyframes rule for the pulsing animation */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.75;
+    }
+    70% {
+        transform: scale(2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+}
+
+/* This class will be toggled by JavaScript to activate the animation */
+.is-recording::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px; /* rounded-full */
+    background-color: #38bdf8; /* sky-400 */
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
 /* ADD THIS CSS FOR THE TABS */
 .tab-button {
     @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
@@ -300,22 +329,31 @@
                 <div id="create-vehicle-section" class="card hidden space-y-4">
                     <h2 class="text-xl font-bold flex items-center gap-2 text-orange-600"><span class="material-symbols-outlined">add_circle</span> Register New Vehicle</h2>
                     <p class="text-sm text-gray-500 -mt-2">Vehicle not found. Please add the details below to register it.</p>
-                    <form id="create-vehicle-form" onsubmit="event.preventDefault(); createVehicle();" class="border-t pt-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div><label class="form-label">Vehicle Number</label><input id="new-vehicle-number" type="text" class="form-input bg-gray-100" readonly></div>
-                    <div><label class="form-label">Vehicle Name</label><input id="new-vehicle-name" type="text" class="form-input" placeholder="e.g., Swift VXI" ></div>
-                    <div><label class="form-label">Brand</label><select id="new-vehicle-brand-exec" class="form-input" required onchange="populateModelDropdown()"></select></div>
-                    <div><label class="form-label">Model</label><select id="new-vehicle-model-exec" class="form-input" required></select></div>
-                    <div><label class="form-label">Color</label><input id="new-color" type="text" class="form-input" placeholder="e.g., White" ></div>
-                    <div><label class="form-label">Fuel Type</label><select id="new-fuel-type" class="form-input" required><option value="">Select Type</option><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option></select></div>
-                    <div><label class="form-label">Engine Number</label><input id="new-engine-no" type="text" class="form-input" placeholder="Enter engine number" required></div>
-                    <div><label class="form-label">Chassis Number</label><input id="new-chassis-no" type="text" class="form-input" placeholder="Enter chassis number" required></div>
-                    <div class="sm:col-span-2"><label class="form-label">Odometer Reading (km)</label><input id="new-odometer" type="number" class="form-input" placeholder="e.g., 54000" required></div>
-                    <div class="sm:col-span-2 border-t pt-4"><label class="form-label">Client Name</label><input id="new-client-name" type="text" class="form-input" placeholder="e.g., John Doe" required></div>
-<div class="sm:col-span-2">
-    <label class="form-label">Client Phone</label>
-    <input id="new-client-phone" type="tel" class="form-input" placeholder="e.g., 9876543210" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-</div>
-                </div><div class="mt-6"><button type="submit" class="btn-primary"><span class="material-symbols-outlined">save</span>Save Vehicle</button></div></form></div>
+                    <form id="create-vehicle-form" onsubmit="event.preventDefault(); createVehicle();" class="border-t pt-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="form-label">Vehicle Number</label><input id="new-vehicle-number" type="text" class="form-input bg-gray-100" readonly></div>
+        <div><label class="form-label">Vehicle Name</label><input id="new-vehicle-name" type="text" class="form-input" placeholder="e.g., Swift VXI" ></div>
+        
+        <div><label class="form-label">Brand <span class="text-red-500">*</span></label><select id="new-vehicle-brand-exec" class="form-input" required onchange="populateModelDropdown()"></select></div>
+        <div><label class="form-label">Model <span class="text-red-500">*</span></label><select id="new-vehicle-model-exec" class="form-input" required></select></div>
+        
+        <div><label class="form-label">Color</label><input id="new-color" type="text" class="form-input" placeholder="e.g., White" ></div>
+        
+        <div><label class="form-label">Fuel Type <span class="text-red-500">*</span></label><select id="new-fuel-type" class="form-input" required><option value="">Select Type</option><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option></select></div>
+        <div><label class="form-label">Engine Number <span class="text-red-500">*</span></label><input id="new-engine-no" type="text" class="form-input" placeholder="Enter engine number" required></div>
+        <div><label class="form-label">Chassis Number <span class="text-red-500">*</span></label><input id="new-chassis-no" type="text" class="form-input" placeholder="Enter chassis number" required></div>
+        
+        <div class="sm:col-span-2"><label class="form-label">Odometer Reading (km) <span class="text-red-500">*</span></label><input id="new-odometer" type="number" class="form-input" placeholder="e.g., 54000" required></div>
+        
+        <div class="sm:col-span-2 border-t pt-4"><label class="form-label">Client Name <span class="text-red-500">*</span></label><input id="new-client-name" type="text" class="form-input" placeholder="e.g., John Doe" required></div>
+        
+        <div class="sm:col-span-2">
+            <label class="form-label">Client Phone <span class="text-red-500">*</span></label>
+            <input id="new-client-phone" type="tel" class="form-input" placeholder="e.g., 9876543210" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+        </div>
+    </div>
+    <div class="mt-6"><button type="submit" class="btn-primary"><span class="material-symbols-outlined">save</span>Save Vehicle</button></div>
+</form></div>
                 
                 <div id="new-complaint-section" class="card hidden">
                     <h2 class="text-xl font-bold mb-4">Register New Complaint(s)</h2>
@@ -360,17 +398,16 @@
                             </div>
                             <!-- Voice Note -->
                             <div>
-                                <div class="flex items-center gap-3">
-                                    <button id="record-btn" type="button" onclick="startRecording()" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
-                                        <span class="material-symbols-outlined">mic</span> Record Note
-                                    </button>
-                                    <button id="stop-record-btn" type="button" onclick="stopRecording()" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
-                                        <span class="material-symbols-outlined">stop_circle</span> Stop
-                                    </button>
-                                </div>
-                                <div id="audio-playback" class="mt-3"></div>
-                                 <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
-                            </div>
+    <div class="flex items-center gap-4">
+        <button id="toggle-record-btn" type="button" onclick="toggleRecording('executive')" class="relative w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+    <span id="record-btn-icon" class="material-symbols-outlined text-3xl">mic</span>
+</button>
+        <div class="flex-grow">
+            <div id="audio-playback"></div>
+            <p id="recording-status" class="text-sm text-gray-500"></p>
+        </div>
+    </div>
+</div>
                         </div>
 
                         <div class="mt-6">
@@ -607,16 +644,15 @@
                         
                         <div class="border-t pt-4">
                             <label class="form-label">Record a Voice Note (Optional):</label>
-                             <div class="flex items-center gap-3">
-                                <button id="customer-record-btn" type="button" onclick="startRecording('customer')" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
-                                    <span class="material-symbols-outlined">mic</span> Record
-                                </button>
-                                <button id="customer-stop-record-btn" type="button" onclick="stopRecording('customer')" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
-                                    <span class="material-symbols-outlined">stop_circle</span> Stop
-                                </button>
-                            </div>
-                            <div id="customer-audio-playback" class="mt-3"></div>
-                            <p id="customer-recording-status" class="text-sm text-gray-500 mt-1"></p>
+                             <div class="flex items-center gap-4">
+   <button id="customer-toggle-record-btn" type="button" onclick="toggleRecording('customer')" class="relative w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+    <span id="customer-record-btn-icon" class="material-symbols-outlined text-3xl">mic</span>
+</button>
+    <div class="flex-grow">
+        <div id="customer-audio-playback"></div>
+        <p id="customer-recording-status" class="text-sm text-gray-500"></p>
+    </div>
+</div>
                         </div>
 
                         <div class="mt-6 border-t pt-6">
@@ -887,11 +923,12 @@
         let damageMarks = [];
         let uploadedImageFile = null;
 
-        // Media recording state
-        let capturedPhotos = [];
-        let voiceNoteBlob = null;
-        let mediaRecorder;
-        let audioChunks = [];
+       // Media recording state
+let capturedPhotos = [];
+let voiceNoteBlob = null;
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false; // <-- ADD THIS LINE
         
         // --- UI Element References ---
         const vehicleDetailsSection = document.getElementById('vehicle-details-section'), createVehicleSection = document.getElementById('create-vehicle-section'), newComplaintSection = document.getElementById('new-complaint-section'), searchError = document.getElementById('search-error');
@@ -1116,6 +1153,7 @@ function renderPhotoPreviews() {
         reader.readAsDataURL(file);
     });
 }
+
 // ADD this new function to handle removing a photo
 function removePhoto(indexToRemove) {
     // Remove the photo from our array at the specified index
@@ -1125,53 +1163,88 @@ function removePhoto(indexToRemove) {
 }
 
 
-        async function startRecording(context = 'executive') {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showError('Audio recording is not supported on this browser.');
-                return;
-            }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
+        // REPLACE your existing startRecording function with this one
+// REPLACE your existing startRecording function with this one
+async function startRecording(context = 'executive') {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('Audio recording is not supported on this browser.');
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        isRecording = true; // Set recording state
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
 
-                mediaRecorder.addEventListener("dataavailable", event => {
-                    audioChunks.push(event.data);
-                });
+        mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
+        });
 
-                mediaRecorder.addEventListener("stop", () => {
-                    voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(voiceNoteBlob);
-                    const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
-                    document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
-                });
+        mediaRecorder.addEventListener("stop", () => {
+            isRecording = false; // Reset recording state
+            voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+            const audioUrl = URL.createObjectURL(voiceNoteBlob);
+            const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+            document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full h-9"></audio>`;
+        });
 
-                mediaRecorder.start();
-                const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        mediaRecorder.start();
 
-                document.getElementById(recordBtnId).classList.add('hidden');
-                document.getElementById(stopBtnId).classList.remove('hidden');
-                document.getElementById(statusId).textContent = 'Recording...';
-            } catch (err) {
-                showError('Microphone access was denied.');
-                console.error("Mic Error:", err);
-            }
-        }
+        // UI update logic for the single button
+        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
+        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
+        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        
+        const recordBtn = document.getElementById(buttonId);
+        const recordIcon = document.getElementById(iconId);
 
-        function stopRecording(context = 'executive') {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-                 const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        // --- NEW VISUAL FEEDBACK ---
+        recordBtn.classList.add('is-recording'); // Add class to trigger animation
+        recordBtn.classList.remove('bg-red-600'); // Change color from red...
+        recordBtn.classList.add('bg-sky-500'); // ...to blue
+        
+        recordIcon.textContent = 'stop';
+        document.getElementById(statusId).textContent = 'Recording...';
+        // Clear any previous audio playback
+        const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+        document.getElementById(audioPlaybackEl).innerHTML = '';
 
-                document.getElementById(recordBtnId).classList.remove('hidden');
-                document.getElementById(stopBtnId).classList.add('hidden');
-                document.getElementById(statusId).textContent = 'Recording stopped.';
-            }
-        }
+    } catch (err) {
+        isRecording = false; // Reset state on error
+        showError('Microphone access was denied.');
+        console.error("Mic Error:", err);
+    }
+}
+
+// REPLACE your existing stopRecording function with this one
+function stopRecording(context = 'executive') {
+    if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        // UI update logic for the single button
+        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
+        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
+        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        
+        const recordBtn = document.getElementById(buttonId);
+        const recordIcon = document.getElementById(iconId);
+
+        // --- NEW VISUAL FEEDBACK ---
+        recordBtn.classList.remove('is-recording'); // Remove animation class
+        recordBtn.classList.remove('bg-sky-500'); // Change color from blue...
+        recordBtn.classList.add('bg-red-600'); // ...back to red
+        
+        recordIcon.textContent = 'mic';
+        document.getElementById(statusId).textContent = 'Recording saved.';
+    }
+}
+		// ADD THIS ENTIRE NEW FUNCTION
+function toggleRecording(context = 'executive') {
+    if (isRecording) {
+        stopRecording(context);
+    } else {
+        startRecording(context);
+    }
+}
 
 // --- AUTHENTICATION & UTILITIES ---
         const normalizeVehicleNumber = (num) => {
@@ -2029,7 +2102,7 @@ async function sendApprovalLink() {
 
 
 		// REPLACE the existing populateNotStartedJobs function with this one
-async function populateNotStartedJobs() {
+		async function populateNotStartedJobs() {
     // Add this check at the very beginning of the function
     if (!currentUser) {
         console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
