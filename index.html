@@ -1251,16 +1251,25 @@ function removePhoto(indexToRemove) {
 }
 
 
-        // ADD THIS NEW FUNCTION to handle the button toggle
-function handleRecordingToggle() {
+        // ADD THIS NEW HANDLER FUNCTION for the customer approval button
+function handleCustomerApprovalRecordingToggle() {
     if (mediaRecorder && mediaRecorder.state === "recording") {
-        stopRecording(); // context defaults to 'executive'
+        stopRecording('customer');
     } else {
-        startRecording(); // context defaults to 'executive'
+        startRecording('customer');
     }
 }
 
-// REPLACE the existing startRecording function with this modified version
+// ADD THIS NEW HANDLER for the executive's job card button
+function handleRecordingToggle() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording('executive'); 
+    } else {
+        startRecording('executive');
+    }
+}
+
+// REPLACE the existing startRecording function with this complete, updated version
 async function startRecording(context = 'executive') {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         showError('Audio recording is not supported on this browser.');
@@ -1284,7 +1293,7 @@ async function startRecording(context = 'executive') {
 
         mediaRecorder.start();
         
-        // --- MODIFIED UI LOGIC ---
+        // --- UPDATED UI LOGIC for both contexts ---
         if (context === 'executive') {
             const recordBtn = document.getElementById('record-toggle-btn');
             const recordIcon = document.getElementById('record-icon');
@@ -1294,13 +1303,15 @@ async function startRecording(context = 'executive') {
             recordIcon.textContent = 'stop_circle';
             recordText.textContent = 'Stop';
             document.getElementById('recording-status').textContent = 'Recording...';
-        } else { // Keep original logic for customer page
-            const recordBtnId = 'customer-record-btn';
-            const stopBtnId = 'customer-stop-record-btn';
-            const statusId = 'customer-recording-status';
-            document.getElementById(recordBtnId).classList.add('hidden');
-            document.getElementById(stopBtnId).classList.remove('hidden');
-            document.getElementById(statusId).textContent = 'Recording...';
+        } else { // Logic for customer page
+            const recordBtn = document.getElementById('cust-approval-record-btn');
+            const recordIcon = document.getElementById('cust-approval-record-icon');
+            const recordText = document.getElementById('cust-approval-record-text');
+            recordBtn.classList.add('is-recording');
+            recordBtn.classList.remove('btn-secondary');
+            recordIcon.textContent = 'stop_circle';
+            recordText.textContent = 'Stop';
+            document.getElementById('customer-recording-status').textContent = 'Recording...';
         }
 
     } catch (err) {
@@ -1309,10 +1320,33 @@ async function startRecording(context = 'executive') {
     }
 }
 
-// REPLACE the existing stopRecording function with this modified version
+// REPLACE the existing stopRecording function with this complete, updated version
 function stopRecording(context = 'executive') {
     if (mediaRecorder) {
         mediaRecorder.stop();
+        
+        // --- UPDATED UI LOGIC for both contexts ---
+        if (context === 'executive') {
+            const recordBtn = document.getElementById('record-toggle-btn');
+            const recordIcon = document.getElementById('record-icon');
+            const recordText = document.getElementById('record-text');
+            recordBtn.classList.remove('is-recording');
+            recordBtn.classList.add('btn-secondary');
+            recordIcon.textContent = 'mic';
+            recordText.textContent = 'Record Note';
+            document.getElementById('recording-status').textContent = 'Recording stopped.';
+        } else { // Logic for customer page
+            const recordBtn = document.getElementById('cust-approval-record-btn');
+            const recordIcon = document.getElementById('cust-approval-record-icon');
+            const recordText = document.getElementById('cust-approval-record-text');
+            recordBtn.classList.remove('is-recording');
+            recordBtn.classList.add('btn-secondary');
+            recordIcon.textContent = 'mic';
+            recordText.textContent = 'Record';
+            document.getElementById('customer-recording-status').textContent = 'Recording stopped.';
+        }
+    }
+}
         
         // --- MODIFIED UI LOGIC ---
         if (context === 'executive') {
