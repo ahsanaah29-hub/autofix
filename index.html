@@ -3005,15 +3005,17 @@ function showExecutiveScreen(screenId) {
         }
 
         // --- Customer Approval Flow ---
+// REPLACE your existing loadApprovalScreen function in edited.html with this one.
 async function loadApprovalScreen(reportId) {
+    // Hide all main app screens and show the customer approval screen
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('admin-screens').style.display = 'none';
     document.getElementById('executive-screens').style.display = 'none';
     document.getElementById('customer-approval-screen').classList.add('active-screen');
 
-    // 1. MODIFIED QUERY: Now also fetches the 'approved' status
+    // --- FIX: Added 'complaint' to the database query below ---
     const { data: report, error } = await sb.from('reports')
-        .select(`suggested, approved, vehicles ( vehicle_no )`)
+        .select(`complaint, suggested, approved, vehicles ( vehicle_no )`)
         .eq('id', reportId)
         .single();
 
@@ -3026,39 +3028,48 @@ async function loadApprovalScreen(reportId) {
 
     document.getElementById('approval-vehicle-no').textContent = report.vehicles.vehicle_no;
 
-    // 2. NEW LOGIC: Check if a response already exists
     if (report.approved !== null) {
-        // If 'approved' is not null, a submission has already been made.
+        // This part correctly shows the "Thank You" message if already submitted.
         document.getElementById('approval-content').classList.add('hidden');
         const successMsg = document.getElementById('approval-success-message');
-        
-        // Update the message to inform the user.
         successMsg.querySelector('h3').textContent = 'Response Already Submitted';
         successMsg.querySelector('p').textContent = 'Thank you, we have already received your feedback for this service request.';
-        
         successMsg.classList.remove('hidden');
         document.querySelector('#customer-approval-card h2').textContent = 'Response Received';
     } else {
-        // If 'approved' is null, show the form as usual.
+        // --- FIX: Added the full logic to render BOTH lists correctly ---
         const suggestionsList = document.getElementById('approval-suggestions-list');
         suggestionsList.innerHTML = '';
         try {
-            const suggestions = JSON.parse(report.suggested || '[]');
-            if (suggestions.length > 0) {
-                suggestions.forEach(text => {
-                    const item = document.createElement('label');
-                    item.className = 'flex items-center gap-3 p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors';
-                    item.innerHTML = `
-                        <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value="${text}">
-                        <span class="flex-1 text-sm font-medium">${text}</span>
+            const originalComplaints = JSON.parse(report.complaint || '[]');
+            const allSuggestions = JSON.parse(report.suggested || '[]');
+            
+            // Combine both lists and remove duplicates
+            const allItems = [...new Set([...originalComplaints, ...allSuggestions])];
+
+            if (allItems.length > 0) {
+                 allItems.forEach(item => {
+                    const isOriginalComplaint = originalComplaints.includes(item);
+                    const label = document.createElement('label');
+                    
+                    const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
+                    const tag = isOriginalComplaint 
+                        ? `<span class="text-xs text-gray-500">(Your Request)</span>`
+                        : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
+
+                    label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
+                    label.innerHTML = `
+                        <input type="checkbox" value="${item}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${isOriginalComplaint ? 'checked' : ''}>
+                        <span class="flex-1 text-sm font-medium">${item}</span>
+                        ${tag}
                     `;
-                    suggestionsList.appendChild(item);
+                    suggestionsList.appendChild(label);
                 });
             } else {
                 suggestionsList.innerHTML = '<p class="text-sm text-gray-500">No specific repairs were suggested.</p>';
             }
         } catch (e) {
-            console.error("Error parsing suggestions:", e);
+            console.error("Error parsing suggestions/complaints:", e);
             suggestionsList.innerHTML = '<p class="text-sm text-red-500">Could not display suggested repairs.</p>';
         }
     }
