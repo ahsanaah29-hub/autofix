@@ -61,7 +61,22 @@
         .report-table td { @apply px-4 py-4 whitespace-nowrap text-sm; }
         .report-table tbody tr:nth-child(even) { @apply bg-white; }
         .report-table tbody tr:nth-child(odd) { @apply bg-gray-50; }
-        
+        @keyframes pulse-ring {
+      0% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+      }
+    }
+
+    .record-button.is-recording {
+        @apply bg-blue-600 hover:bg-blue-700 text-white;
+        animation: pulse-ring 1.5s infinite;
+    }
         /* Styles for the accordion list in Due Date page */
         .due-date-details {
             max-height: 0;
@@ -78,6 +93,7 @@
         .printable-area {
             display: none;
         }
+		
 /* ADD THIS CSS FOR THE TABS */
 .tab-button {
     @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
@@ -406,17 +422,15 @@
                             </div>
                             <!-- Voice Note -->
                             <div>
-                                <div class="flex items-center gap-3">
-                                    <button id="record-btn" type="button" onclick="startRecording()" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
-                                        <span class="material-symbols-outlined">mic</span> Record Note
-                                    </button>
-                                    <button id="stop-record-btn" type="button" onclick="stopRecording()" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
-                                        <span class="material-symbols-outlined">stop_circle</span> Stop
-                                    </button>
-                                </div>
-                                <div id="audio-playback" class="mt-3"></div>
-                                 <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
-                            </div>
+    <div class="flex items-center gap-3">
+        <button id="record-toggle-btn" type="button" onclick="handleRecordingToggle()" class="record-button btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 transition-colors duration-300">
+            <span id="record-icon" class="material-symbols-outlined">mic</span>
+            <span id="record-text">Record Note</span>
+        </button>
+    </div>
+    <div id="audio-playback" class="mt-3"></div>
+     <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
+</div>
                         </div>
 
                         <div class="mt-6">
@@ -1239,53 +1253,89 @@ function removePhoto(indexToRemove) {
 }
 
 
-        async function startRecording(context = 'executive') {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showError('Audio recording is not supported on this browser.');
-                return;
-            }
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
+        // ADD THIS NEW FUNCTION to handle the button toggle
+function handleRecordingToggle() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording(); // context defaults to 'executive'
+    } else {
+        startRecording(); // context defaults to 'executive'
+    }
+}
 
-                mediaRecorder.addEventListener("dataavailable", event => {
-                    audioChunks.push(event.data);
-                });
+// REPLACE the existing startRecording function with this modified version
+async function startRecording(context = 'executive') {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showError('Audio recording is not supported on this browser.');
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
 
-                mediaRecorder.addEventListener("stop", () => {
-                    voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
-                    const audioUrl = URL.createObjectURL(voiceNoteBlob);
-                    const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
-                    document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
-                });
+        mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
+        });
 
-                mediaRecorder.start();
-                const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+        mediaRecorder.addEventListener("stop", () => {
+            voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+            const audioUrl = URL.createObjectURL(voiceNoteBlob);
+            const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+            document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
+        });
 
-                document.getElementById(recordBtnId).classList.add('hidden');
-                document.getElementById(stopBtnId).classList.remove('hidden');
-                document.getElementById(statusId).textContent = 'Recording...';
-            } catch (err) {
-                showError('Microphone access was denied.');
-                console.error("Mic Error:", err);
-            }
+        mediaRecorder.start();
+        
+        // --- MODIFIED UI LOGIC ---
+        if (context === 'executive') {
+            const recordBtn = document.getElementById('record-toggle-btn');
+            const recordIcon = document.getElementById('record-icon');
+            const recordText = document.getElementById('record-text');
+            recordBtn.classList.add('is-recording');
+            recordBtn.classList.remove('btn-secondary');
+            recordIcon.textContent = 'stop_circle';
+            recordText.textContent = 'Stop';
+            document.getElementById('recording-status').textContent = 'Recording...';
+        } else { // Keep original logic for customer page
+            const recordBtnId = 'customer-record-btn';
+            const stopBtnId = 'customer-stop-record-btn';
+            const statusId = 'customer-recording-status';
+            document.getElementById(recordBtnId).classList.add('hidden');
+            document.getElementById(stopBtnId).classList.remove('hidden');
+            document.getElementById(statusId).textContent = 'Recording...';
         }
 
-        function stopRecording(context = 'executive') {
-            if (mediaRecorder) {
-                mediaRecorder.stop();
-                 const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
-                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
-                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+    } catch (err) {
+        showError('Microphone access was denied.');
+        console.error("Mic Error:", err);
+    }
+}
 
-                document.getElementById(recordBtnId).classList.remove('hidden');
-                document.getElementById(stopBtnId).classList.add('hidden');
-                document.getElementById(statusId).textContent = 'Recording stopped.';
-            }
+// REPLACE the existing stopRecording function with this modified version
+function stopRecording(context = 'executive') {
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+        
+        // --- MODIFIED UI LOGIC ---
+        if (context === 'executive') {
+            const recordBtn = document.getElementById('record-toggle-btn');
+            const recordIcon = document.getElementById('record-icon');
+            const recordText = document.getElementById('record-text');
+            recordBtn.classList.remove('is-recording');
+            recordBtn.classList.add('btn-secondary');
+            recordIcon.textContent = 'mic';
+            recordText.textContent = 'Record Note';
+            document.getElementById('recording-status').textContent = 'Recording stopped.';
+        } else { // Keep original logic for customer page
+            const recordBtnId = 'customer-record-btn';
+            const stopBtnId = 'customer-stop-record-btn';
+            const statusId = 'customer-recording-status';
+            document.getElementById(recordBtnId).classList.remove('hidden');
+            document.getElementById(stopBtnId).classList.add('hidden');
+            document.getElementById(statusId).textContent = 'Recording stopped.';
         }
+    }
+}
 
 // --- AUTHENTICATION & UTILITIES ---
         const normalizeVehicleNumber = (num) => {
@@ -3324,5 +3374,4 @@ document.addEventListener('DOMContentLoaded', () => {
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
-
 
