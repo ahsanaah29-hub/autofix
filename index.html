@@ -667,14 +667,12 @@
                         
                         <div class="border-t pt-4">
                             <label class="form-label">Record a Voice Note (Optional):</label>
-                             <div class="flex items-center gap-3">
-                                <button id="customer-record-btn" type="button" onclick="startRecording('customer')" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
-                                    <span class="material-symbols-outlined">mic</span> Record
-                                </button>
-                                <button id="customer-stop-record-btn" type="button" onclick="stopRecording('customer')" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
-                                    <span class="material-symbols-outlined">stop_circle</span> Stop
-                                </button>
-                            </div>
+                            <div class="flex items-center gap-3">
+    <button id="cust-approval-record-btn" type="button" onclick="handleCustomerApprovalRecordingToggle()" class="record-button btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 transition-colors duration-300">
+        <span id="cust-approval-record-icon" class="material-symbols-outlined">mic</span>
+        <span id="cust-approval-record-text">Record</span>
+    </button>
+</div>
                             <div id="customer-audio-playback" class="mt-3"></div>
                             <p id="customer-recording-status" class="text-sm text-gray-500 mt-1"></p>
                         </div>
