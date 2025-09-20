@@ -1261,6 +1261,16 @@ function handleCustomerApprovalRecordingToggle() {
 }
 
 // ADD THIS NEW HANDLER for the executive's job card button
+// ADD THIS NEW HANDLER FUNCTION for the customer approval button
+function handleCustomerApprovalRecordingToggle() {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        stopRecording('customer');
+    } else {
+        startRecording('customer');
+    }
+}
+
+// ADD THIS HANDLER for the executive's job card button (was previously named handleRecordingToggle)
 function handleRecordingToggle() {
     if (mediaRecorder && mediaRecorder.state === "recording") {
         stopRecording('executive'); 
