@@ -35,34 +35,7 @@
         .screen { display: none; }
         .active-screen { display: block; }
         .modal-hidden { display: none; }
-        /* Add this keyframes rule for the pulsing animation */
-@keyframes pulse-ring {
-    0% {
-        transform: scale(0.95);
-        opacity: 0.75;
-    }
-    70% {
-        transform: scale(2);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(0.95);
-        opacity: 0;
-    }
-}
-
-/* This class will be toggled by JavaScript to activate the animation */
-.is-recording::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 9999px; /* rounded-full */
-    background-color: #38bdf8; /* sky-400 */
-    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
+        
         /* Component Styles */
         .form-input { @apply w-full rounded-lg border-[var(--border-color)] text-base shadow-sm transition-colors focus:border-[var(--primary-color)] focus:ring focus:ring-[var(--primary-color)] focus:ring-opacity-50; }
         .form-label { @apply block text-sm font-medium text-[var(--text-secondary)] mb-1; }
@@ -111,6 +84,43 @@
 }
 .tab-button.active-tab {
     @apply border-blue-600 text-blue-600;
+}
+.menu-container {
+    position: relative;
+}
+.menu-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 20;
+    width: 120px;
+}
+.menu-container:hover .dropdown-menu {
+    display: block;
+}
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+.dropdown-item:hover {
+    background-color: #f3f4f6; /* Gray 100 */
+}
+.dropdown-item .material-symbols-outlined {
+    font-size: 1.25rem;
 }
         @media print {
             body * {
@@ -395,19 +405,18 @@
                                 <div id="photo-previews" class="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
                             </div>
                             <!-- Voice Note -->
-<div>
-    <div class="flex items-center gap-4">
-        <!-- New single, modern button -->
-        <button id="toggle-record-btn" type="button" onclick="toggleRecording('executive')" class="relative w-14 h-14 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-            <span id="record-btn-icon" class="material-symbols-outlined text-3xl">mic</span>
-        </button>
-        <!-- Audio playback and status are now next to the button -->
-        <div class="flex-grow">
-            <div id="audio-playback"></div>
-            <p id="recording-status" class="text-sm text-gray-500"></p>
-        </div>
-    </div>
-</div>
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <button id="record-btn" type="button" onclick="startRecording()" class="btn-secondary !w-auto !py-2 !px-3 text-sm flex items-center gap-2">
+                                        <span class="material-symbols-outlined">mic</span> Record Note
+                                    </button>
+                                    <button id="stop-record-btn" type="button" onclick="stopRecording()" class="btn-primary !w-auto !py-2 !px-3 text-sm flex items-center gap-2 hidden !bg-red-600">
+                                        <span class="material-symbols-outlined">stop_circle</span> Stop
+                                    </button>
+                                </div>
+                                <div id="audio-playback" class="mt-3"></div>
+                                 <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
+                            </div>
                         </div>
 
                         <div class="mt-6">
@@ -720,6 +729,30 @@
 </div>
 
 
+<div id="cancel-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-lg p-6 w-full max-w-md m-4 space-y-4">
+        <div class="flex items-start">
+            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                <span class="material-symbols-outlined text-red-600">cancel</span>
+            </div>
+            <div class="ml-4 text-left">
+                 <h3 class="text-xl font-bold text-gray-800">Confirm Job Cancellation</h3>
+                 <p id="cancel-modal-text" class="text-gray-600 mt-2"></p>
+            </div>
+        </div>
+        <div class="mt-4 border-t pt-4">
+            <label for="cancel-confirmation-input" class="form-label">To confirm cancellation, please type 'cancel' below.</label>
+            <input id="cancel-confirmation-input" type="text" class="form-input" placeholder="Type 'cancel' to confirm">
+        </div>
+        <div class="flex justify-end gap-4 pt-4">
+            <button onclick="closeCancelModal()" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">Back</button>
+            <button id="confirm-cancel-button" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold">Confirm Cancellation</button>
+        </div>
+    </div>
+</div>
+
+
 <div id="complete-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative bg-white rounded-lg p-6 w-full max-w-md m-4 space-y-4">
@@ -898,8 +931,23 @@
 </div>
     
     <script>
-        // --- Google API Client Libraries ---
-        // Moved to bottom of body to ensure functions are defined before they are called.
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://gfylsjfljnwyomfouwvs.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmeWxzamZsam53eW9tZm91d3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MDc5MTYsImV4cCI6MjA3Mjk4MzkxNn0.hMvLvCDVaFtq0rXToHGOJPSFe-QnJ6_S-MYsI0d5zOs';
+        const sb = createClient(supabaseUrl, supabaseKey);
+
+        // --- Google Drive API Configuration ---
+        const CLIENT_ID = '903962440902-olb0km18p980o04na5hi4ah4f6lanms1.apps.googleusercontent.com'; // Paste your OAuth 2.0 Client ID here
+        const API_KEY = 'AIzaSyDq39bo-QQRWbPWM0qWcolswBdkBpiLR3w'; // Paste your API Key here
+        const PARENT_FOLDER_ID = '1jmD_XBl_4a_FEvT3xQ9RKgH7-26gmM30'; // Paste your Google Drive Folder ID here
+        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
+        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        // --- Google API Client Loader Functions ---
         function gapiLoaded() {
             gapi.load('client', initializeGapiClient);
         }
@@ -919,26 +967,6 @@
             gisInited = true;
             checkInitialAuth();
         }
-    </script>
-    <script>
-        const { createClient } = supabase;
-        const supabaseUrl = 'https://gfylsjfljnwyomfouwvs.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmeWxzamZsam53eW9tZm91d3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MDc5MTYsImV4cCI6MjA3Mjk4MzkxNn0.hMvLvCDVaFtq0rXToHGOJPSFe-QnJ6_S-MYsI0d5zOs';
-        const sb = createClient(supabaseUrl, supabaseKey);
-
-        // --- Google Drive API Configuration ---
-        // PASTE YOUR CREDENTIALS HERE
-        const CLIENT_ID = '903962440902-olb0km18p980o04na5hi4ah4f6lanms1.apps.googleusercontent.com'; // Paste your OAuth 2.0 Client ID here
-        const API_KEY = 'AIzaSyDq39bo-QQRWbPWM0qWcolswBdkBpiLR3w'; // Paste your API Key here
-        const PARENT_FOLDER_ID = '1jmD_XBl_4a_FEvT3xQ9RKgH7-26gmM30'; // Paste your Google Drive Folder ID here
-        // END OF CONFIGURATION
-
-        const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
 
         // Global error handler for unhandled promise rejections.
         window.addEventListener('unhandledrejection', function(event) {
@@ -960,6 +988,7 @@
         let currentUser = null;
         let vehicleModelsCache = [];
         let reportsDataStore = {};
+        let updateableReportsStore = {};
         let currentVehicleId = null;
         let currentReportId = null;
         let originalComplaintsForUpdate = [];
@@ -977,7 +1006,6 @@
         let voiceNoteBlob = null;
         let mediaRecorder;
         let audioChunks = [];
-		let isRecording = false;
         
         // --- UI Element References ---
         const vehicleDetailsSection = document.getElementById('vehicle-details-section'), createVehicleSection = document.getElementById('create-vehicle-section'), newComplaintSection = document.getElementById('new-complaint-section'), searchError = document.getElementById('search-error');
@@ -1210,89 +1238,54 @@ function removePhoto(indexToRemove) {
     renderPhotoPreviews();
 }
 
-	// ADD THIS NEW FUNCTION
-function toggleRecording(context = 'executive') {
-    if (isRecording) {
-        stopRecording(context);
-    } else {
-        startRecording(context);
-    }
-}
-        // REPLACE your existing startRecording function
-async function startRecording(context = 'executive') {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showError('Audio recording is not supported on this browser.');
-        return;
-    }
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        isRecording = true; // Set recording state
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
 
-        mediaRecorder.addEventListener("dataavailable", event => {
-            audioChunks.push(event.data);
-        });
+        async function startRecording(context = 'executive') {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Audio recording is not supported on this browser.');
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
 
-        mediaRecorder.addEventListener("stop", () => {
-            voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
-            const audioUrl = URL.createObjectURL(voiceNoteBlob);
-            const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
-            document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full h-9"></audio>`;
-        });
+                mediaRecorder.addEventListener("dataavailable", event => {
+                    audioChunks.push(event.data);
+                });
 
-        mediaRecorder.start();
-        
-        // --- NEW UI LOGIC ---
-        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
-        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
-        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
-        
-        const recordBtn = document.getElementById(buttonId);
-        const recordIcon = document.getElementById(iconId);
+                mediaRecorder.addEventListener("stop", () => {
+                    voiceNoteBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(voiceNoteBlob);
+                    const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
+                    document.getElementById(audioPlaybackEl).innerHTML = `<audio controls src="${audioUrl}" class="w-full"></audio>`;
+                });
 
-        recordBtn.classList.add('is-recording'); // Add class to trigger animation
-        recordBtn.classList.remove('bg-red-600'); // Change color from red...
-        recordBtn.classList.add('bg-sky-500'); // ...to blue
-        
-        recordIcon.textContent = 'stop';
-        document.getElementById(statusId).textContent = 'Recording...';
-        
-        // Clear any previous audio playback
-        const audioPlaybackEl = context === 'customer' ? 'customer-audio-playback' : 'audio-playback';
-        if (document.getElementById(audioPlaybackEl)) {
-             document.getElementById(audioPlaybackEl).innerHTML = '';
+                mediaRecorder.start();
+                const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
+                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
+                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
+
+                document.getElementById(recordBtnId).classList.add('hidden');
+                document.getElementById(stopBtnId).classList.remove('hidden');
+                document.getElementById(statusId).textContent = 'Recording...';
+            } catch (err) {
+                showError('Microphone access was denied.');
+                console.error("Mic Error:", err);
+            }
         }
-       
-    } catch (err) {
-        isRecording = false; // Reset state on error
-        showError('Microphone access was denied.');
-        console.error("Mic Error:", err);
-    }
-}
 
-// REPLACE your existing stopRecording function
-function stopRecording(context = 'executive') {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false; // Update state
+        function stopRecording(context = 'executive') {
+            if (mediaRecorder) {
+                mediaRecorder.stop();
+                 const recordBtnId = context === 'customer' ? 'customer-record-btn' : 'record-btn';
+                const stopBtnId = context === 'customer' ? 'customer-stop-record-btn' : 'stop-record-btn';
+                const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
 
-        // --- NEW UI LOGIC ---
-        const buttonId = context === 'customer' ? 'customer-toggle-record-btn' : 'toggle-record-btn';
-        const iconId = context === 'customer' ? 'customer-record-btn-icon' : 'record-btn-icon';
-        const statusId = context === 'customer' ? 'customer-recording-status' : 'recording-status';
-        
-        const recordBtn = document.getElementById(buttonId);
-        const recordIcon = document.getElementById(iconId);
-
-        recordBtn.classList.remove('is-recording'); // Remove animation class
-        recordBtn.classList.remove('bg-sky-500'); // Change color from blue...
-        recordBtn.classList.add('bg-red-600'); // ...back to red
-        
-        recordIcon.textContent = 'mic';
-        document.getElementById(statusId).textContent = 'Recording saved.';
-    }
-}
+                document.getElementById(recordBtnId).classList.remove('hidden');
+                document.getElementById(stopBtnId).classList.add('hidden');
+                document.getElementById(statusId).textContent = 'Recording stopped.';
+            }
+        }
 
 // --- AUTHENTICATION & UTILITIES ---
         const normalizeVehicleNumber = (num) => {
@@ -1534,7 +1527,7 @@ function stopRecording(context = 'executive') {
             }
             noReportsMsg.classList.add('hidden');
             
-            const statusColors = { 'Completed': 'bg-green-100 text-green-800', 'Ongoing': 'bg-orange-100 text-orange-800', 'Not Started': 'bg-red-100 text-red-800' };
+            const statusColors = { 'Completed': 'bg-green-100 text-green-800', 'Ongoing': 'bg-orange-100 text-orange-800', 'Not Started': 'bg-red-100 text-red-800', 'Cancelled': 'bg-gray-200 text-gray-800' };
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 let marksButton = 'N/A';
@@ -1976,9 +1969,6 @@ async function executeSaveComplaints() {
     resetJobCardState();
 }
 
-        
-        
-// ADD THIS NEW FUNCTION to your script in abcd.html
 async function saveSuggestionsForApproval() {
     if (!currentReportId) {
         showError('No report selected.');
@@ -2002,9 +1992,7 @@ async function saveSuggestionsForApproval() {
     console.log('Suggestions saved for approval link.');
     return true; // Indicate success
 }
-
         
-        // REPLACE the existing addSuggestion function
 function addSuggestion() {
     const input = document.getElementById('suggestion-input');
     const suggestionText = input.value.trim();
@@ -2023,7 +2011,6 @@ function addSuggestion() {
     }
 }
 
-// REPLACE the existing deleteSuggestion function
 function deleteSuggestion(index) {
     newSuggestions.splice(index, 1);
     
@@ -2035,7 +2022,6 @@ function deleteSuggestion(index) {
     renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
 }
 
-       // REPLACE your existing renderSuggestions function in abcd.html with this one.
 function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const executiveList = document.getElementById('executive-suggestions-list');
     const customerList = document.getElementById('customer-approval-list');
@@ -2117,31 +2103,61 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
             }
         }
 
-       // REPLACE the existing saveVehicleUpdate function in abcd.html with this one.
 async function saveVehicleUpdate(shouldReset = true) {
     if(!currentReportId) return showError('No report selected for update.');
 
-// ... existing code ... -->
+    const deliveryDate = document.getElementById('delivery-date').value;
+    if(!deliveryDate) return showError('Please select an expected delivery date.');
+
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        approvedItems.push(checkbox.value); 
+    });
+
+    const allSuggestions = [...new Set(newSuggestions)];
+
+    const updateData = {
+        suggested: JSON.stringify(allSuggestions),
+        approved: JSON.stringify(approvedItems),
+        materials_required: JSON.stringify(requiredMaterials),
+        expected_delivery: deliveryDate,
+        status: 'Ongoing'
+    };
+
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if(error) return showError(`Failed to save update: ${error.message}`);
+
+    showSuccessMessage('Update saved successfully!');
     if (shouldReset) {
         resetVehicleUpdateScreen();
     }
 }
         
-       // REPLACE your existing sendApprovalLink function in abcd.html with this one.
 async function sendApprovalLink() {
     if (!currentReportId) { 
         showError('No report is currently selected.'); 
         return; 
     }
     
-    // Step 1: Save the current suggestions without requiring a date.
+    // Step 1: Save the current suggestions to the database.
     const savedSuccessfully = await saveSuggestionsForApproval();
     if (!savedSuccessfully) {
         showError('Could not save suggestions before sending. Please try again.');
         return;
     }
 
-    // Step 2: Fetch the client's phone number from the report or the vehicle record.
+    // Step 2: NEW - Automatically update the status to 'Ongoing'
+    const { error: statusUpdateError } = await sb.from('reports')
+        .update({ status: 'Ongoing' })
+        .eq('id', currentReportId);
+
+    if (statusUpdateError) {
+        showError('Could not update job status before sending. Please try again.');
+        console.error('Status Update Error:', statusUpdateError);
+        return;
+    }
+
+    // Step 3: Fetch the client's phone number from the report or the vehicle record.
     const { data: reportData, error: reportError } = await sb
         .from('reports')
         .select('client_phone, vehicles(client_phone)') // Efficiently gets phone from report or vehicle
@@ -2162,7 +2178,7 @@ async function sendApprovalLink() {
         return; 
     }
     
-    // Step 3: Construct the WhatsApp message and URL, then open it.
+    // Step 4: Construct the WhatsApp message and URL, then open it.
     const approvalUrl = `${window.location.origin}${window.location.pathname}?report_id=${currentReportId}`;
     const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
     
@@ -2170,12 +2186,14 @@ async function sendApprovalLink() {
     const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
     
     window.open(whatsappUrl, '_blank');
+
+    // After sending, refresh the view
+    showSuccessMessage("Approval link sent and job moved to 'Awaiting Response'.");
+    resetVehicleUpdateScreen();
 }
 
 
-// REPLACE the existing populateNotStartedJobs function with this one
 async function populateNotStartedJobs() {
-    // Add this check at the very beginning of the function
     if (!currentUser) {
         console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
         document.getElementById('no-pending-jobs-message').classList.remove('hidden');
@@ -2187,10 +2205,9 @@ async function populateNotStartedJobs() {
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // Updated query to fetch vehicle_name, color, brand, and created_at
     const { data: reports, error } = await sb.from('reports')
         .select(`id, created_at, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
-        .eq('executive_id', currentUser.id) // This is the line that was failing
+        .eq('executive_id', currentUser.id)
         .eq('status', 'Not Started')
         .order('created_at', { ascending: false });
 
@@ -2205,32 +2222,29 @@ async function populateNotStartedJobs() {
         return;
     }
 
+    updateableReportsStore = {}; // Clear before populating
     reports.forEach(report => {
+        updateableReportsStore[report.id] = report; // Store it
         const card = document.createElement('div');
 		const vehicle = report.vehicles;
 
-		// Safely get all vehicle details, now including the model
 		const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
 		const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
 		const vehicleName = vehicle.vehicle_name || '';
 		const color = vehicle.color || '';
         
-        // Format the creation date
         const createdDate = new Date(report.created_at).toLocaleDateString('en-GB', {
             day: 'numeric', month: 'short', year: 'numeric'
         });
 
-		// Create a new description string that combines brand and model
 		const brandAndModel = `${brand} ${model}`.trim();
 		const descriptionParts = [vehicleName, brandAndModel, color].filter(part => part);
-		const description = descriptionParts.join(' &bull; '); // Using a bullet separator
+		const description = descriptionParts.join(' &bull; '); 
 
-		// Card style remains the same
-		card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-blue-500 cursor-pointer transition-all flex justify-between items-center';
+		card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-blue-500 transition-all flex justify-between items-center';
 
-		// The innerHTML is updated with the new description and date
 		card.innerHTML = `
-			<div>
+			<div class="flex-grow cursor-pointer" onclick="selectReportForUpdateById(${report.id})">
 				<div class="flex items-center gap-4">
                     <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
                     <p class="text-xs font-medium text-gray-500">${createdDate}</p>
@@ -2238,23 +2252,26 @@ async function populateNotStartedJobs() {
 				<p class="text-sm text-gray-600 mt-1">${description}</p>
 				<p class="text-xs text-gray-500 mt-1 truncate" title="${formatArrayCell(report.complaint)}"><strong>Complaint:</strong> ${formatArrayCell(report.complaint)}</p>
 			</div>
-			<span class="material-symbols-outlined text-gray-400">chevron_right</span>
+            <div class="menu-container">
+                <button class="menu-button p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-gray-500">more_vert</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a onclick="openCancelModal(${report.id}, '${vehicle.vehicle_no}')" class="dropdown-item">
+                        <span class="material-symbols-outlined text-red-500">cancel</span>
+                        <span>Cancel Job</span>
+                    </a>
+                </div>
+            </div>
 		`;
 
-        card.onclick = () => selectReportForUpdate(report);
         listContainer.appendChild(card);
     });
 }
 
-
-
-		// ADD THIS NEW FUNCTION
-// ADD THIS NEW FUNCTION
 function showUpdateTab(tabName) {
-    // Manage active state for tab buttons
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active-tab'));
     
-    // Manage visibility for tab content panels
     document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
 
     if (tabName === 'pending') {
@@ -2271,20 +2288,18 @@ function showUpdateTab(tabName) {
         populateCustomerResponseJobs();
     }
 }
-// ADD THIS NEW FUNCTION
 async function populateCustomerResponseJobs() {
     const listContainer = document.getElementById('customer-response-list');
     const noJobsMsg = document.getElementById('no-customer-response-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // Fetch ongoing reports where the 'approved' field has been populated by a customer
     const { data: reports, error } = await sb.from('reports')
         .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'Ongoing')
-        .not('approved', 'is', null)       // Ensures a response has been submitted
-	.neq('approved', '[]')             // The key fix: ensures AT LEAST ONE item was approved
+        .not('approved', 'is', null)
+	    .neq('approved', '[]')
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -2298,43 +2313,51 @@ async function populateCustomerResponseJobs() {
     }
 
     reports.forEach(report => {
+        updateableReportsStore[report.id] = report; // Store it
         const card = document.createElement('div');
         const approvedCount = (JSON.parse(report.approved || '[]')).length;
 
-        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-500 cursor-pointer transition-all flex justify-between items-center';
-const vehicle = report.vehicles;
-const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
-const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
+        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-green-500 transition-all flex justify-between items-center';
+        const vehicle = report.vehicles;
+        const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
+        const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
 
-card.innerHTML = `
-    <div class="flex-grow">
-        <div class="flex justify-between items-center">
-            <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
-            <p class="text-xs text-gray-500 italic">${brand} ${model}</p>
-        </div>
-        <p class="text-sm text-green-700 font-semibold mt-1">${approvedCount} service(s) approved</p>
-    </div>
-    <span class="material-symbols-outlined text-gray-400 ml-2">chevron_right</span>
-`;
-        card.onclick = () => selectReportForUpdate(report);
+        card.innerHTML = `
+            <div class="flex-grow cursor-pointer" onclick="selectReportForUpdateById(${report.id})">
+                <div class="flex justify-between items-center">
+                    <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
+                    <p class="text-xs text-gray-500 italic">${brand} ${model}</p>
+                </div>
+                <p class="text-sm text-green-700 font-semibold mt-1">${approvedCount} service(s) approved</p>
+            </div>
+            <div class="menu-container">
+                <button class="menu-button p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-gray-500">more_vert</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a onclick="openCancelModal(${report.id}, '${vehicle.vehicle_no}')" class="dropdown-item">
+                        <span class="material-symbols-outlined text-red-500">cancel</span>
+                        <span>Cancel Job</span>
+                    </a>
+                </div>
+            </div>
+        `;
         listContainer.appendChild(card);
     });
 }
 
-// ADD THIS NEW FUNCTION
 async function populateAwaitingResponseJobs() {
     const listContainer = document.getElementById('awaiting-response-list');
     const noJobsMsg = document.getElementById('no-awaiting-response-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // Query for jobs that are 'Ongoing', have suggestions, but no approval yet.
     const { data: reports, error } = await sb.from('reports')
         .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'Ongoing')
         .not('suggested', 'is', null)
-        .or('approved.is.null,approved.eq.[]') // This is the key fix
+        .or('approved.is.null,approved.eq.[]') 
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -2348,23 +2371,33 @@ async function populateAwaitingResponseJobs() {
     }
 
     reports.forEach(report => {
+        updateableReportsStore[report.id] = report; // Store it
         const card = document.createElement('div');
         const vehicle = report.vehicles;
         const brand = vehicle.vehicle_models ? vehicle.vehicle_models.brand : '';
         const model = vehicle.vehicle_models ? vehicle.vehicle_models.model : '';
 
-        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-blue-500 cursor-pointer transition-all flex justify-between items-center';
+        card.className = 'p-4 border border-gray-200 rounded-lg hover:shadow-md hover:border-blue-500 transition-all flex justify-between items-center';
         card.innerHTML = `
-            <div>
+            <div class="flex-grow cursor-pointer" onclick="selectReportForUpdateById(${report.id})">
                 <div class="flex justify-between items-center w-full">
                      <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
                      <p class="text-xs text-gray-500 italic ml-4">${brand} ${model}</p>
                 </div>
                 <p class="text-sm text-blue-700 font-semibold mt-1">Approval sent to customer</p>
             </div>
-            <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+             <div class="menu-container">
+                <button class="menu-button p-2 rounded-full hover:bg-gray-100">
+                    <span class="material-symbols-outlined text-gray-500">more_vert</span>
+                </button>
+                <div class="dropdown-menu">
+                    <a onclick="openCancelModal(${report.id}, '${vehicle.vehicle_no}')" class="dropdown-item">
+                        <span class="material-symbols-outlined text-red-500">cancel</span>
+                        <span>Cancel Job</span>
+                    </a>
+                </div>
+            </div>
         `;
-        card.onclick = () => selectReportForUpdate(report);
         listContainer.appendChild(card);
     });
 }		
@@ -2526,6 +2559,42 @@ async function populateAwaitingResponseJobs() {
             populateDueDateScreen(); // To reset the dropdown to its original value
         }
         
+        function openCancelModal(reportId, vehicleNo) {
+            document.getElementById('cancel-modal-text').textContent = `Are you sure you want to cancel the job for vehicle ${vehicleNo}? This action cannot be undone.`;
+            document.getElementById('confirm-cancel-button').onclick = () => executeCancellation(reportId, vehicleNo);
+            showModal('cancel-confirmation-modal');
+        }
+
+        async function executeCancellation(reportId, vehicleNo) {
+            const confirmationInput = document.getElementById('cancel-confirmation-input');
+            if (confirmationInput.value.trim().toLowerCase() !== 'cancel') {
+                return showError("Confirmation text did not match. Please type 'cancel' to proceed.");
+            }
+
+            const { error } = await sb.from('reports').update({ status: 'Cancelled' }).eq('id', reportId);
+
+            confirmationInput.value = '';
+            hideModal('cancel-confirmation-modal');
+
+            if (error) {
+                return showError(`Failed to cancel job: ${error.message}`);
+            }
+
+            showSuccessMessage(`Job for ${vehicleNo} has been cancelled.`);
+            // Refresh the current tab view
+            const activeTab = document.querySelector('.tab-button.active-tab');
+            if (activeTab) {
+                if (activeTab.id === 'tab-btn-pending') populateNotStartedJobs();
+                else if (activeTab.id === 'tab-btn-awaiting') populateAwaitingResponseJobs();
+                else if (activeTab.id === 'tab-btn-responses') populateCustomerResponseJobs();
+            }
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancel-confirmation-input').value = '';
+            hideModal('cancel-confirmation-modal');
+        }
+
         async function resetPassword() {
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
@@ -2609,11 +2678,7 @@ async function populateAwaitingResponseJobs() {
             document.getElementById('recording-status').textContent = '';
         }
 
-// REPLACE the existing selectReportForUpdate function
-// REPLACE the existing selectReportForUpdate function
-// REPLACE the existing selectReportForUpdate function in abcd.html with this one.
 function selectReportForUpdate(report) {
-    // Hide the tab interface and search bar to show the form
     document.getElementById('update-tab-container').classList.add('hidden');
     
     currentReportId = report.id;
@@ -2636,10 +2701,8 @@ function selectReportForUpdate(report) {
 
     const approvedItems = report.approved ? JSON.parse(report.approved) : [];
     
-    // This is the key change: Call the modified renderSuggestions with all the necessary data
     renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
     
-    // The rest of the function remains the same, handling display of other elements.
     renderMaterials();
 
     const complaintDisplayList = document.getElementById('original-complaints-list');
@@ -2693,7 +2756,16 @@ function selectReportForUpdate(report) {
         whatsappButton.style.display = 'flex';
     }
 }
-// REPLACE the existing resetVehicleUpdateScreen function
+
+function selectReportForUpdateById(reportId) {
+    const report = updateableReportsStore[reportId];
+    if (report) {
+        selectReportForUpdate(report);
+    } else {
+        console.error(`Report with ID ${reportId} not found in store.`);
+        showError("Could not load report details. Please try again.");
+    }
+}
 function resetVehicleUpdateScreen() {
     // Hide update form sections
     document.getElementById('update-details-section').classList.add('hidden');
@@ -3241,6 +3313,5 @@ document.addEventListener('DOMContentLoaded', () => {
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
-
 
 
