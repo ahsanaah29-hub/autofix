@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=es6,Promise,Array.prototype.find,Array.prototype.includes,Object.entries,Object.values"></script>
     <style type="text/tailwindcss">
         :root {
             --primary-color: #2563eb; /* Blue 600 */
@@ -2262,7 +2262,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
             complaintItem.className = 'flex items-center justify-between gap-3 p-3 bg-gray-100 rounded-lg';
             complaintItem.innerHTML = `
                 <div class="flex-1">
-                    <span class="font-medium break-all">${item.text}</span>
+                    <span class="font-medium break-words">${item.text}</span>
                 </div>
                 <div class="flex items-center gap-1">
                     <span class="font-bold text-gray-500">₹</span>
@@ -2338,38 +2338,43 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
 
 
-       async function saveVehicleUpdate(shouldReset = true) {
-            if(!currentReportId) return showError('No report selected for update.');
+      async function saveVehicleUpdate(shouldReset = true) {
+    if(!currentReportId) return showError('No report selected for update.');
 
-            const deliveryDate = document.getElementById('delivery-date').value;
-            if(!deliveryDate) return showError('Please select an expected delivery date.');
+    const deliveryDate = document.getElementById('delivery-date').value;
+    if(!deliveryDate) return showError('Please select an expected delivery date.');
 
-            const approvedItems = [];
-            document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-                try {
-                    approvedItems.push(JSON.parse(checkbox.value));
-                } catch(e) { console.error("Could not parse approved item from checkbox", checkbox.value); }
-            });
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        try {
+            approvedItems.push(JSON.parse(checkbox.value));
+        } catch(e) { console.error("Could not parse approved item from checkbox", checkbox.value); }
+    });
 
-            const allSuggestions = [...new Set(newSuggestions)];
+    // Combine both original complaints and new suggestions into one complete list.
+    const allItemsForApproval = [
+        ...originalComplaintsForUpdate,
+        ...newSuggestions
+    ];
 
-            // The 'materials_required' line has been removed from this object
-            const updateData = {
-                complaint: JSON.stringify(originalComplaintsForUpdate), // KEY CHANGE: Save updated complaints
-                suggested: JSON.stringify(allSuggestions),
-                approved: JSON.stringify(approvedItems),
-                expected_delivery: deliveryDate,
-                status: 'Ongoing'
-            };
+    // Create the data object to be saved in the database.
+    const updateData = {
+        complaint: JSON.stringify(originalComplaintsForUpdate),
+        // Save the COMBINED list to the 'suggested' column to preserve all items.
+        suggested: JSON.stringify(allItemsForApproval), 
+        approved: JSON.stringify(approvedItems),
+        expected_delivery: deliveryDate,
+        status: 'Ongoing'
+    };
 
-            const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-            if(error) return showError(`Failed to save update: ${error.message}`);
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if(error) return showError(`Failed to save update: ${error.message}`);
 
-            showSuccessMessage('Update saved successfully!');
-            if (shouldReset) {
-                resetVehicleUpdateScreen();
-            }
-        }
+    showSuccessMessage('Update saved successfully!');
+    if (shouldReset) {
+        resetVehicleUpdateScreen();
+    }
+}
 
                 
         // This new version combines all items and costs before creating the link.
@@ -2497,7 +2502,7 @@ async function sendApprovalLink() {
                             <p class="text-xs font-medium text-gray-500">${createdDate}</p>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">${description}</p>
-                        <p class="text-xs text-gray-500 mt-1 break-all"><strong>Complaint:</strong> ${formatArrayCell(report.complaint)}</p>
+                        <p class="text-xs text-gray-500 mt-1 break-words"><strong>Complaint:</strong> ${formatArrayCell(report.complaint)}</p>
                     </div>
                     <div class="menu-container">
                         <button class="menu-button p-2 rounded-full hover:bg-gray-100">
