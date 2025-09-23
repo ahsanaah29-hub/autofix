@@ -781,6 +781,45 @@
         align-items: center !important;
     }
 }
+/* === FINAL LAYOUT FIXES FOR MOBILE === */
+
+/* 1. Fix for the Bottom Navigation Bar */
+.bottom-nav > div {
+    width: 100% !important;
+}
+.nav-item {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+    min-width: 0 !important; /* Allows items to shrink properly to fit the screen */
+    text-align: center !important;
+}
+
+/* 2. Fix for the Job Card Search Buttons */
+#job-card-screen .flex.flex-col.sm\\:flex-row {
+    flex-direction: row !important; /* Forces the input and buttons into a single row */
+    align-items: center !important;
+}
+#job-card-screen .flex-shrink-0 {
+    width: auto !important; /* Overrides the default full-width style for these specific buttons */
+    flex-shrink: 0 !important;
+}
+/* === LOGIN FORM ICON ALIGNMENT FIX === */
+#login-screen form .relative {
+    position: relative !important;
+}
+
+#login-screen form .relative .material-symbols-outlined {
+    position: absolute !important;
+    top: 50% !important;
+    left: 0.75rem !important; /* 12px */
+    transform: translateY(-50%) !important;
+    -webkit-transform: translateY(-50%) !important;
+    color: #9ca3af; /* gray-400 */
+}
+
+#login-screen form .relative .form-input {
+    padding-left: 2.5rem !important; /* 40px */
+}
     </style>
 </head>
 <body>
