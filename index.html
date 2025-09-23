@@ -531,7 +531,7 @@
 </div>
 
         <div>
-            <h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approval for Mechanic Suggestions</h3>
+            <h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved suggestions</h3>
             <div id="customer-approval-list" class="space-y-2">
                 <p class="text-sm text-gray-500">Add mechanic suggestions above to see them here for approval.</p>
             </div>
@@ -851,6 +851,25 @@
         </div>
       </div>
     </div>
+	
+	<div id="change-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-lg p-6 w-full max-w-sm m-4 space-y-4">
+            <div class="flex items-start">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <span class="material-symbols-outlined text-yellow-600">warning</span>
+                </div>
+                <div class="ml-4 text-left">
+                     <h3 class="text-xl font-bold text-gray-800">Confirm Change</h3>
+                     <p class="text-gray-600 mt-2">The customer has already provided their approval. Are you sure you want to modify the list of services?</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 pt-4">
+                <button id="cancel-change-button" onclick="hideModal('change-confirmation-modal')" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">Cancel</button>
+                <button id="confirm-change-button" class="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">Confirm</button>
+            </div>
+        </div>
+    </div>
     
 	<div id="printable-job-card" class="printable-area">
     <style>
@@ -1009,6 +1028,7 @@
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
+		let hasCustomerApproval = false;
 
         // --- Google API Client Loader Functions ---
         function gapiLoaded() {
@@ -1308,6 +1328,28 @@
                 startRecording('customer');
             }
         }
+		
+
+function handleCheckboxChange(checkbox) {
+    if (hasCustomerApproval) {
+        showModal('change-confirmation-modal');
+        const confirmBtn = document.getElementById('confirm-change-button');
+        const cancelBtn = document.getElementById('cancel-change-button');
+
+        confirmBtn.onclick = () => {
+            hideModal('change-confirmation-modal');
+            recalculateAndUpdateTotal(); // User confirmed, so update the total
+        };
+        cancelBtn.onclick = () => {
+            checkbox.checked = !checkbox.checked; // Revert the checkbox to its original state
+            hideModal('change-confirmation-modal');
+        };
+    } else {
+        recalculateAndUpdateTotal(); // No prior approval, so just update the total directly
+    }
+}
+
+
 
         function handleRecordingToggle() {
             if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -1916,6 +1958,7 @@ function addComplaint() {
         }
 
         // This version displays only the complaint text, not the amount.
+// This version displays only the complaint text, not the amount.
 function renderComplaints() {
     const list = document.getElementById('complaints-list');
     list.innerHTML = '';
@@ -1930,7 +1973,7 @@ function renderComplaints() {
         div.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg text-sm';
         // Display only the text, not the amount, on the Job Card screen.
         div.innerHTML = `
-            <p class="flex-1 mr-2">${item.text}</p>
+            <p class="flex-1 mr-2 break-all">${item.text}</p>
             <button onclick="deleteComplaint(${index})" class="text-red-500 hover:text-red-700 shrink-0">
                 <span class="material-symbols-outlined">delete</span>
             </button>
@@ -2103,8 +2146,30 @@ function renderComplaints() {
             return true; // Indicate success
         }
         
-        // REPLACE the existing addSuggestion function
+
+// This function now contains the confirmation logic
 function addSuggestion() {
+    const suggestionInput = document.getElementById('suggestion-input');
+    const suggestionText = suggestionInput.value.trim();
+    if (!suggestionText) return; // Do nothing if the input is empty
+
+    if (hasCustomerApproval) {
+        showModal('change-confirmation-modal');
+        const confirmBtn = document.getElementById('confirm-change-button');
+        const cancelBtn = document.getElementById('cancel-change-button');
+
+        confirmBtn.onclick = () => {
+            hideModal('change-confirmation-modal');
+            executeAddSuggestion(); // Proceed with adding if confirmed
+        };
+        // The cancel button's default onclick (from the HTML) is enough here
+    } else {
+        executeAddSuggestion(); // No approval yet, so add directly
+    }
+}
+
+// This function contains the original core logic for adding a suggestion
+function executeAddSuggestion() {
     const suggestionInput = document.getElementById('suggestion-input');
     const amountInput = document.getElementById('suggestion-amount-input');
     const suggestionText = suggestionInput.value.trim();
@@ -2119,14 +2184,13 @@ function addSuggestion() {
         document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
             try {
                 approvedItems.push(JSON.parse(checkbox.value));
-            } catch {
-                approvedItems.push(checkbox.value);
-            }
+            } catch {}
         });
         renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
     }
     suggestionInput.focus();
 }
+
 
 // REPLACE the existing deleteSuggestion function
 function deleteSuggestion(index) {
@@ -2169,24 +2233,21 @@ function updateComplaintCost(text, newAmount) {
 function recalculateAndUpdateTotal() {
     const totalAmountEl = document.getElementById('approx-total-amount');
     let totalAmount = 0;
-    
-    // Sum costs from original complaints
-    originalComplaintsForUpdate.forEach(item => {
-        totalAmount += item.amount || 0;
+    // Find all checked checkboxes in the list and sum their values
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        try {
+            // The checkbox value is a stringified JSON object, so we parse it
+            const item = JSON.parse(checkbox.value);
+            if (item && typeof item.amount === 'number') {
+                totalAmount += item.amount;
+            }
+        } catch (e) {
+            console.error("Could not parse checkbox value for total calculation:", checkbox.value);
+        }
     });
-    
-    // Sum costs from new mechanic suggestions
-    newSuggestions.forEach(item => {
-        totalAmount += item.amount || 0;
-    });
-
     totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
 }
 
-// REPLACE the existing renderSuggestions function
-// REPLACE the existing renderSuggestions function with this one.
-// This function now populates three different lists for better clarity.
-// This function now generates a smaller amount field for the complaints list.
 function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const executiveList = document.getElementById('executive-suggestions-list');
     const customerComplaintsList = document.getElementById('customer-complaints-list');
@@ -2201,7 +2262,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
             complaintItem.className = 'flex items-center justify-between gap-3 p-3 bg-gray-100 rounded-lg';
             complaintItem.innerHTML = `
                 <div class="flex-1">
-                    <span class="font-medium">${item.text}</span>
+                    <span class="font-medium break-all">${item.text}</span>
                 </div>
                 <div class="flex items-center gap-1">
                     <span class="font-bold text-gray-500">₹</span>
@@ -2232,17 +2293,20 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // --- MODIFICATION STARTS HERE ---
     // 3. Render the COMBINED list for the final approval checklist
     customerApprovalList.innerHTML = '';
     const allItemsForApproval = [...complaints, ...suggestions]; // Combine both lists
 
     if (allItemsForApproval.length > 0) {
+        const hasCustomerResponded = approved.length > 0;
+        
         allItemsForApproval.forEach(item => {
-            const isApproved = approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text);
+            const isChecked = hasCustomerResponded
+                ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text)
+                : true;
+
             const checkboxValue = `'${JSON.stringify(item)}'`;
             
-            // Add a visual tag to distinguish between item types
             const isOriginalComplaint = item.type === 'complaint';
             const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
             const tag = isOriginalComplaint 
@@ -2251,10 +2315,14 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             const approvalItem = document.createElement('label');
             approvalItem.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200`;
+            // THE CHANGE IS ON THE NEXT LINE: onchange now calls handleCheckboxChange(this)
             approvalItem.innerHTML = `
-                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value=${checkboxValue} ${isApproved ? 'checked' : ''}>
+                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                       value=${checkboxValue} 
+                       ${isChecked ? 'checked' : ''}
+                       onchange="handleCheckboxChange(this)">
                 <div class="flex-1 flex justify-between items-center">
-                    <span class="font-medium">${item.text}</span>
+                   <span class="font-medium break-all">${item.text}</span>
                     <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                 </div>
                 ${tag}
@@ -2264,7 +2332,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     } else {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
-    // --- MODIFICATION ENDS HERE ---
     
     recalculateAndUpdateTotal();
 }
@@ -2306,62 +2373,72 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
                 
         // This new version combines all items and costs before creating the link.
+// This new version opens a window immediately to prevent pop-up blockers
+// and fetches the client's phone number more reliably.
+// This is a more robust version that ensures all data is saved and verified
+// BEFORE attempting to open the WhatsApp link in a single, direct action.
 async function sendApprovalLink() {
-    if (!currentReportId) { 
-        showError('No report is currently selected.'); 
-        return; 
+    if (!currentReportId) {
+        return showError('No report is currently selected.');
     }
-    
-    // CRITICAL FIX: Combine original complaints (with updated amounts) and new suggestions into one list.
-    const allItemsForApproval = [
-        ...originalComplaintsForUpdate,
-        ...newSuggestions
-    ];
 
-    // Now, save this complete list to the 'suggested' column. This becomes the single source of truth for the customer.
-    const { error: saveDataError } = await sb.from('reports')
-        .update({ 
-            suggested: JSON.stringify(allItemsForApproval), // Save the combined list
-            status: 'Ongoing' 
-        })
-        .eq('id', currentReportId);
+    try {
+        // 1. Give the user immediate feedback that something is happening.
+        showSuccessMessage('Saving and preparing link...');
 
-    if (saveDataError) {
-        showError('Could not save data for approval. Please try again.');
-        console.error('Save for Approval Error:', saveDataError);
-        return;
+        // 2. Combine and save all required data to the database first.
+        const allItemsForApproval = [
+            ...originalComplaintsForUpdate,
+            ...newSuggestions
+        ];
+        const { error: saveDataError } = await sb.from('reports')
+            .update({
+                suggested: JSON.stringify(allItemsForApproval),
+                status: 'Ongoing'
+            })
+            .eq('id', currentReportId);
+
+        if (saveDataError) {
+            // If saving fails, stop here and show an error.
+            throw saveDataError;
+        }
+
+        // 3. Fetch the report data again to get the client's phone number.
+        const { data: reportData, error: reportError } = await sb
+            .from('reports')
+            .select('client_phone, vehicles(*)')
+            .eq('id', currentReportId)
+            .single();
+
+        if (reportError) {
+            throw reportError;
+        }
+
+        // 4. Explicitly check if a phone number exists.
+        const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
+        if (!clientPhone) {
+            // This is a clear error message instead of getting stuck.
+            return showError("Cannot send: Client phone number is missing for this job card.");
+        }
+
+        // 5. Construct the final URL.
+        const approvalUrl = `${window.location.origin}${window.location.pathname}?report_id=${currentReportId}`;
+        const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
+        const encodedText = encodeURIComponent(messageText);
+        const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
+
+        // 6. Only after all checks pass, open the link directly.
+        window.open(whatsappUrl, '_blank');
+
+        showSuccessMessage("Approval link sent! Job moved to 'Awaiting Response'.");
+        resetVehicleUpdateScreen();
+
+    } catch (error) {
+        // This will catch any error from the steps above.
+        console.error('Error in sendApprovalLink:', error);
+        showError(`An error occurred: ${error.message}`);
     }
-    
-    const { data: reportData, error: reportError } = await sb
-        .from('reports')
-        .select('client_phone, vehicles(client_phone)')
-        .eq('id', currentReportId)
-        .single();
-
-    if (reportError) { 
-        showError("Could not fetch report details to send the link."); 
-        return; 
-    }
-    
-    const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
-
-    if (!clientPhone) { 
-        showError("A client phone number could not be found for this report or vehicle."); 
-        return; 
-    }
-    
-    const approvalUrl = `${window.location.origin}${window.location.pathname}?report_id=${currentReportId}`;
-    const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
-    
-    const encodedText = encodeURIComponent(messageText);
-    const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
-    
-    window.open(whatsappUrl, '_blank');
-
-    showSuccessMessage("Approval link sent and job moved to 'Awaiting Response'.");
-    resetVehicleUpdateScreen();
 }
-
         async function populateNotStartedJobs() {
             if (!currentUser) {
                 console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
@@ -2853,25 +2930,17 @@ async function sendApprovalLink() {
             document.getElementById('recording-status').textContent = '';
         }
 
-       function selectReportForUpdate(report) {
+function selectReportForUpdate(report) {
+            hasCustomerApproval = false; // Reset flag for each new selection
 	    const complaintsSection = document.getElementById('customer-complaints-update-section');
-          //  const suggestionsSection = document.getElementById('mechanic-suggestions-update-section');
             const isResponsesTabActive = document.getElementById('tab-btn-responses').classList.contains('active-tab');
 
             if (isResponsesTabActive) {
-                // If on the "Responses Received" tab, HIDE the sections
                 complaintsSection.classList.add('hidden');
-               // suggestionsSection.classList.add('hidden');
             } else {
-                // On any other tab, make sure they are VISIBLE
                 complaintsSection.classList.remove('hidden');
-               // suggestionsSection.classList.remove('hidden');
             }
-            // END OF ADDED LOGIC
-
-            document.getElementById('update-tab-container').classList.add('hidden');
-            // ...rest of the function continues here
-       
+            
             document.getElementById('update-tab-container').classList.add('hidden');
             
             currentReportId = report.id;
@@ -2880,27 +2949,44 @@ async function sendApprovalLink() {
             updateDetailsSection.classList.remove('hidden');
             updateFormSection.classList.remove('hidden');
 
-            try {
+        try {
+            const suggestedItems = report.suggested ? JSON.parse(report.suggested) : null;
+
+            if (suggestedItems && suggestedItems.length > 0) {
+                originalComplaintsForUpdate = suggestedItems.filter(item => item.type === 'complaint');
+                newSuggestions = suggestedItems.filter(item => item.type === 'suggestion');
+            } else {
                 let parsedComplaints = JSON.parse(report.complaint || '[]');
                 originalComplaintsForUpdate = parsedComplaints.map(c => 
                     typeof c === 'string' ? { text: c, amount: 0, type: 'complaint' } : c
                 );
-            } catch (e) {
-                originalComplaintsForUpdate = [];
-            }
-            try {
-                let parsedSuggestions = report.suggested ? JSON.parse(report.suggested) : [];
-                newSuggestions = parsedSuggestions.map(s => 
-                    typeof s === 'string' ? { text: s, amount: 0, type: 'suggestion' } : s
-                );
-            } catch (e) {
                 newSuggestions = [];
             }
+        } catch (e) {
+            console.error("Error parsing complaint/suggestion data:", e);
+            originalComplaintsForUpdate = [];
+            newSuggestions = [];
+        }
 
             const approvedItems = report.approved ? JSON.parse(report.approved) : [];
             
-            // The call to renderMaterials() has been removed here
+            if (approvedItems && approvedItems.length > 0) {
+                hasCustomerApproval = true;
+            }
+            
             renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+
+            const isResponseReceived = approvedItems && approvedItems.length > 0;
+            if (isResponseReceived) {
+                const totalAmountEl = document.getElementById('approx-total-amount');
+                let totalAmount = 0;
+                approvedItems.forEach(item => {
+                    if (item && typeof item.amount === 'number') {
+                        totalAmount += item.amount;
+                    }
+                });
+                totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
+            }
 
             const complaintDisplayList = document.getElementById('original-complaints-list');
             const complaintSummaryP = document.getElementById('update-detail-complaint');
@@ -2912,6 +2998,7 @@ async function sendApprovalLink() {
                 originalComplaintsForUpdate.forEach(complaint => {
                     const li = document.createElement('li');
                     li.textContent = complaint.text;
+					li.classList.add('break-all');
                     complaintDisplayList.appendChild(li);
                 });
                 complaintDisplayDiv.classList.remove('hidden');
@@ -3241,7 +3328,7 @@ async function sendApprovalLink() {
                             label.innerHTML = `
                                 <input type="checkbox" value=${checkboxValue} class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()">
                                 <div class="flex-1 flex justify-between items-center gap-3">
-                                     <span class="text-sm font-medium break-all">${item.text}</span>
+                                     <span class="text-sm font-medium break-words">${item.text}</span>
                                      ${amountDisplay}
                                 </div>
                                 ${tag}
