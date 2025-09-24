@@ -2878,7 +2878,7 @@ async function handleCompletionConfirmation(id, vehicleNo) {
 
     // Set up the "Send" button in the feedback modal
     const sendButton = document.getElementById('confirm-feedback-send-button');
-    sendButton.onclick = () => sendWhatsAppFeedback(clientPhone, vehicleNo);
+    sendButton.onclick = () => sendWhatsAppFeedback(id, clientPhone, vehicleNo);
 
     // Show the new feedback modal
     showModal('whatsapp-feedback-modal');
