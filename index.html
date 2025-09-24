@@ -748,7 +748,39 @@
 
     <div id="success-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">check_circle</span><span id="success-text"></span></div>
     <div id="error-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">error</span><span id="error-text"></span></div>
-    
+    <div id="customer-feedback-screen" class="screen">
+    <div class="flex flex-col min-h-screen justify-center items-center p-4 bg-gray-50">
+        <div class="w-full max-w-lg">
+            <div class="flex justify-center items-center gap-3 mb-8">
+                <span class="material-symbols-outlined text-4xl text-[var(--primary-color)]">rate_review</span>
+                <h1 class="text-3xl font-bold tracking-tight text-[var(--text-primary)]">AutoFix Service Feedback</h1>
+            </div>
+            <div class="card space-y-6">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Share Your Feedback</h2>
+                    <p class="text-[var(--text-secondary)] mt-1">For Vehicle: <span id="feedback-vehicle-no" class="font-bold"></span></p>
+                </div>
+                
+                <div id="feedback-form-content" class="space-y-4">
+                    <div class="border-t pt-4">
+                        <label for="customer-feedback-input" class="form-label">Please share your experience with us:</label>
+                        <textarea id="customer-feedback-input" class="form-input" rows="4" placeholder="Your feedback is important to us..."></textarea>
+                    </div>
+                    <div class="mt-6">
+                         <button onclick="submitCustomerTextFeedback()" class="btn-primary">
+                            <span class="material-symbols-outlined">send</span> Submit Feedback
+                        </button>
+                    </div>
+                </div>
+
+                 <div id="feedback-success-message" class="hidden text-center p-4 bg-green-100 text-green-800 rounded-lg">
+                    <h3 class="font-bold text-xl">Thank You!</h3>
+                    <p>Your feedback has been submitted successfully. We appreciate you taking the time to help us improve.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <div id="scanner-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-hidden">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeScannerModal()"></div>
         <div class="relative bg-white rounded-lg p-4 w-full max-w-lg m-4 space-y-4">
@@ -2856,17 +2888,77 @@ async function handleCompletionConfirmation(id, vehicleNo) {
 }
 
 // ADD this new function right after the `handleCompletionConfirmation` function.
-function sendWhatsAppFeedback(clientPhone, vehicleNo) {
-    const messageText = `Dear Customer, we hope you are satisfied with the service for your vehicle ${vehicleNo}. We would appreciate it if you could share your valuable feedback with us. Thank you for choosing AutoFix Service!`;
+// REPLACE your existing sendWhatsAppFeedback function with this one
+function sendWhatsAppFeedback(reportId, clientPhone, vehicleNo) {
+    // This creates a unique link back to the application for feedback
+    const feedbackUrl = `${window.location.origin}${window.location.pathname}?feedback_id=${reportId}`;
+
+    const messageText = `Dear Customer,
+
+Thank you for choosing AutoFix for your vehicle ${vehicleNo}.
+
+We would be grateful if you could share your experience with us by clicking the link below:
+${feedbackUrl}
+
+Your feedback helps us improve our service.`;
+    
     const encodedText = encodeURIComponent(messageText);
     const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
     window.open(whatsappUrl, '_blank');
     
-    // Hide the modal after clicking send
     hideModal('whatsapp-feedback-modal');
 }
+// START: Add these two new functions
+async function loadFeedbackScreen(feedbackId) {
+    // Hide all other screens and show the feedback screen
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+    document.getElementById('customer-feedback-screen').classList.add('active-screen');
 
+    // Fetch the vehicle number to display it on the page for context
+    const { data, error } = await sb
+        .from('reports')
+        .select('vehicles(vehicle_no)')
+        .eq('id', feedbackId)
+        .single();
+
+    if (error || !data) {
+        console.error('Error fetching report for feedback:', error);
+        document.getElementById('feedback-form-content').innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid.</p>';
+        return;
+    }
+
+    document.getElementById('feedback-vehicle-no').textContent = data.vehicles.vehicle_no;
+}
+
+async function submitCustomerTextFeedback() {
+    const params = new URLSearchParams(window.location.search);
+    const feedbackId = params.get('feedback_id');
+    if (!feedbackId) {
+        return alert("Error: Report ID not found. Your session may be invalid.");
+    }
+
+    const feedbackText = document.getElementById('customer-feedback-input').value.trim();
+    if (!feedbackText) {
+        return alert('Please enter your feedback before submitting.');
+    }
+
+    // Update the 'customer_feedback_text' column in the 'reports' table
+    const { error } = await sb
+        .from('reports')
+        .update({ customer_feedback_text: feedbackText })
+        .eq('id', feedbackId);
+
+    if (error) {
+        console.error('Error submitting feedback:', error);
+        return alert('Sorry, there was an error submitting your feedback. Please try again.');
+    }
+
+    // On success, hide the form and show the thank you message
+    document.getElementById('feedback-form-content').classList.add('hidden');
+    document.getElementById('feedback-success-message').classList.remove('hidden');
+}
+// END: Add these two new functions
         async function executeCancellation(reportId, vehicleNo) {
             const confirmationInput = document.getElementById('cancel-confirmation-input');
             if (confirmationInput.value.trim().toLowerCase() !== 'cancel') {
@@ -3453,15 +3545,19 @@ function selectReportForUpdate(report) {
     document.getElementById('approval-success-message').classList.remove('hidden');
 }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const reportId = params.get('report_id');
+        
+            document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const reportId = params.get('report_id');
+    const feedbackId = params.get('feedback_id'); // <-- ADD THIS LINE
 
-            if (reportId) {
-                loadApprovalScreen(reportId);
-            } else {
-                const savedUser = sessionStorage.getItem('currentUser');
-                if (savedUser) {
+    if (reportId) {
+        loadApprovalScreen(reportId);
+    } else if (feedbackId) { // <-- ADD THIS ELSE IF BLOCK
+        loadFeedbackScreen(feedbackId);
+    } else {
+        const savedUser = sessionStorage.getItem('currentUser');
+        if (savedUser) {
                     currentUser = JSON.parse(savedUser);
                     if (currentUser.role === 'admin') {
                         showAdminScreen('admin-dashboard-screen');
