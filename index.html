@@ -195,6 +195,11 @@
 				  <a href="javascript:void(0)" onclick="showAdminScreen('admin-vehicle-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1"><span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">minor_crash</span><h2 class="text-lg font-bold mt-2">Vehicle Management</h2><p class="text-sm text-[var(--text-secondary)]">Create & Delete Brands/Models</p></a>
                  <a href="javascript:void(0)" onclick="showAdminScreen('admin-executive-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1"><span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">manage_accounts</span><h2 class="text-lg font-bold mt-2">Executive Management</h2><p class="text-sm text-[var(--text-secondary)]">Create & Delete Executives</p></a>
                  <a href="javascript:void(0)" onclick="showAdminScreen('admin-admin-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1"><span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">admin_panel_settings</span><h2 class="text-lg font-bold mt-2">Admin Management</h2><p class="text-sm text-[var(--text-secondary)]">Manage Admins & Passwords</p></a>
+				 <a href="javascript:void(0)" onclick="showAdminScreen('admin-settings-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1">
+                    <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">toggle_on</span>
+                    <h2 class="text-lg font-bold mt-2">App Settings</h2>
+                    <p class="text-sm text-[var(--text-secondary)]">Toggle features and form fields</p>
+                </a>
             </main>
         </div>
         
@@ -259,6 +264,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
+									<th>Service Feedback</th> 
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -300,6 +306,27 @@
                     <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Admin</button></form></div>
                 <div class="card space-y-3"><h2 class="text-xl font-bold">Admin List</h2><div id="admins-list"></div></div>
             </main>
+			</div> <div id="admin-settings-screen" class="admin-screen" style="display: none;">
+            <header class="app-header">
+                <div class="app-header-content">
+                    <button class="absolute left-4 text-[var(--text-secondary)] hover:text-[var(--primary-color)]" onclick="showAdminScreen('admin-dashboard-screen')">
+                        <span class="material-symbols-outlined">arrow_back_ios_new</span>
+                    </button>
+                    <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">App Settings</h1>
+                </div>
+            </header>
+            <main class="app-main">
+                <div class="card space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold">Feature Toggles</h2>
+                        <p class="text-sm text-gray-500">Control which features and fields are available to executives.</p>
+                    </div>
+                    <div id="settings-toggles-container" class="border-t pt-6 space-y-4">
+                        <p class="text-gray-500">Loading settings...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
         </div>
     </div>
 
@@ -615,6 +642,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
+									<th>Service Feedback</th> 
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -748,7 +776,8 @@
 
     <div id="success-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">check_circle</span><span id="success-text"></span></div>
     <div id="error-message" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-full shadow-lg hidden flex items-center gap-2 transition-transform duration-300 transform"><span class="material-symbols-outlined">error</span><span id="error-text"></span></div>
-    <div id="customer-feedback-screen" class="screen">
+	
+<div id="customer-feedback-screen" class="screen">
     <div class="flex flex-col min-h-screen justify-center items-center p-4 bg-gray-50">
         <div class="w-full max-w-lg">
             <div class="flex justify-center items-center gap-3 mb-8">
@@ -760,7 +789,6 @@
                     <h2 class="text-2xl font-bold text-gray-800">Share Your Feedback</h2>
                     <p class="text-[var(--text-secondary)] mt-1">For Vehicle: <span id="feedback-vehicle-no" class="font-bold"></span></p>
                 </div>
-                
                 <div id="feedback-form-content" class="space-y-4">
                     <div class="border-t pt-4">
                         <label for="customer-feedback-input" class="form-label">Please share your experience with us:</label>
@@ -772,7 +800,6 @@
                         </button>
                     </div>
                 </div>
-
                  <div id="feedback-success-message" class="hidden text-center p-4 bg-green-100 text-green-800 rounded-lg">
                     <h3 class="font-bold text-xl">Thank You!</h3>
                     <p>Your feedback has been submitted successfully. We appreciate you taking the time to help us improve.</p>
@@ -781,6 +808,7 @@
         </div>
     </div>
 </div>
+    
     <div id="scanner-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-hidden">
         <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="closeScannerModal()"></div>
         <div class="relative bg-white rounded-lg p-4 w-full max-w-lg m-4 space-y-4">
@@ -883,7 +911,28 @@
         </div>
       </div>
     </div>
-	<div id="whatsapp-feedback-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
+	
+	<div id="change-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-lg p-6 w-full max-w-sm m-4 space-y-4">
+            <div class="flex items-start">
+                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <span class="material-symbols-outlined text-yellow-600">warning</span>
+                </div>
+                <div class="ml-4 text-left">
+                     <h3 class="text-xl font-bold text-gray-800">Confirm Change</h3>
+                     <p class="text-gray-600 mt-2">The customer has already provided their approval. Are you sure you want to modify the list of services?</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-4 pt-4">
+                <button id="cancel-change-button" onclick="hideModal('change-confirmation-modal')" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">Cancel</button>
+                <button id="confirm-change-button" class="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">Confirm</button>
+            </div>
+        </div>
+    </div>
+	
+	
+<div id="whatsapp-feedback-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="relative bg-white rounded-lg p-6 w-full max-w-md m-4 space-y-4">
         <div class="flex items-start">
@@ -906,25 +955,8 @@
         </div>
     </div>
 </div>
-	<div id="change-confirmation-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="relative bg-white rounded-lg p-6 w-full max-w-sm m-4 space-y-4">
-            <div class="flex items-start">
-                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <span class="material-symbols-outlined text-yellow-600">warning</span>
-                </div>
-                <div class="ml-4 text-left">
-                     <h3 class="text-xl font-bold text-gray-800">Confirm Change</h3>
-                     <p class="text-gray-600 mt-2">The customer has already provided their approval. Are you sure you want to modify the list of services?</p>
-                </div>
-            </div>
-            <div class="flex justify-end gap-4 pt-4">
-                <button id="cancel-change-button" onclick="hideModal('change-confirmation-modal')" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">Cancel</button>
-                <button id="confirm-change-button" class="px-4 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold">Confirm</button>
-            </div>
-        </div>
-    </div>
-    
+
+
 	<div id="printable-job-card" class="printable-area">
     <style>
         /* Specific styles for the print layout */
@@ -1130,6 +1162,7 @@
         let currentReportId = null;
         let originalComplaintsForUpdate = [];
 		let newSuggestions = [];
+		let appSettings = {};
         
         let currentComplaints = []; 
         let currentOdometer = 0; 
@@ -1504,7 +1537,7 @@ function handleCheckboxChange(checkbox) {
             return cleaned;
         };
 
-        async function login() {
+async function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             if (!username || !password) return showError('Username and password are required.');
@@ -1527,6 +1560,7 @@ function handleCheckboxChange(checkbox) {
             } else if (currentUser.role === 'executive') {
                 document.getElementById('profile-username').textContent = currentUser.username;
                 document.getElementById('profile-role').textContent = currentUser.role;
+                await fetchAndApplyAppSettings(); 
                 showExecutiveScreen('job-card-screen');
                 setTimeout(checkInitialAuth, 1000);
             } else {
@@ -1669,13 +1703,15 @@ function handleCheckboxChange(checkbox) {
             }
 
             let query = sb.from('reports').select(`
-                id, created_at, status, complaint, suggested, approved, marks, odometer_reading, client_name, client_phone, gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
-                vehicles!inner( 
+					id, created_at, status, complaint, suggested, approved, marks, odometer_reading, client_name, client_phone, gdrive_folder_url, customer_feedback_text, customer_feedback_audio, // <- a comma here
+					// ADD service_feedback TO THIS LINE
+					service_feedback, 
+					vehicles!inner( 
                     id, vehicle_no, vehicle_name, color, engine_no, chassis_no, 
                     vehicle_models!inner( brand, model ) 
-                ),
-                users!inner( username )
-            `).order('created_at', { ascending: false });
+					),
+					users!inner( username )
+					`).order('created_at', { ascending: false });
 
             if (vehicleIdFilter !== null) {
                 if (vehicleIdFilter.length === 0) {
@@ -1766,6 +1802,7 @@ function handleCheckboxChange(checkbox) {
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.suggested)}">${formatArrayCell(row.suggested)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.approved)}">${formatArrayCell(row.approved)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${row.customer_feedback_text || ''}">${row.customer_feedback_text || 'N/A'}</td>
+					<td class="whitespace-normal max-w-xs truncate" title="${row.service_feedback || ''}">${row.service_feedback || 'N/A'}</td>
                     <td>${customerVoiceCell}</td>
                     <td>${marksButton}</td>
                     <td>${mediaLink}</td>
@@ -1961,23 +1998,31 @@ function handleCheckboxChange(checkbox) {
     }
 }
         
-        async function createVehicle() {
+async function createVehicle() {
+            const showFullForm = appSettings.show_full_vehicle_form === true;
+
             const newVehicle = {
                 vehicle_no: normalizeVehicleNumber(document.getElementById('new-vehicle-number').value),
-                model_id: document.getElementById('new-vehicle-model-exec').value,
-                fuel_type: document.getElementById('new-fuel-type').value,
-                odometer: document.getElementById('new-odometer').value,
-                vehicle_name: document.getElementById('new-vehicle-name').value.trim(),
-                color: document.getElementById('new-color').value.trim(),
-                engine_no: document.getElementById('new-engine-no').value.trim(),
-                chassis_no: document.getElementById('new-chassis-no').value.trim(),
-                client_name: document.getElementById('new-client-name').value.trim(),
                 client_phone: document.getElementById('new-client-phone').value.trim()
             };
 
-            if (!newVehicle.model_id || !newVehicle.fuel_type || !newVehicle.odometer || !newVehicle.client_name || !newVehicle.client_phone || !newVehicle.engine_no || !newVehicle.chassis_no) {
-                return showError('Please fill all mandatory vehicle details.');
+            if (showFullForm) {
+                Object.assign(newVehicle, {
+                    model_id: document.getElementById('new-vehicle-model-exec').value,
+                    fuel_type: document.getElementById('new-fuel-type').value,
+                    odometer: document.getElementById('new-odometer').value,
+                    vehicle_name: document.getElementById('new-vehicle-name').value.trim(),
+                    color: document.getElementById('new-color').value.trim(),
+                    engine_no: document.getElementById('new-engine-no').value.trim(),
+                    chassis_no: document.getElementById('new-chassis-no').value.trim(),
+                    client_name: document.getElementById('new-client-name').value.trim(),
+                });
+
+                if (!newVehicle.model_id || !newVehicle.fuel_type || !newVehicle.odometer || !newVehicle.client_name || !newVehicle.engine_no || !newVehicle.chassis_no) {
+                    return showError('Please fill all mandatory vehicle details.');
+                }
             }
+
             if (!/^\d{10}$/.test(newVehicle.client_phone)) {
                 return showError('Please enter a valid 10-digit phone number.');
             }
@@ -2392,17 +2437,142 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
 
 
-      async function saveVehicleUpdate(shouldReset = true) {
-    if(!currentReportId) return showError('No report selected for update.');
+
+async function renderSettingsToggles() {
+            const container = document.getElementById('settings-toggles-container');
+            container.innerHTML = ''; 
+
+            // NEW: Settings are now grouped by a title
+            const settingGroups = {
+                "Job Card": [
+                    { key: 'enable_vehicle_scanner', label: 'Enable Vehicle Number Plate Scanner', description: 'Allows executives to scan number plates using the camera.' },
+                    { key: 'show_full_vehicle_form', label: 'Show Full "Register New Vehicle" Form', description: 'If off, executives will only see Vehicle Number and Client Phone fields.' }
+                ]
+                // You can add more groups here in the future, e.g., "Update Screen": [ ...settings ]
+            };
+
+            const { data, error } = await sb.from('app_settings').select('*');
+            if (error) {
+                container.innerHTML = '<p class="text-red-500">Failed to load settings.</p>';
+                return showError('Could not fetch app settings.');
+            }
+
+            const dbSettings = {};
+            if (data) {
+                data.forEach(setting => { dbSettings[setting.setting_key] = setting.setting_value; });
+            }
+
+            // NEW: Loop over each group first, then the settings inside it
+            Object.entries(settingGroups).forEach(([groupTitle, settings]) => {
+                // Create and append the group title heading
+                const groupHeader = document.createElement('div');
+                groupHeader.className = 'pb-2 border-b border-gray-200';
+                groupHeader.innerHTML = `<h3 class="text-lg font-semibold text-gray-700">${groupTitle}</h3>`;
+                container.appendChild(groupHeader);
+
+                // Create a container for the toggles in this group
+                const groupTogglesContainer = document.createElement('div');
+                groupTogglesContainer.className = 'space-y-4 pt-4';
+                container.appendChild(groupTogglesContainer);
+
+                // Loop through the settings for the current group
+                settings.forEach(def => {
+                    const isEnabled = dbSettings[def.key] === undefined ? true : dbSettings[def.key];
+                    const toggleWrapper = document.createElement('div');
+                    toggleWrapper.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+                    toggleWrapper.innerHTML = `
+                        <div>
+                            <p class="font-semibold text-gray-800">${def.label}</p>
+                            <p class="text-xs text-gray-500">${def.description}</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" ${isEnabled ? 'checked' : ''} class="sr-only peer" onchange="updateSetting('${def.key}', this.checked)">
+                          <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                    `;
+                    groupTogglesContainer.appendChild(toggleWrapper);
+                });
+            });
+        }
+
+        async function updateSetting(key, value) {
+            const { error } = await sb
+                .from('app_settings')
+                .upsert({ setting_key: key, setting_value: value }, { onConflict: 'setting_key' });
+
+            if (error) {
+                showError(`Failed to update setting: ${error.message}`);
+                renderSettingsToggles();
+            } else {
+                showSuccessMessage('Setting updated!');
+                appSettings[key] = value;
+            }
+        }
+
+        async function fetchAndApplyAppSettings() {
+            appSettings = { enable_vehicle_scanner: true, show_full_vehicle_form: true };
+            const { data, error } = await sb.from('app_settings').select('*');
+            if (error) {
+                console.error("Could not fetch app settings, using defaults.", error);
+            } else if (data) {
+                data.forEach(setting => { appSettings[setting.setting_key] = setting.setting_value; });
+            }
+            applyFeatureToggles();
+        }
+
+        function applyFeatureToggles() {
+            const scannerButton = document.querySelector("button[onclick=\"document.getElementById('image-upload-input').click()\"]");
+            if (scannerButton) {
+                scannerButton.style.display = appSettings.enable_vehicle_scanner ? 'flex' : 'none';
+            }
+
+            const form = document.getElementById('create-vehicle-form');
+            if (form) {
+                const fieldsToToggle = [
+                    'new-vehicle-name', 'new-vehicle-brand-exec', 'new-vehicle-model-exec', 
+                    'new-color', 'new-fuel-type', 'new-engine-no', 'new-chassis-no', 
+                    'new-odometer', 'new-client-name'
+                ];
+                const showFullForm = appSettings.show_full_vehicle_form === true;
+                fieldsToToggle.forEach(fieldId => {
+                    const input = document.getElementById(fieldId);
+                    const wrapper = input.parentElement;
+                    if (wrapper) {
+                        wrapper.style.display = showFullForm ? 'block' : 'none';
+                    }
+                    if (input) {
+                        input.required = showFullForm;
+                    }
+                });
+            }
+        }
+
+
+
+// REPLACE this entire function
+async function saveVehicleUpdate(shouldReset = true) {
+    if (!currentReportId) return showError('No report selected for update.');
 
     const deliveryDate = document.getElementById('delivery-date').value;
-    if(!deliveryDate) return showError('Please select an expected delivery date.');
+    if (!deliveryDate) return showError('Please select an expected delivery date.');
+
+    // **THE FIX:** Manually validate the selected date to prevent past dates.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to the beginning of today for accurate comparison.
+    const selectedDate = new Date(deliveryDate);
+    // Adjust for timezone differences that can make the selected date appear as the previous day.
+    selectedDate.setMinutes(selectedDate.getMinutes() + selectedDate.getTimezoneOffset());
+
+    if (selectedDate < today) {
+        return showError('The delivery date cannot be in the past. Please select today or a future date.');
+    }
+    // End of fix
 
     const approvedItems = [];
     document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
         try {
             approvedItems.push(JSON.parse(checkbox.value));
-        } catch(e) { console.error("Could not parse approved item from checkbox", checkbox.value); }
+        } catch (e) { console.error("Could not parse approved item from checkbox", checkbox.value); }
     });
 
     // Combine both original complaints and new suggestions into one complete list.
@@ -2415,14 +2585,14 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const updateData = {
         complaint: JSON.stringify(originalComplaintsForUpdate),
         // Save the COMBINED list to the 'suggested' column to preserve all items.
-        suggested: JSON.stringify(allItemsForApproval), 
+        suggested: JSON.stringify(allItemsForApproval),
         approved: JSON.stringify(approvedItems),
         expected_delivery: deliveryDate,
         status: 'Ongoing'
     };
 
     const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-    if(error) return showError(`Failed to save update: ${error.message}`);
+    if (error) return showError(`Failed to save update: ${error.message}`);
 
     showSuccessMessage('Update saved successfully!');
     if (shouldReset) {
@@ -2430,12 +2600,9 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     }
 }
 
+
                 
-        // This new version combines all items and costs before creating the link.
-// This new version opens a window immediately to prevent pop-up blockers
-// and fetches the client's phone number more reliably.
-// This is a more robust version that ensures all data is saved and verified
-// BEFORE attempting to open the WhatsApp link in a single, direct action.
+// REPLACE this entire function
 async function sendApprovalLink() {
     if (!currentReportId) {
         return showError('No report is currently selected.');
@@ -2486,8 +2653,8 @@ async function sendApprovalLink() {
         const encodedText = encodeURIComponent(messageText);
         const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
-        // 6. Only after all checks pass, open the link directly.
-        window.open(whatsappUrl, '_blank');
+        // 6. **THE FIX:** Use window.location.href for better mobile compatibility.
+        window.location.href = whatsappUrl;
 
         showSuccessMessage("Approval link sent! Job moved to 'Awaiting Response'.");
         resetVehicleUpdateScreen();
@@ -2498,6 +2665,8 @@ async function sendApprovalLink() {
         showError(`An error occurred: ${error.message}`);
     }
 }
+
+
         async function populateNotStartedJobs() {
             if (!currentUser) {
                 console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
@@ -2840,94 +3009,72 @@ async function sendApprovalLink() {
             }
         }
 
-        // REPLACE the existing `handleCompletionConfirmation` function with this new version.
 async function handleCompletionConfirmation(id, vehicleNo) {
     const confirmationInput = document.getElementById('complete-confirmation-input');
     if (confirmationInput.value.trim().toLowerCase() !== 'yes') {
         return showError("Confirmation text did not match. Please type 'yes' to proceed.");
     }
-
     // First, update the status in the database
     const { error } = await sb.from('reports').update({ status: 'Completed' }).eq('id', id);
-    
     confirmationInput.value = ''; // Clear input for next time
     hideModal('complete-confirmation-modal'); // Close the confirmation modal
-
     if(error) {
         return showError('Failed to update status.');
     }
-
     // If the update was successful, show the success message and then the feedback modal
     showSuccessMessage(`Job for ${vehicleNo} marked as Completed!`);
-    
     // Fetch the client's phone number
     const { data: reportData, error: fetchError } = await sb
         .from('reports')
         .select('client_phone')
         .eq('id', id)
         .single();
-
     if (fetchError || !reportData || !reportData.client_phone) {
         console.error("Could not fetch client phone number for feedback message.", fetchError);
         // Don't show the feedback modal if we don't have a number. Just refresh the screen.
         setTimeout(populateDueDateScreen, 1000);
         return;
     }
-
     const clientPhone = reportData.client_phone;
-
     // Set up the "Send" button in the feedback modal
     const sendButton = document.getElementById('confirm-feedback-send-button');
     sendButton.onclick = () => sendWhatsAppFeedback(id, clientPhone, vehicleNo);
-
     // Show the new feedback modal
     showModal('whatsapp-feedback-modal');
-    
     // Refresh the due date screen in the background
     setTimeout(populateDueDateScreen, 500);
 }
 
-// ADD this new function right after the `handleCompletionConfirmation` function.
-// REPLACE your existing sendWhatsAppFeedback function with this one
 function sendWhatsAppFeedback(reportId, clientPhone, vehicleNo) {
     // This creates a unique link back to the application for feedback
     const feedbackUrl = `${window.location.origin}${window.location.pathname}?feedback_id=${reportId}`;
-
     const messageText = `Dear Customer,
-
 Thank you for choosing AutoFix for your vehicle ${vehicleNo}.
-
 We would be grateful if you could share your experience with us by clicking the link below:
 ${feedbackUrl}
-
 Your feedback helps us improve our service.`;
-    
     const encodedText = encodeURIComponent(messageText);
     const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
-
     window.open(whatsappUrl, '_blank');
-    
     hideModal('whatsapp-feedback-modal');
 }
+
 // START: Add these two new functions
 async function loadFeedbackScreen(feedbackId) {
     // Hide all other screens and show the feedback screen
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
     document.getElementById('customer-feedback-screen').classList.add('active-screen');
-
     // Fetch the vehicle number to display it on the page for context
     const { data, error } = await sb
         .from('reports')
         .select('vehicles(vehicle_no)')
         .eq('id', feedbackId)
         .single();
-
     if (error || !data) {
         console.error('Error fetching report for feedback:', error);
         document.getElementById('feedback-form-content').innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid.</p>';
         return;
     }
-
     document.getElementById('feedback-vehicle-no').textContent = data.vehicles.vehicle_no;
 }
 
@@ -2937,28 +3084,37 @@ async function submitCustomerTextFeedback() {
     if (!feedbackId) {
         return alert("Error: Report ID not found. Your session may be invalid.");
     }
-
     const feedbackText = document.getElementById('customer-feedback-input').value.trim();
     if (!feedbackText) {
         return alert('Please enter your feedback before submitting.');
     }
-
     // Update the 'customer_feedback_text' column in the 'reports' table
     const { error } = await sb
         .from('reports')
-        .update({ customer_feedback_text: feedbackText })
+        .update({ service_feedback: feedbackText })
         .eq('id', feedbackId);
-
     if (error) {
         console.error('Error submitting feedback:', error);
         return alert('Sorry, there was an error submitting your feedback. Please try again.');
     }
-
     // On success, hide the form and show the thank you message
     document.getElementById('feedback-form-content').classList.add('hidden');
     document.getElementById('feedback-success-message').classList.remove('hidden');
 }
 // END: Add these two new functions
+
+        function cancelCompletion() {
+            document.getElementById('complete-confirmation-input').value = '';
+            hideModal('complete-confirmation-modal');
+            populateDueDateScreen(); // To reset the dropdown to its original value
+        }
+        
+        function openCancelModal(reportId, vehicleNo) {
+            document.getElementById('cancel-modal-text').textContent = `Are you sure you want to cancel the job for vehicle ${vehicleNo}? This action cannot be undone.`;
+            document.getElementById('confirm-cancel-button').onclick = () => executeCancellation(reportId, vehicleNo);
+            showModal('cancel-confirmation-modal');
+        }
+
         async function executeCancellation(reportId, vehicleNo) {
             const confirmationInput = document.getElementById('cancel-confirmation-input');
             if (confirmationInput.value.trim().toLowerCase() !== 'cancel') {
@@ -2988,7 +3144,6 @@ async function submitCustomerTextFeedback() {
             document.getElementById('cancel-confirmation-input').value = '';
             hideModal('cancel-confirmation-modal');
         }
-		
 
         async function resetPassword() {
             const currentPassword = document.getElementById('current-password').value;
@@ -3286,7 +3441,7 @@ function selectReportForUpdate(report) {
         
         function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(screenId).classList.add('active-screen'); }
         
-        function showAdminScreen(screenId) {
+function showAdminScreen(screenId) {
             document.querySelectorAll('#admin-screens .admin-screen').forEach(s => s.style.display = 'none');
             document.getElementById(screenId).style.display = 'block';
             
@@ -3295,6 +3450,7 @@ function selectReportForUpdate(report) {
             if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
             if (screenId === 'admin-executive-management-screen') renderUserList('executive');
             if (screenId === 'admin-admin-management-screen') renderUserList('admin');
+            if (screenId === 'admin-settings-screen') renderSettingsToggles();
             
             showScreen('admin-screens');
         }
@@ -3545,12 +3701,10 @@ function selectReportForUpdate(report) {
     document.getElementById('approval-success-message').classList.remove('hidden');
 }
 
-        
-            document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const reportId = params.get('report_id');
     const feedbackId = params.get('feedback_id'); // <-- ADD THIS LINE
-
     if (reportId) {
         loadApprovalScreen(reportId);
     } else if (feedbackId) { // <-- ADD THIS ELSE IF BLOCK
@@ -3568,39 +3722,32 @@ function selectReportForUpdate(report) {
                     }
                 }
             }
-
             carImage = document.getElementById("carImage");
             damageCanvas = document.getElementById("damageCanvas");
             checkCanvas = document.getElementById("checkCanvas");
-
             if (carImage && damageCanvas && checkCanvas) {
                 damageCtx = damageCanvas.getContext("2d");
                 checkCtx = checkCanvas.getContext("2d");
-
                 carImage.onload = resizeCanvas;
                 window.addEventListener("resize", resizeCanvas);
-
                 damageCanvas.addEventListener("click", (e) => {
                     if (!checkCtx) return;
-
                     const rect = damageCanvas.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
-
                     const pixel = checkCtx.getImageData(x, y, 1, 1).data;
                     const alpha = pixel[3];
-
                     if (alpha > 0) {
                         damageCtx.fillStyle = "red";
                         damageCtx.beginPath();
                         damageCtx.arc(x, y, 5, 0, Math.PI * 2);
                         damageCtx.fill();
-
                         damageMarks.push({ x, y });
                     }
                 });
             }
         });
+		
 		
         function printJobCardById(reportId) {
             const reportData = reportsDataStore[reportId];
