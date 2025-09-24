@@ -2641,9 +2641,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
-    // ... (the first part of the function rendering editable complaints and new suggestions remains the same)
-    
-    // 1. Render editable customer complaints
+    // --- (The first part of the function remains the same) ---
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
         complaints.forEach((item) => {
@@ -2667,7 +2665,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerComplaintsList.innerHTML = '<p class="text-sm text-gray-500">No original complaints were registered.</p>';
     }
     
-    // 2. Render NEW mechanic suggestions
     executiveList.innerHTML = '';
     if (suggestions.length > 0) {
         suggestions.forEach((item, index) => {
@@ -2683,10 +2680,12 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // --- START: MODIFIED SECTION ---
-    // 3. Render the COMBINED list for the final approval checklist and add material inputs
+    // --- (The change is in the section below) ---
     customerApprovalList.innerHTML = '';
     const allItemsForApproval = [...complaints, ...suggestions];
+
+    // NEW: Check which tab is currently active.
+    const isResponsesTabActive = document.getElementById('tab-btn-responses').classList.contains('active-tab');
 
     if (allItemsForApproval.length > 0) {
         const hasCustomerResponded = approved.length > 0;
@@ -2696,18 +2695,15 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
                 ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text) 
                 : false;
 
-            // Only show items that have been approved by the customer on the "Responses Received" tab
             if (hasCustomerResponded && !isApproved) {
-                return; // Skip non-approved items if customer has responded
+                return;
             }
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
             const sanitizedServiceText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
             const approvalItem = document.createElement('div');
             approvalItem.className = 'p-3 bg-gray-50 rounded-lg';
             
-            // Render a checkbox for pending approvals, or just text for confirmed approvals
             const itemHeader = hasCustomerResponded ? `
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-green-600">check_box</span>
@@ -2727,11 +2723,11 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             approvalItem.innerHTML = `
                 ${itemHeader}
-                ${(hasCustomerResponded && isApproved) ? `
+                ${(isResponsesTabActive && hasCustomerResponded && isApproved) ? `
                 <div class="mt-3 pt-3 border-t border-gray-200 ml-8">
                     <label class="text-xs font-bold text-gray-500">MATERIALS REQUIRED</label>
                     <div id="materials-list-for-${item.text.replace(/\s+/g, '-')}" class="text-sm mt-1 space-y-1">
-                        </div>
+                    </div>
                     <div class="flex items-center gap-2 mt-2">
                         <input id="material-input-for-${item.text.replace(/\s+/g, '-')}" type="text" class="form-input !text-sm !py-1 flex-grow" placeholder="e.g., Oil Filter, 1L Engine Oil">
                         <button type="button" onclick="addMaterial('${sanitizedServiceText}')" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
@@ -2743,7 +2739,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
             `;
             customerApprovalList.appendChild(approvalItem);
             
-            // If materials exist for this service, render them
             if (materialsForServices[item.text]) {
                 renderMaterialsForService(item.text);
             }
@@ -2751,7 +2746,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     } else {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
-    // --- END: MODIFIED SECTION ---
     
     recalculateAndUpdateTotal();
 }
