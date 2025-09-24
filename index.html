@@ -1703,15 +1703,33 @@ async function login() {
             }
 
             let query = sb.from('reports').select(`
-					id, created_at, status, complaint, suggested, approved, marks, odometer_reading, client_name, client_phone, gdrive_folder_url, customer_feedback_text, customer_feedback_audio, // <- a comma here
-					// ADD service_feedback TO THIS LINE
-					service_feedback, 
-					vehicles!inner( 
-                    id, vehicle_no, vehicle_name, color, engine_no, chassis_no, 
-                    vehicle_models!inner( brand, model ) 
-					),
-					users!inner( username )
-					`).order('created_at', { ascending: false });
+    id,
+    created_at,
+    status,
+    complaint,
+    suggested,
+    approved,
+    marks,
+    odometer_reading,
+    client_name,
+    client_phone,
+    gdrive_folder_url,
+    customer_feedback_text,
+    customer_feedback_audio,
+    service_feedback,
+    vehicles!inner(
+        id,
+        vehicle_no,
+        vehicle_name,
+        color,
+        engine_no,
+        chassis_no,
+        vehicle_models!inner(brand, model)
+    ),
+    users!inner(
+        username
+    )
+`).order('created_at', { ascending: false });
 
             if (vehicleIdFilter !== null) {
                 if (vehicleIdFilter.length === 0) {
