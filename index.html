@@ -200,6 +200,11 @@
                     <h2 class="text-lg font-bold mt-2">App Settings</h2>
                     <p class="text-sm text-[var(--text-secondary)]">Toggle features and form fields</p>
                 </a>
+				<a href="javascript:void(0)" onclick="showAdminScreen('admin-washer-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1">
+                    <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">local_car_wash</span>
+                    <h2 class="text-lg font-bold mt-2">Washer Management</h2>
+                    <p class="text-sm text-[var(--text-secondary)]">Create & Delete Washers</p>
+                </a>
             </main>
         </div>
         
@@ -264,7 +269,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
-									<th>Service Feedback</th> 
+									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -289,10 +294,21 @@
         <div id="admin-executive-management-screen" class="admin-screen" style="display: none;">
             <header class="app-header"><div class="app-header-content"><button class="absolute left-4 text-[var(--text-secondary)] hover:text-[var(--primary-color)]" onclick="showAdminScreen('admin-dashboard-screen')"><span class="material-symbols-outlined">arrow_back_ios_new</span></button><h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Executive Management</h1></div></header>
             <main class="app-main">
-                <div class="card"><h2 class="text-xl font-bold mb-4">Create New Executive</h2><form id="add-exec-form" onsubmit="event.preventDefault(); addUser('executive');" class="space-y-4">
-                    <div><label for="new-exec-username" class="form-label">Username <span class="text-red-500">*</span></label><input id="new-exec-username" class="form-input" placeholder="Enter Username" required /></div>
-                    <div><label for="new-exec-pass" class="form-label">Password <span class="text-red-500">*</span></label><input id="new-exec-pass" class="form-input" placeholder="Enter Password" type="password" required /></div>
-                    <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Executive</button></form></div>
+                <div class="card"><h2 class="text-xl font-bold mb-4">Create New Executive</h2>
+				<form id="add-exec-form" onsubmit="event.preventDefault(); addUser('executive');" class="space-y-4">
+                        <div><label for="new-exec-username" class="form-label">Username <span class="text-red-500">*</span></label><input id="new-exec-username" class="form-input" placeholder="Enter Username" required /></div>
+                        <div><label for="new-exec-pass" class="form-label">Password <span class="text-red-500">*</span></label><input id="new-exec-pass" class="form-input" placeholder="Enter Password" type="password" required /></div>
+                        <div>
+                            <label for="new-exec-team" class="form-label">Team <span class="text-red-500">*</span></label>
+                            <select id="new-exec-team" class="form-input" required>
+                                <option value="">Select Team</option>
+                                <option value="Accident">Accident</option>
+                                <option value="Service">Service</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Executive</button>
+                    </form>
+				</div>
                 <div class="card space-y-3"><h2 class="text-xl font-bold">Executive List</h2><div id="executives-list"></div></div>
             </main>
         </div>
@@ -324,6 +340,30 @@
                     <div id="settings-toggles-container" class="border-t pt-6 space-y-4">
                         <p class="text-gray-500">Loading settings...</p>
                     </div>
+                </div>
+            </main>
+        </div>
+		</div> <div id="admin-washer-management-screen" class="admin-screen" style="display: none;">
+            <header class="app-header">
+                <div class="app-header-content">
+                    <button class="absolute left-4 text-[var(--text-secondary)] hover:text-[var(--primary-color)]" onclick="showAdminScreen('admin-dashboard-screen')">
+                        <span class="material-symbols-outlined">arrow_back_ios_new</span>
+                    </button>
+                    <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Washer Management</h1>
+                </div>
+            </header>
+            <main class="app-main">
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-4">Create New Washer</h2>
+                    <form id="add-washer-form" onsubmit="event.preventDefault(); addUser('washer');" class="space-y-4">
+                        <div><label for="new-washer-username" class="form-label">Username <span class="text-red-500">*</span></label><input id="new-washer-username" class="form-input" placeholder="Enter Username" required /></div>
+                        <div><label for="new-washer-pass" class="form-label">Password <span class="text-red-500">*</span></label><input id="new-washer-pass" class="form-input" placeholder="Enter Password" type="password" required /></div>
+                        <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Washer</button>
+                    </form>
+                </div>
+                <div class="card space-y-3">
+                    <h2 class="text-xl font-bold">Washer List</h2>
+                    <div id="washers-list"></div>
                 </div>
             </main>
         </div>
@@ -642,7 +682,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
-									<th>Service Feedback</th> 
+									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -655,11 +695,22 @@
                 </div>
             </main>
         </div>
-        <div id="due-date-screen" class="executive-screen" style="display: none;">
+<div id="due-date-screen" class="executive-screen" style="display: none;">
             <main class="app-main">
-                <div id="due-date-list" class="space-y-1">
+                <div class="card !p-0">
+                    <div class="flex border-b border-gray-200 px-5">
+                        <button id="tab-btn-wash-pending" class="tab-button active-tab" onclick="showCloseTab('wash-pending')">Wash Pending</button>
+                        <button id="tab-btn-complete" class="tab-button" onclick="showCloseTab('complete')">Complete</button>
                     </div>
-                <p id="no-due-dates-message" class="text-center text-gray-500 py-8 hidden">No upcoming due dates found.</p>
+                    <div class="p-5">
+                        <div id="wash-pending-panel" class="tab-panel space-y-3">
+                            <p id="no-wash-pending-message" class="text-center text-gray-500 py-8 hidden">No jobs are pending for wash.</p>
+                        </div>
+                        <div id="complete-panel" class="tab-panel hidden space-y-3">
+                            <p id="no-complete-message" class="text-center text-gray-500 py-8 hidden">No jobs are ready for completion.</p>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
         <div id="profile-screen" class="executive-screen" style="display: none;">
@@ -708,6 +759,22 @@
                 <a href="javascript:void(0)" class="nav-item" data-target="profile-screen" onclick="showExecutiveScreen('profile-screen')"><span class="material-symbols-outlined">person</span><span>Profile</span></a>
             </div>
         </footer>
+    </div>
+</div> <div id="washer-screen" class="screen">
+        <header class="app-header">
+            <div class="app-header-content">
+                <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Wash Queue</h1>
+                <button onclick="logout()" class="absolute right-4 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary-color)]">
+                    <span class="font-medium text-sm hidden sm:block">Logout</span>
+                    <span class="material-symbols-outlined">logout</span>
+                </button>
+            </div>
+        </header>
+        <main class="app-main">
+            <div id="wash-queue-list" class="space-y-3">
+                </div>
+            <p id="no-wash-jobs-message" class="text-center text-gray-500 py-8 hidden">No vehicles are currently in the wash queue.</p>
+        </main>
     </div>
     
     <!-- Customer Approval Screen -->
@@ -1549,8 +1616,8 @@ async function login() {
                 .single();
 
             if (error || !data || data.password !== password) {
-    	    return showError('Invalid credentials.');
-           }
+    	        return showError('Invalid credentials.');
+            }
             
             currentUser = data;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
@@ -1563,10 +1630,71 @@ async function login() {
                 await fetchAndApplyAppSettings(); 
                 showExecutiveScreen('job-card-screen');
                 setTimeout(checkInitialAuth, 1000);
+            } else if (currentUser.role === 'washer') { // ADDED
+                showScreen('washer-screen');
+                populateWashList();
             } else {
                 return showError('Unknown user role.');
             }
             showSuccessMessage(`Welcome, ${currentUser.username}!`);
+        }
+		
+// ADD NEW FUNCTION: Populates the list for the washer
+        async function populateWashList() {
+            const listContainer = document.getElementById('wash-queue-list');
+            const noJobsMsg = document.getElementById('no-wash-jobs-message');
+            listContainer.innerHTML = '';
+            noJobsMsg.classList.add('hidden');
+
+            const { data: reports, error } = await sb.from('reports')
+                .select(`id, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)), users!inner(username)`)
+                .eq('status', 'Sent To Wash')
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error("Error fetching wash queue:", error);
+                return showError('Could not fetch wash queue.');
+            }
+
+            if (!reports || reports.length === 0) {
+                noJobsMsg.classList.remove('hidden');
+                return;
+            }
+
+            reports.forEach(report => {
+                const card = document.createElement('div');
+                const vehicle = report.vehicles;
+                const executive = report.users;
+                const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
+
+                card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
+                        <p class="text-sm text-gray-600 mt-1">${brandAndModel}</p>
+                        <p class="text-xs text-gray-500 mt-1">From: ${executive.username}</p>
+                    </div>
+                    <button onclick="completeWash(${report.id})" class="btn-primary !w-auto flex-shrink-0 !py-2 !px-3">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        <span>Wash Completed</span>
+                    </button>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // ADD NEW FUNCTION: Washer marks a job as done
+        async function completeWash(reportId) {
+            const { error } = await sb.from('reports')
+                .update({ status: 'Wash Completed' })
+                .eq('id', reportId);
+            
+            if (error) {
+                return showError(`Failed to update status: ${error.message}`);
+            }
+
+            showSuccessMessage('Status updated. Vehicle sent back to executive.');
+            populateWashList();
         }
 
         function logout() {
@@ -1611,6 +1739,132 @@ async function login() {
                 list.appendChild(div);
             });
         }
+		
+
+// ADD NEW FUNCTION: Handles tab switching on the Close page
+        function showCloseTab(tabName) {
+            document.querySelectorAll('#due-date-screen .tab-button').forEach(btn => btn.classList.remove('active-tab'));
+            document.querySelectorAll('#due-date-screen .tab-panel').forEach(panel => panel.classList.add('hidden'));
+
+            if (tabName === 'wash-pending') {
+                document.getElementById('tab-btn-wash-pending').classList.add('active-tab');
+                document.getElementById('wash-pending-panel').classList.remove('hidden');
+                populateWashPendingJobs();
+            } else if (tabName === 'complete') {
+                document.getElementById('tab-btn-complete').classList.add('active-tab');
+                document.getElementById('complete-panel').classList.remove('hidden');
+                populateCompletedWashJobs();
+            }
+        }
+
+
+
+// Find and replace this entire function
+        async function populateWashPendingJobs() {
+            const listContainer = document.getElementById('wash-pending-panel');
+            const noJobsMsg = document.getElementById('no-wash-pending-message');
+
+            // FIX: Selectively remove only previous job cards, leaving the message element intact.
+            listContainer.querySelectorAll('.job-card-item').forEach(card => card.remove());
+            
+            const { data: reports, error } = await sb.from('reports')
+                .select(`id, vehicles!inner(vehicle_no, vehicle_name)`)
+                .eq('executive_id', currentUser.id)
+                .eq('status', 'Ongoing')
+                .not('approved', 'is', null)
+                .neq('approved', '[]')
+                .order('created_at', { ascending: true });
+
+            if (error) return showError('Could not fetch jobs for wash.');
+
+            if (!reports || reports.length === 0) {
+                noJobsMsg.classList.remove('hidden');
+                return;
+            }
+            noJobsMsg.classList.add('hidden');
+
+            reports.forEach(report => {
+                const card = document.createElement('div');
+                // ADDED 'job-card-item' class for selective removal
+                card.className = 'p-4 border border-gray-200 rounded-lg job-card-item';
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                            <p class="text-sm text-gray-600">${report.vehicles.vehicle_name || ''}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="sendToWash(${report.id})" class="btn-primary !w-auto !py-1.5 !px-3 text-sm">
+                                <span class="material-symbols-outlined !text-base">local_car_wash</span> Send to Wash
+                            </button>
+                            <button onclick="markCompletedDirectly(${report.id}, '${report.vehicles.vehicle_no}')" class="btn-secondary !w-auto !py-1.5 !px-3 text-sm">
+                                Complete
+                            </button>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+		
+		
+        
+// Find and replace this entire function
+        async function populateCompletedWashJobs() {
+            const listContainer = document.getElementById('complete-panel');
+            const noJobsMsg = document.getElementById('no-complete-message');
+
+            // FIX: Selectively remove only previous job cards
+            listContainer.querySelectorAll('.job-card-item').forEach(card => card.remove());
+            
+            const { data: reports, error } = await sb.from('reports')
+                .select(`id, vehicles!inner(vehicle_no, vehicle_name)`)
+                .eq('executive_id', currentUser.id)
+                .eq('status', 'Wash Completed')
+                .order('created_at', { ascending: true });
+
+            if (error) return showError('Could not fetch completed wash jobs.');
+
+            if (!reports || reports.length === 0) {
+                noJobsMsg.classList.remove('hidden');
+                return;
+            }
+            noJobsMsg.classList.add('hidden');
+
+            reports.forEach(report => {
+                const card = document.createElement('div');
+                // ADDED 'job-card-item' class
+                card.className = 'p-4 border border-green-300 bg-green-50 rounded-lg flex justify-between items-center job-card-item';
+                card.innerHTML = `
+                    <div>
+                        <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                        <p class="text-sm text-green-700 font-semibold">Ready for delivery</p>
+                    </div>
+                    <button onclick="updateJobStatus(${report.id}, 'Completed', '${report.vehicles.vehicle_no}')" class="btn-primary !bg-green-600 hover:!bg-green-700 !w-auto !py-1.5 !px-3 text-sm">
+                        <span class="material-symbols-outlined !text-base">check_circle</span> Mark Completed
+                    </button>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // ADD NEW FUNCTION: Executive sends a job to the washer
+        async function sendToWash(reportId) {
+            const { error } = await sb.from('reports').update({ status: 'Sent To Wash' }).eq('id', reportId);
+            if (error) return showError('Failed to send to wash.');
+            showSuccessMessage('Vehicle sent to wash queue.');
+            populateWashPendingJobs();
+        }
+
+        // ADD NEW FUNCTION: Executive completes job without washing
+        function markCompletedDirectly(id, vehicleNo) {
+            // Reuse the existing completion modal but change its text
+            document.getElementById('complete-modal-text').textContent = `Are you sure you want to close the job for vehicle ${vehicleNo} WITHOUT sending it for wash?`;
+            document.getElementById('confirm-complete-button').onclick = () => handleCompletionConfirmation(id, vehicleNo);
+            showModal('complete-confirmation-modal');
+        }
+		
+		
         
         async function addVehicleModel() {
             const brand = document.getElementById('new-brand-admin').value.trim();
@@ -1626,8 +1880,8 @@ async function login() {
         }
 
         // --- ADMIN: USER MANAGEMENT ---
-        async function renderUserList(role) {
-            const listId = role === 'admin' ? 'admins-list' : 'executives-list';
+async function renderUserList(role) {
+            const listId = role === 'admin' ? 'admins-list' : (role === 'executive' ? 'executives-list' : 'washers-list');
             const list = document.getElementById(listId);
             list.innerHTML = '';
 
@@ -1642,18 +1896,26 @@ async function login() {
             });
         }
 
-        async function addUser(role) {
-            const usernameInputId = role === 'admin' ? 'new-admin-username' : 'new-exec-username';
-            const passwordInputId = role === 'admin' ? 'new-admin-pass' : 'new-exec-pass';
-            const formId = role === 'admin' ? 'add-admin-form' : 'add-exec-form';
+async function addUser(role) {
+            const usernameInputId = `new-${role}-username`;
+            const passwordInputId = `new-${role}-pass`;
+            const formId = `add-${role}-form`;
 
             const username = document.getElementById(usernameInputId).value.trim();
             const password = document.getElementById(passwordInputId).value.trim();
 
-            if(!username || !password) return showError('Username and password are required.');
+            if (!username || !password) return showError('Username and password are required.');
 
-            const { error } = await sb.from('users').insert({ username, password, role });
-            if(error) return showError(`Could not create ${role}: ${error.message}`);
+            const userData = { username, password, role };
+            
+            if (role === 'executive') {
+                const team = document.getElementById('new-exec-team').value;
+                if (!team) return showError('Please select a team for the executive.');
+                userData.team = team;
+            }
+
+            const { error } = await sb.from('users').insert(userData);
+            if (error) return showError(`Could not create ${role}: ${error.message}`);
             
             showSuccessMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created.`);
             document.getElementById(formId).reset();
@@ -2110,17 +2372,26 @@ function renderComplaints() {
             }
         }
 
-        async function saveComplaints() {
+async function saveComplaints() {
             addComplaint(); 
             
             if (currentComplaints.length === 0) return showError('Please add at least one complaint.');
             if (!currentVehicleId) return showError('No vehicle selected.');
 
-            // --- Check for existing job card ---
+            // --- Check for existing job card WITHIN THE SAME TEAM ---
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Start of today
+            today.setHours(0, 0, 0, 0); 
             const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1); // Start of tomorrow
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            // Get IDs of executives in the same team
+            const { data: teamUsers, error: teamError } = await sb
+                .from('users')
+                .select('id')
+                .eq('team', currentUser.team);
+            
+            if (teamError) return showError('Could not verify team data.');
+            const teamUserIds = teamUsers.map(u => u.id);
 
             const { data: existingReport, error: checkError } = await sb
                 .from('reports')
@@ -2128,6 +2399,7 @@ function renderComplaints() {
                 .eq('vehicle_id', currentVehicleId)
                 .gte('created_at', today.toISOString())
                 .lt('created_at', tomorrow.toISOString())
+                .in('executive_id', teamUserIds) // <-- MODIFIED a job withing same team
                 .maybeSingle();
 
             if (checkError) {
@@ -2137,12 +2409,11 @@ function renderComplaints() {
 
             if (existingReport) {
                 const executiveName = existingReport.users ? existingReport.users.username : 'another executive';
-                document.getElementById('duplicate-modal-text').textContent = `A job card for this vehicle was already created today by ${executiveName}. Are you sure you want to create another one?`;
+                document.getElementById('duplicate-modal-text').textContent = `A job card for this vehicle was already created today by ${executiveName} from your team. Are you sure you want to create another one?`;
                 showModal('duplicate-job-card-modal');
-                return; // Stop here and wait for user confirmation
+                return; 
             }
             
-            // If no duplicate is found, proceed directly
             await executeSaveComplaints();
         }
 
@@ -2370,6 +2641,8 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
+    // ... (the first part of the function rendering editable complaints and new suggestions remains the same)
+    
     // 1. Render editable customer complaints
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
@@ -2410,50 +2683,130 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // 3. Render the COMBINED list for the final approval checklist
+    // --- START: MODIFIED SECTION ---
+    // 3. Render the COMBINED list for the final approval checklist and add material inputs
     customerApprovalList.innerHTML = '';
-    const allItemsForApproval = [...complaints, ...suggestions]; // Combine both lists
+    const allItemsForApproval = [...complaints, ...suggestions];
 
     if (allItemsForApproval.length > 0) {
         const hasCustomerResponded = approved.length > 0;
         
         allItemsForApproval.forEach(item => {
-            const isChecked = hasCustomerResponded
-                ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text)
-                : true;
+            const isApproved = hasCustomerResponded 
+                ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text) 
+                : false;
+
+            // Only show items that have been approved by the customer on the "Responses Received" tab
+            if (hasCustomerResponded && !isApproved) {
+                return; // Skip non-approved items if customer has responded
+            }
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
-            
-            const isOriginalComplaint = item.type === 'complaint';
-            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
-            const tag = isOriginalComplaint 
-                ? `<span class="text-xs text-gray-500">(Customer Request)</span>` 
-                : `<span class="text-xs text-blue-600">(New Suggestion)</span>`;
+            const sanitizedServiceText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-            const approvalItem = document.createElement('label');
-            approvalItem.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200`;
-            // THE CHANGE IS ON THE NEXT LINE: onchange now calls handleCheckboxChange(this)
-            approvalItem.innerHTML = `
-                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                       value=${checkboxValue} 
-                       ${isChecked ? 'checked' : ''}
-                       onchange="handleCheckboxChange(this)">
-                <div class="flex-1 flex justify-between items-center">
-                   <span class="font-medium break-all">${item.text}</span>
-                    <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
+            const approvalItem = document.createElement('div');
+            approvalItem.className = 'p-3 bg-gray-50 rounded-lg';
+            
+            // Render a checkbox for pending approvals, or just text for confirmed approvals
+            const itemHeader = hasCustomerResponded ? `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-green-600">check_box</span>
+                    <span class="font-bold text-gray-800 flex-1 break-all">${item.text}</span>
+                    <span class="font-semibold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                 </div>
-                ${tag}
+            ` : `
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                           value=${checkboxValue} checked onchange="handleCheckboxChange(this)">
+                    <div class="flex-1 flex justify-between items-center">
+                        <span class="font-medium break-all">${item.text}</span>
+                        <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
+                    </div>
+                </label>
+            `;
+
+            approvalItem.innerHTML = `
+                ${itemHeader}
+                ${(hasCustomerResponded && isApproved) ? `
+                <div class="mt-3 pt-3 border-t border-gray-200 ml-8">
+                    <label class="text-xs font-bold text-gray-500">MATERIALS REQUIRED</label>
+                    <div id="materials-list-for-${item.text.replace(/\s+/g, '-')}" class="text-sm mt-1 space-y-1">
+                        </div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <input id="material-input-for-${item.text.replace(/\s+/g, '-')}" type="text" class="form-input !text-sm !py-1 flex-grow" placeholder="e.g., Oil Filter, 1L Engine Oil">
+                        <button type="button" onclick="addMaterial('${sanitizedServiceText}')" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                </div>
+                ` : ''}
             `;
             customerApprovalList.appendChild(approvalItem);
+            
+            // If materials exist for this service, render them
+            if (materialsForServices[item.text]) {
+                renderMaterialsForService(item.text);
+            }
         });
     } else {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
+    // --- END: MODIFIED SECTION ---
     
     recalculateAndUpdateTotal();
 }
+// Add this new global variable at the top of your script
+let materialsForServices = {};
 
+// Add these THREE new functions to your script
+function addMaterial(serviceText) {
+    const sanitizedId = serviceText.replace(/\s+/g, '-');
+    const input = document.getElementById(`material-input-for-${sanitizedId}`);
+    const materialName = input.value.trim();
 
+    if (materialName) {
+        if (!materialsForServices[serviceText]) {
+            materialsForServices[serviceText] = [];
+        }
+        materialsForServices[serviceText].push(materialName);
+        input.value = '';
+        renderMaterialsForService(serviceText);
+    }
+    input.focus();
+}
+
+function deleteMaterial(serviceText, materialIndex) {
+    if (materialsForServices[serviceText]) {
+        materialsForServices[serviceText].splice(materialIndex, 1);
+        renderMaterialsForService(serviceText);
+    }
+}
+
+function renderMaterialsForService(serviceText) {
+    const sanitizedId = serviceText.replace(/\s+/g, '-');
+    const listContainer = document.getElementById(`materials-list-for-${sanitizedId}`);
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '';
+    const materials = materialsForServices[serviceText] || [];
+
+    if (materials.length === 0) {
+        listContainer.innerHTML = '<p class="text-xs text-gray-400 italic">No materials added yet.</p>';
+    } else {
+        materials.forEach((material, index) => {
+            const sanitizedServiceText = serviceText.replace(/'/g, "\\'");
+            const materialItem = document.createElement('div');
+            materialItem.className = 'flex items-center justify-between bg-white p-1.5 rounded';
+            materialItem.innerHTML = `
+                <span>${material}</span>
+                <button onclick="deleteMaterial('${sanitizedServiceText}', ${index})" class="text-red-400 hover:text-red-600">
+                    <span class="material-symbols-outlined !text-sm">close</span>
+                </button>
+            `;
+            listContainer.appendChild(materialItem);
+        });
+    }
+}
 
 
 async function renderSettingsToggles() {
@@ -2600,14 +2953,15 @@ async function saveVehicleUpdate(shouldReset = true) {
     ];
 
     // Create the data object to be saved in the database.
-    const updateData = {
-        complaint: JSON.stringify(originalComplaintsForUpdate),
-        // Save the COMBINED list to the 'suggested' column to preserve all items.
-        suggested: JSON.stringify(allItemsForApproval),
-        approved: JSON.stringify(approvedItems),
-        expected_delivery: deliveryDate,
-        status: 'Ongoing'
-    };
+    // REPLACE IT WITH THIS BLOCK
+const updateData = {
+    complaint: JSON.stringify(originalComplaintsForUpdate),
+    suggested: JSON.stringify(allItemsForApproval),
+    approved: JSON.stringify(approvedItems),
+    expected_delivery: deliveryDate,
+    materials_required: JSON.stringify(materialsForServices), // This line is added
+    status: 'Ongoing'
+};
 
     const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
     if (error) return showError(`Failed to save update: ${error.message}`);
@@ -2894,124 +3248,8 @@ async function sendApprovalLink() {
             });
         }		
 		
-        // --- EXECUTIVE: DUE DATES ---
-        async function populateDueDateScreen() {
-            const listContainer = document.getElementById('due-date-list');
-            const noDatesMsg = document.getElementById('no-due-dates-message');
-            listContainer.innerHTML = '';
-
-            const { data, error } = await sb.from('reports')
-                .select(`id, complaint, expected_delivery, status, vehicles!inner(vehicle_no)`)
-                .eq('executive_id', currentUser.id)
-                .in('status', ['Not Started', 'Ongoing'])
-                .order('expected_delivery', { ascending: true, nullsfirst: false });
-            
-            if(error) return showError('Could not fetch due dates.');
-
-            if (!data || data.length === 0) {
-                noDatesMsg.classList.remove('hidden');
-                return;
-            }
-            noDatesMsg.classList.add('hidden');
-
-            const groupedJobs = {};
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-
-            data.forEach(job => {
-                if (!job.expected_delivery) return; 
-
-                const dueDate = new Date(job.expected_delivery + 'T00:00:00Z');
-                let groupKey = '';
-                 let sortKey = job.expected_delivery;
-
-                if (dueDate < today) {
-                    groupKey = 'Overdue';
-                    sortKey = `1-${job.expected_delivery}`;
-                } else if (dueDate.getTime() === today.getTime()) {
-                    groupKey = 'Today';
-                    sortKey = `2-${job.expected_delivery}`;
-                } else if (dueDate.getTime() === tomorrow.getTime()) {
-                    groupKey = 'Tomorrow';
-                     sortKey = `3-${job.expected_delivery}`;
-                } else {
-                    groupKey = dueDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-                    sortKey = `4-${job.expected_delivery}`;
-                }
-
-                if (!groupedJobs[groupKey]) {
-                    groupedJobs[groupKey] = { jobs: [], sortKey: sortKey };
-                }
-                groupedJobs[groupKey].jobs.push(job);
-            });
-
-            const sortedGroupKeys = Object.keys(groupedJobs).sort((a, b) => {
-                return groupedJobs[a].sortKey.localeCompare(groupedJobs[b].sortKey);
-            });
-
-            sortedGroupKeys.forEach(groupKey => {
-                const group = groupedJobs[groupKey];
-                 if (group.jobs.length > 0) {
-                    const header = document.createElement('div');
-                    const isImmediate = groupKey === 'Overdue' || groupKey === 'Today';
-                    
-                    let headerColor = isImmediate ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-700';
-                    
-                    header.className = `py-2 px-4 ${headerColor} rounded-lg text-sm font-bold sticky top-[64px] z-10`; 
-                    header.textContent = `${groupKey} (${group.jobs.length})`;
-                    listContainer.appendChild(header);
-                    
-                    const sortedJobs = group.jobs.sort((a, b) => a.vehicles.vehicle_no.localeCompare(b.vehicles.vehicle_no));
-
-                    sortedJobs.forEach(job => {
-                        const itemContainer = document.createElement('div');
-                        const itemBorderClass = isImmediate ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-transparent';
-                        itemContainer.className = `due-date-item bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${itemBorderClass}`;
-                        
-                        const statusOptions = ['Not Started', 'Ongoing', 'Completed'];
-                        let optionsHtml = statusOptions.map(opt => `<option value="${opt}" ${job.status === opt ? 'selected' : ''}>${opt}</option>`).join('');
-
-                        itemContainer.innerHTML = `
-                            <div class="due-date-header p-4 flex justify-between items-center cursor-pointer" onclick="toggleDueDateItem(this.parentElement)">
-                                <div>
-                                    <p class="font-bold text-gray-800">${job.vehicles.vehicle_no}</p>
-                                    <p class="text-sm text-gray-500">${job.status}</p>
-                                </div>
-                                <span class="material-symbols-outlined transition-transform duration-300">expand_more</span>
-                            </div>
-                            <div class="due-date-details">
-                                <div class="p-4 border-t border-gray-200">
-                                    <p class="text-sm text-gray-600 mb-4"><strong>Complaint:</strong> ${formatArrayCell(job.complaint)}</p>
-                                    <div class="flex items-center gap-3">
-                                        <label class="text-sm font-medium text-gray-600 shrink-0">Update Status:</label>
-                                        <select onchange="updateJobStatus(${job.id}, this.value, '${job.vehicles.vehicle_no}')" class="form-input text-sm !py-1.5 !px-2 w-full">${optionsHtml}</select>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        listContainer.appendChild(itemContainer);
-                    });
-                }
-            });
-        }
         
-        function toggleDueDateItem(element) {
-            const isExpanded = element.classList.contains('expanded');
-            
-            document.querySelectorAll('.due-date-item.expanded').forEach(item => {
-                if (item !== element) {
-                    item.classList.remove('expanded');
-                }
-            });
 
-            if (isExpanded) {
-                element.classList.remove('expanded');
-            } else {
-                element.classList.add('expanded');
-            }
-        }
         
         async function updateJobStatus(id, newStatus, vehicleNo) {
             if (newStatus === 'Completed') {
@@ -3027,41 +3265,42 @@ async function sendApprovalLink() {
             }
         }
 
-async function handleCompletionConfirmation(id, vehicleNo) {
-    const confirmationInput = document.getElementById('complete-confirmation-input');
-    if (confirmationInput.value.trim().toLowerCase() !== 'yes') {
-        return showError("Confirmation text did not match. Please type 'yes' to proceed.");
-    }
-    // First, update the status in the database
-    const { error } = await sb.from('reports').update({ status: 'Completed' }).eq('id', id);
-    confirmationInput.value = ''; // Clear input for next time
-    hideModal('complete-confirmation-modal'); // Close the confirmation modal
-    if(error) {
-        return showError('Failed to update status.');
-    }
-    // If the update was successful, show the success message and then the feedback modal
-    showSuccessMessage(`Job for ${vehicleNo} marked as Completed!`);
-    // Fetch the client's phone number
-    const { data: reportData, error: fetchError } = await sb
-        .from('reports')
-        .select('client_phone')
-        .eq('id', id)
-        .single();
-    if (fetchError || !reportData || !reportData.client_phone) {
-        console.error("Could not fetch client phone number for feedback message.", fetchError);
-        // Don't show the feedback modal if we don't have a number. Just refresh the screen.
-        setTimeout(populateDueDateScreen, 1000);
-        return;
-    }
-    const clientPhone = reportData.client_phone;
-    // Set up the "Send" button in the feedback modal
-    const sendButton = document.getElementById('confirm-feedback-send-button');
-    sendButton.onclick = () => sendWhatsAppFeedback(id, clientPhone, vehicleNo);
-    // Show the new feedback modal
-    showModal('whatsapp-feedback-modal');
-    // Refresh the due date screen in the background
-    setTimeout(populateDueDateScreen, 500);
-}
+// Find and replace this entire function
+        async function handleCompletionConfirmation(id, vehicleNo) {
+            const confirmationInput = document.getElementById('complete-confirmation-input');
+            if (confirmationInput.value.trim().toLowerCase() !== 'yes') {
+                return showError("Confirmation text did not match. Please type 'yes' to proceed.");
+            }
+            
+            const { error } = await sb.from('reports').update({ status: 'Completed' }).eq('id', id);
+            confirmationInput.value = ''; 
+            hideModal('complete-confirmation-modal'); 
+            
+            if(error) {
+                return showError('Failed to update status.');
+            }
+            
+            showSuccessMessage(`Job for ${vehicleNo} marked as Completed!`);
+            
+            const { data: reportData, error: fetchError } = await sb
+                .from('reports')
+                .select('client_phone')
+                .eq('id', id)
+                .single();
+
+            if (fetchError || !reportData || !reportData.client_phone) {
+                console.error("Could not fetch client phone number for feedback message.", fetchError);
+                showCloseTab('complete'); // REPLACED: Refresh the new "Complete" tab
+                return;
+            }
+
+            const clientPhone = reportData.client_phone;
+            const sendButton = document.getElementById('confirm-feedback-send-button');
+            sendButton.onclick = () => sendWhatsAppFeedback(id, clientPhone, vehicleNo);
+            showModal('whatsapp-feedback-modal');
+            
+            showCloseTab('complete'); // REPLACED: Refresh the new "Complete" tab in the background
+        }
 
 function sendWhatsAppFeedback(reportId, clientPhone, vehicleNo) {
     // This creates a unique link back to the application for feedback
@@ -3121,10 +3360,17 @@ async function submitCustomerTextFeedback() {
 }
 // END: Add these two new functions
 
+// Find and replace this entire function
         function cancelCompletion() {
             document.getElementById('complete-confirmation-input').value = '';
             hideModal('complete-confirmation-modal');
-            populateDueDateScreen(); // To reset the dropdown to its original value
+            // REPLACED: Refresh the appropriate tab instead of calling the old function
+            const activeTab = document.querySelector('#due-date-screen .tab-button.active-tab');
+            if (activeTab && activeTab.id === 'tab-btn-complete') {
+                showCloseTab('complete');
+            } else {
+                showCloseTab('wash-pending');
+            }
         }
         
         function openCancelModal(reportId, vehicleNo) {
@@ -3290,6 +3536,7 @@ function selectReportForUpdate(report) {
             originalComplaintsForUpdate = [];
             newSuggestions = [];
         }
+    materialsForServices = JSON.parse(report.materials_required || '{}');
 
             const approvedItems = report.approved ? JSON.parse(report.approved) : [];
             
@@ -3374,16 +3621,23 @@ function selectReportForUpdate(report) {
             }
         }
 
-        function resetVehicleUpdateScreen() {
-            document.getElementById('update-details-section').classList.add('hidden');
-            document.getElementById('update-form-section').classList.add('hidden');
-            document.getElementById('update-tab-container').classList.remove('hidden');
-            document.getElementById('delivery-date').value = '';
-            newSuggestions = [];
-            currentReportId = null;
-            renderSuggestions();
-            showUpdateTab('pending');
-        }
+
+
+function resetVehicleUpdateScreen() {
+    document.getElementById('update-details-section').classList.add('hidden');
+    document.getElementById('update-form-section').classList.add('hidden');
+    document.getElementById('update-tab-container').classList.remove('hidden');
+    document.getElementById('delivery-date').value = '';
+    newSuggestions = [];
+    currentReportId = null;
+    renderSuggestions(); // This will clear the suggestions list
+
+    // This is the fix: Always reset to the 'pending' tab view.
+    // We remove the logic that redirects to the 'Close' page.
+    showUpdateTab('pending');
+}
+		
+		
         // --- Damage Marking Functions ---
         function resizeCanvas() {
             if (!carImage || !damageCanvas || !checkCanvas) return;
@@ -3468,25 +3722,25 @@ function showAdminScreen(screenId) {
             if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
             if (screenId === 'admin-executive-management-screen') renderUserList('executive');
             if (screenId === 'admin-admin-management-screen') renderUserList('admin');
+            if (screenId === 'admin-washer-management-screen') renderUserList('washer'); // ADDED
             if (screenId === 'admin-settings-screen') renderSettingsToggles();
             
             showScreen('admin-screens');
         }
 
 
-        function showExecutiveScreen(screenId) {
+function showExecutiveScreen(screenId) {
             document.querySelectorAll('#executive-screens .executive-screen').forEach(s => s.style.display = 'none');
             document.getElementById(screenId).style.display = 'block';
             setActiveNav(screenId);
 
             if (screenId === 'report-screen') fetchAndPopulateReports(false);
-            if (screenId === 'due-date-screen') populateDueDateScreen();
+            if (screenId === 'due-date-screen') showCloseTab('wash-pending'); // MODIFIED
             if (screenId === 'job-card-screen') {
                 resetJobCardState();
             }
             if (screenId === 'vehicle-update-screen') {
                 resetVehicleUpdateScreen();
-                populateNotStartedJobs();
             }
 
             showScreen('executive-screens');
