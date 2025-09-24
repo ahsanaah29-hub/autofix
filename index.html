@@ -269,6 +269,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
+									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -681,6 +682,7 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
+									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -1963,13 +1965,33 @@ async function addUser(role) {
             }
 
             let query = sb.from('reports').select(`
-                id, created_at, status, complaint, suggested, approved, marks, odometer_reading, client_name, client_phone, gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
-                vehicles!inner( 
-                    id, vehicle_no, vehicle_name, color, engine_no, chassis_no, 
-                    vehicle_models!inner( brand, model ) 
-                ),
-                users!inner( username )
-            `).order('created_at', { ascending: false });
+    id,
+    created_at,
+    status,
+    complaint,
+    suggested,
+    approved,
+    marks,
+    odometer_reading,
+    client_name,
+    client_phone,
+    gdrive_folder_url,
+    customer_feedback_text,
+    customer_feedback_audio,
+    service_feedback,
+    vehicles!inner(
+        id,
+        vehicle_no,
+        vehicle_name,
+        color,
+        engine_no,
+        chassis_no,
+        vehicle_models!inner(brand, model)
+    ),
+    users!inner(
+        username
+    )
+`).order('created_at', { ascending: false });
 
             if (vehicleIdFilter !== null) {
                 if (vehicleIdFilter.length === 0) {
@@ -2060,6 +2082,7 @@ async function addUser(role) {
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.suggested)}">${formatArrayCell(row.suggested)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.approved)}">${formatArrayCell(row.approved)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${row.customer_feedback_text || ''}">${row.customer_feedback_text || 'N/A'}</td>
+					<td class="whitespace-normal max-w-xs truncate" title="${row.service_feedback || ''}">${row.service_feedback || 'N/A'}</td>
                     <td>${customerVoiceCell}</td>
                     <td>${marksButton}</td>
                     <td>${mediaLink}</td>
@@ -3242,7 +3265,7 @@ async function submitCustomerTextFeedback() {
     // Update the 'customer_feedback_text' column in the 'reports' table
     const { error } = await sb
         .from('reports')
-        .update({ customer_feedback_text: feedbackText })
+        .update({ service_feedback: feedbackText })
         .eq('id', feedbackId);
     if (error) {
         console.error('Error submitting feedback:', error);
