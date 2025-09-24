@@ -269,7 +269,6 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
-									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -682,7 +681,6 @@
                                     <th>Suggested</th>
                                     <th>Approved</th>
                                     <th>Customer's Feedback</th>
-									<th>Service Feedback</th>
                                     <th>Customer's Voice</th>
                                     <th>Marks</th>
                                     <th>Media</th>
@@ -1965,33 +1963,13 @@ async function addUser(role) {
             }
 
             let query = sb.from('reports').select(`
-    id,
-    created_at,
-    status,
-    complaint,
-    suggested,
-    approved,
-    marks,
-    odometer_reading,
-    client_name,
-    client_phone,
-    gdrive_folder_url,
-    customer_feedback_text,
-    customer_feedback_audio,
-    service_feedback,
-    vehicles!inner(
-        id,
-        vehicle_no,
-        vehicle_name,
-        color,
-        engine_no,
-        chassis_no,
-        vehicle_models!inner(brand, model)
-    ),
-    users!inner(
-        username
-    )
-`).order('created_at', { ascending: false });
+                id, created_at, status, complaint, suggested, approved, marks, odometer_reading, client_name, client_phone, gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
+                vehicles!inner( 
+                    id, vehicle_no, vehicle_name, color, engine_no, chassis_no, 
+                    vehicle_models!inner( brand, model ) 
+                ),
+                users!inner( username )
+            `).order('created_at', { ascending: false });
 
             if (vehicleIdFilter !== null) {
                 if (vehicleIdFilter.length === 0) {
@@ -2082,7 +2060,6 @@ async function addUser(role) {
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.suggested)}">${formatArrayCell(row.suggested)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${formatArrayCell(row.approved)}">${formatArrayCell(row.approved)}</td>
                     <td class="whitespace-normal max-w-xs truncate" title="${row.customer_feedback_text || ''}">${row.customer_feedback_text || 'N/A'}</td>
-					<td class="whitespace-normal max-w-xs truncate" title="${row.service_feedback || ''}">${row.service_feedback || 'N/A'}</td>
                     <td>${customerVoiceCell}</td>
                     <td>${marksButton}</td>
                     <td>${mediaLink}</td>
@@ -2641,7 +2618,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
-    // --- (The first part of the function remains the same) ---
+    // 1. Render editable customer complaints
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
         complaints.forEach((item) => {
@@ -2665,6 +2642,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerComplaintsList.innerHTML = '<p class="text-sm text-gray-500">No original complaints were registered.</p>';
     }
     
+    // 2. Render NEW mechanic suggestions
     executiveList.innerHTML = '';
     if (suggestions.length > 0) {
         suggestions.forEach((item, index) => {
@@ -2680,68 +2658,41 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // --- (The change is in the section below) ---
+    // 3. Render the COMBINED list for the final approval checklist
     customerApprovalList.innerHTML = '';
-    const allItemsForApproval = [...complaints, ...suggestions];
-
-    // NEW: Check which tab is currently active.
-    const isResponsesTabActive = document.getElementById('tab-btn-responses').classList.contains('active-tab');
+    const allItemsForApproval = [...complaints, ...suggestions]; // Combine both lists
 
     if (allItemsForApproval.length > 0) {
         const hasCustomerResponded = approved.length > 0;
         
         allItemsForApproval.forEach(item => {
-            const isApproved = hasCustomerResponded 
-                ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text) 
-                : false;
-
-            if (hasCustomerResponded && !isApproved) {
-                return;
-            }
+            const isChecked = hasCustomerResponded
+                ? approved.some(approvedItem => (approvedItem.text || approvedItem) === item.text)
+                : true;
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
-            const sanitizedServiceText = item.text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            const approvalItem = document.createElement('div');
-            approvalItem.className = 'p-3 bg-gray-50 rounded-lg';
             
-            const itemHeader = hasCustomerResponded ? `
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-green-600">check_box</span>
-                    <span class="font-bold text-gray-800 flex-1 break-all">${item.text}</span>
-                    <span class="font-semibold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
-                </div>
-            ` : `
-                <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                           value=${checkboxValue} checked onchange="handleCheckboxChange(this)">
-                    <div class="flex-1 flex justify-between items-center">
-                        <span class="font-medium break-all">${item.text}</span>
-                        <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
-                    </div>
-                </label>
-            `;
+            const isOriginalComplaint = item.type === 'complaint';
+            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
+            const tag = isOriginalComplaint 
+                ? `<span class="text-xs text-gray-500">(Customer Request)</span>` 
+                : `<span class="text-xs text-blue-600">(New Suggestion)</span>`;
 
+            const approvalItem = document.createElement('label');
+            approvalItem.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200`;
+            // THE CHANGE IS ON THE NEXT LINE: onchange now calls handleCheckboxChange(this)
             approvalItem.innerHTML = `
-                ${itemHeader}
-                ${(isResponsesTabActive && hasCustomerResponded && isApproved) ? `
-                <div class="mt-3 pt-3 border-t border-gray-200 ml-8">
-                    <label class="text-xs font-bold text-gray-500">MATERIALS REQUIRED</label>
-                    <div id="materials-list-for-${item.text.replace(/\s+/g, '-')}" class="text-sm mt-1 space-y-1">
-                    </div>
-                    <div class="flex items-center gap-2 mt-2">
-                        <input id="material-input-for-${item.text.replace(/\s+/g, '-')}" type="text" class="form-input !text-sm !py-1 flex-grow" placeholder="e.g., Oil Filter, 1L Engine Oil">
-                        <button type="button" onclick="addMaterial('${sanitizedServiceText}')" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </div>
+                <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                       value=${checkboxValue} 
+                       ${isChecked ? 'checked' : ''}
+                       onchange="handleCheckboxChange(this)">
+                <div class="flex-1 flex justify-between items-center">
+                   <span class="font-medium break-all">${item.text}</span>
+                    <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                 </div>
-                ` : ''}
+                ${tag}
             `;
             customerApprovalList.appendChild(approvalItem);
-            
-            if (materialsForServices[item.text]) {
-                renderMaterialsForService(item.text);
-            }
         });
     } else {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
@@ -2749,58 +2700,8 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     
     recalculateAndUpdateTotal();
 }
-// Add this new global variable at the top of your script
-let materialsForServices = {};
 
-// Add these THREE new functions to your script
-function addMaterial(serviceText) {
-    const sanitizedId = serviceText.replace(/\s+/g, '-');
-    const input = document.getElementById(`material-input-for-${sanitizedId}`);
-    const materialName = input.value.trim();
 
-    if (materialName) {
-        if (!materialsForServices[serviceText]) {
-            materialsForServices[serviceText] = [];
-        }
-        materialsForServices[serviceText].push(materialName);
-        input.value = '';
-        renderMaterialsForService(serviceText);
-    }
-    input.focus();
-}
-
-function deleteMaterial(serviceText, materialIndex) {
-    if (materialsForServices[serviceText]) {
-        materialsForServices[serviceText].splice(materialIndex, 1);
-        renderMaterialsForService(serviceText);
-    }
-}
-
-function renderMaterialsForService(serviceText) {
-    const sanitizedId = serviceText.replace(/\s+/g, '-');
-    const listContainer = document.getElementById(`materials-list-for-${sanitizedId}`);
-    if (!listContainer) return;
-
-    listContainer.innerHTML = '';
-    const materials = materialsForServices[serviceText] || [];
-
-    if (materials.length === 0) {
-        listContainer.innerHTML = '<p class="text-xs text-gray-400 italic">No materials added yet.</p>';
-    } else {
-        materials.forEach((material, index) => {
-            const sanitizedServiceText = serviceText.replace(/'/g, "\\'");
-            const materialItem = document.createElement('div');
-            materialItem.className = 'flex items-center justify-between bg-white p-1.5 rounded';
-            materialItem.innerHTML = `
-                <span>${material}</span>
-                <button onclick="deleteMaterial('${sanitizedServiceText}', ${index})" class="text-red-400 hover:text-red-600">
-                    <span class="material-symbols-outlined !text-sm">close</span>
-                </button>
-            `;
-            listContainer.appendChild(materialItem);
-        });
-    }
-}
 
 
 async function renderSettingsToggles() {
@@ -2947,15 +2848,14 @@ async function saveVehicleUpdate(shouldReset = true) {
     ];
 
     // Create the data object to be saved in the database.
-    // REPLACE IT WITH THIS BLOCK
-const updateData = {
-    complaint: JSON.stringify(originalComplaintsForUpdate),
-    suggested: JSON.stringify(allItemsForApproval),
-    approved: JSON.stringify(approvedItems),
-    expected_delivery: deliveryDate,
-    materials_required: JSON.stringify(materialsForServices), // This line is added
-    status: 'Ongoing'
-};
+    const updateData = {
+        complaint: JSON.stringify(originalComplaintsForUpdate),
+        // Save the COMBINED list to the 'suggested' column to preserve all items.
+        suggested: JSON.stringify(allItemsForApproval),
+        approved: JSON.stringify(approvedItems),
+        expected_delivery: deliveryDate,
+        status: 'Ongoing'
+    };
 
     const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
     if (error) return showError(`Failed to save update: ${error.message}`);
@@ -3342,7 +3242,7 @@ async function submitCustomerTextFeedback() {
     // Update the 'customer_feedback_text' column in the 'reports' table
     const { error } = await sb
         .from('reports')
-        .update({ service_feedback: feedbackText })
+        .update({ customer_feedback_text: feedbackText })
         .eq('id', feedbackId);
     if (error) {
         console.error('Error submitting feedback:', error);
@@ -3530,7 +3430,6 @@ function selectReportForUpdate(report) {
             originalComplaintsForUpdate = [];
             newSuggestions = [];
         }
-    materialsForServices = JSON.parse(report.materials_required || '{}');
 
             const approvedItems = report.approved ? JSON.parse(report.approved) : [];
             
@@ -3618,18 +3517,20 @@ function selectReportForUpdate(report) {
 
 
 function resetVehicleUpdateScreen() {
-    document.getElementById('update-details-section').classList.add('hidden');
-    document.getElementById('update-form-section').classList.add('hidden');
-    document.getElementById('update-tab-container').classList.remove('hidden');
-    document.getElementById('delivery-date').value = '';
-    newSuggestions = [];
-    currentReportId = null;
-    renderSuggestions(); // This will clear the suggestions list
-
-    // This is the fix: Always reset to the 'pending' tab view.
-    // We remove the logic that redirects to the 'Close' page.
-    showUpdateTab('pending');
-}
+            document.getElementById('update-details-section').classList.add('hidden');
+            document.getElementById('update-form-section').classList.add('hidden');
+            document.getElementById('update-tab-container').classList.remove('hidden');
+            document.getElementById('delivery-date').value = '';
+            newSuggestions = [];
+            currentReportId = null;
+            renderSuggestions();
+            // If the active tab was "Responses Received", go to the Close page after saving.
+            if(document.getElementById('tab-btn-responses').classList.contains('active-tab')) {
+                showExecutiveScreen('due-date-screen');
+            } else {
+                showUpdateTab('pending');
+            }
+        }
 		
 		
         // --- Damage Marking Functions ---
