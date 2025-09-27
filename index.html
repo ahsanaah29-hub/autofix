@@ -200,6 +200,11 @@
                     <h2 class="text-lg font-bold mt-2">App Settings</h2>
                     <p class="text-sm text-[var(--text-secondary)]">Toggle features and form fields</p>
                 </a>
+<a href="javascript:void(0)" onclick="showAdminScreen('admin-inspector-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1">
+    <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">fact_check</span>
+    <h2 class="text-lg font-bold mt-2">Inspector Management</h2>
+    <p class="text-sm text-[var(--text-secondary)]">Create & Delete Inspectors</p>
+</a>
 				<a href="javascript:void(0)" onclick="showAdminScreen('admin-washer-management-screen')" class="card text-center items-center flex flex-col justify-center transition-all hover:shadow-xl hover:-translate-y-1">
                     <span class="material-symbols-outlined text-5xl text-[var(--primary-color)]">local_car_wash</span>
                     <h2 class="text-lg font-bold mt-2">Washer Management</h2>
@@ -356,6 +361,32 @@
                 </div>
             </main>
         </div>
+		
+<div id="admin-inspector-management-screen" class="admin-screen" style="display: none;">
+    <header class="app-header">
+        <div class="app-header-content">
+            <button class="absolute left-4 text-[var(--text-secondary)] hover:text-[var(--primary-color)]" onclick="showAdminScreen('admin-dashboard-screen')">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </button>
+            <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Inspector Management</h1>
+        </div>
+    </header>
+    <main class="app-main">
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Create New Inspector</h2>
+            <form id="add-inspector-form" onsubmit="event.preventDefault(); addUser('inspector');" class="space-y-4">
+                <div><label for="new-inspector-username" class="form-label">Username <span class="text-red-500">*</span></label><input id="new-inspector-username" class="form-input" placeholder="Enter Username" required /></div>
+                <div><label for="new-inspector-pass" class="form-label">Password <span class="text-red-500">*</span></label><input id="new-inspector-pass" class="form-input" placeholder="Enter Password" type="password" required /></div>
+                <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Inspector</button>
+            </form>
+        </div>
+        <div class="card space-y-3">
+            <h2 class="text-xl font-bold">Inspector List</h2>
+            <div id="inspectors-list"></div>
+        </div>
+    </main>
+</div>
+
         </div>
     </div>
 <div id="quick-access-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
@@ -527,29 +558,29 @@
             </main>
         </div>
 
-        <div id="vehicle-update-screen" class="executive-screen" style="display: none;">
-			<main class="app-main">
-                <div id="update-tab-container" class="card !p-0">
-                    <div class="flex border-b border-gray-200 px-5">
-                        <button id="tab-btn-pending" class="tab-button active-tab" onclick="showUpdateTab('pending')">Pending Jobs</button>
-                        <button id="tab-btn-awaiting" class="tab-button" onclick="showUpdateTab('awaiting')">Awaiting Response</button>
-                        <button id="tab-btn-responses" class="tab-button" onclick="showUpdateTab('responses')">Responses Received</button>
-                    </div>
-                    <div class="p-5">
-                        <div id="pending-jobs-panel" class="tab-panel">
-                            <div id="not-started-jobs-list" class="space-y-3"></div>
-                            <p id="no-pending-jobs-message" class="text-center text-gray-500 py-8 hidden">No pending job cards found.</p>
-                        </div>
-                        <div id="awaiting-response-panel" class="tab-panel hidden">
-                            <div id="awaiting-response-list" class="space-y-3"></div>
-                            <p id="no-awaiting-response-message" class="text-center text-gray-500 py-8 hidden">No jobs are currently awaiting a customer response.</p>
-                        </div>
-                        <div id="responses-received-panel" class="tab-panel hidden">
-                            <div id="customer-response-list" class="space-y-3"></div>
-                            <p id="no-customer-response-message" class="text-center text-gray-500 py-8 hidden">No new customer responses found.</p>
-                        </div>
-                    </div>
+<div id="vehicle-update-screen" class="executive-screen" style="display: none;">
+    <main class="app-main">
+        <div id="update-tab-container">
+            <div class="flex border-b border-gray-200 px-5">
+                <button id="tab-btn-pending" class="tab-button active-tab" onclick="showUpdateTab('pending')">Pending Jobs</button>
+                <button id="tab-btn-awaiting" class="tab-button" onclick="showUpdateTab('awaiting')">Awaiting Response</button>
+                <button id="tab-btn-responses" class="tab-button" onclick="showUpdateTab('responses')">Responses Received</button>
+            </div>
+            <div class="p-5">
+                <div id="pending-jobs-panel" class="tab-panel">
+                    <div id="not-started-jobs-list" class="space-y-3"></div>
+                    <p id="no-pending-jobs-message" class="text-center text-gray-500 py-8 hidden">No jobs are currently pending.</p>
                 </div>
+                <div id="awaiting-response-panel" class="tab-panel hidden">
+                    <div id="awaiting-response-list" class="space-y-3"></div>
+                    <p id="no-awaiting-response-message" class="text-center text-gray-500 py-8 hidden">No jobs are awaiting customer response.</p>
+                </div>
+                <div id="responses-received-panel" class="tab-panel hidden">
+                    <div id="customer-response-list" class="space-y-3"></div>
+                    <p id="no-customer-response-message" class="text-center text-gray-500 py-8 hidden">No responses received from customers yet.</p>
+                </div>
+            </div>
+        </div>
 
                 <div id="update-details-section" class="card hidden space-y-4">
                     <h2 class="text-xl font-bold flex items-center gap-2 text-green-600"><span class="material-symbols-outlined">check_circle</span> Selected Report</h2>
@@ -676,23 +707,54 @@
             </main>
         </div>
 <div id="due-date-screen" class="executive-screen" style="display: none;">
-            <main class="app-main">
-                <div class="card !p-0">
-                    <div class="flex border-b border-gray-200 px-5">
-                        <button id="tab-btn-wash-pending" class="tab-button active-tab" onclick="showCloseTab('wash-pending')">Wash Pending</button>
-                        <button id="tab-btn-complete" class="tab-button" onclick="showCloseTab('complete')">Complete</button>
-                    </div>
-                    <div class="p-5">
-                        <div id="wash-pending-panel" class="tab-panel space-y-3">
-                            <p id="no-wash-pending-message" class="text-center text-gray-500 py-8 hidden">No jobs are pending for wash.</p>
-                        </div>
-                        <div id="complete-panel" class="tab-panel hidden space-y-3">
-                            <p id="no-complete-message" class="text-center text-gray-500 py-8 hidden">No jobs are ready for completion.</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <main class="app-main">
+        <div class="card !p-0">
+            <div class="flex border-b border-gray-200 px-5">
+                <button id="tab-btn-ready-to-close" class="tab-button active-tab" onclick="showCloseTab('ready-to-close')">
+                    Ready to Close
+                </button>
+                <button id="tab-btn-inspection-pending" class="tab-button" onclick="showCloseTab('inspection-pending')">
+                    Inspection Pending
+                </button>
+                <button id="tab-btn-wash-pending" class="tab-button" onclick="showCloseTab('wash-pending')">
+                    Wash Pending
+                </button>
+                <button id="tab-btn-complete" class="tab-button" onclick="showCloseTab('complete')">
+                    Complete
+                </button>
+            </div>
+            <div class="p-5">
+<div id="ready-to-close-panel" class="tab-panel">
+    <div id="ready-to-close-list" class="space-y-3"></div>
+    <p id="no-ready-to-close-message" class="text-center text-gray-500 py-8 hidden">No jobs are ready for the next step.</p>
+</div>
+
+<div id="inspection-pending-panel" class="tab-panel hidden space-y-6">
+    <div id="rejected-jobs-section">
+        <h3 class="text-lg font-bold text-red-700 mb-2">Rejected by Inspector</h3>
+        <div id="rejected-jobs-list" class="space-y-3"></div>
+        <p id="no-rejected-jobs-message" class="text-center text-gray-500 py-4 hidden">No jobs have been rejected.</p>
+    </div>
+    <div id="pending-inspection-section" class="border-t pt-4">
+        <h3 class="text-lg font-bold text-gray-700 mb-2">Pending Inspection</h3>
+        <div id="pending-inspection-list" class="space-y-3"></div>
+        <p id="no-inspection-pending-message" class="text-center text-gray-500 py-4 hidden">No jobs are currently pending for inspection.</p>
+    </div>
+</div>
+
+<div id="wash-pending-panel" class="tab-panel hidden">
+    <div id="wash-pending-list" class="space-y-3"></div>
+    <p id="no-wash-pending-message" class="text-center text-gray-500 py-8 hidden">No jobs are pending for wash.</p>
+</div>
+
+<div id="complete-panel" class="tab-panel hidden">
+    <div id="complete-list" class="space-y-3"></div>
+    <p id="no-complete-message" class="text-center text-gray-500 py-8 hidden">No jobs are ready for completion.</p>
+</div>
+            </div>
         </div>
+    </main>
+</div>
         <div id="profile-screen" class="executive-screen" style="display: none;">
             <main class="app-main">
                 <div class="card">
@@ -740,22 +802,55 @@
             </div>
         </footer>
     </div>
-</div> <div id="washer-screen" class="screen">
-        <header class="app-header">
-            <div class="app-header-content">
-                <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Wash Queue</h1>
-                <button onclick="logout()" class="absolute right-4 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary-color)]">
-                    <span class="font-medium text-sm hidden sm:block">Logout</span>
-                    <span class="material-symbols-outlined">logout</span>
-                </button>
+</div> 
+<div id="washer-screen" class="screen">
+    <header class="app-header">
+        <div class="app-header-content">
+            <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Wash Queue</h1>
+            <button onclick="logout()" class="absolute right-4 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary-color)]">
+                <span class="font-medium text-sm hidden sm:block">Logout</span>
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+    <main class="app-main">
+        <div id="wash-queue-list" class="space-y-3">
             </div>
-        </header>
-        <main class="app-main">
-            <div id="wash-queue-list" class="space-y-3">
-                </div>
-            <p id="no-wash-jobs-message" class="text-center text-gray-500 py-8 hidden">No vehicles are currently in the wash queue.</p>
-        </main>
+        <p id="no-wash-jobs-message" class="text-center text-gray-500 py-8 hidden">No vehicles are currently in the wash queue.</p>
+    </main>
+</div>
+<div id="inspector-screen" class="screen">
+    <header class="app-header">
+        <div class="app-header-content">
+            <h1 class="text-2xl font-bold text-[var(--primary-color)] flex-1 text-center">Inspection Queue</h1>
+            <button onclick="logout()" class="absolute right-4 flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary-color)]">
+                <span class="font-medium text-sm hidden sm:block">Logout</span>
+                <span class="material-symbols-outlined">logout</span>
+            </button>
+        </div>
+    </header>
+    <main class="app-main">
+        <div id="inspection-queue-list" class="space-y-3">
+            </div>
+        <p id="no-inspection-jobs-message" class="text-center text-gray-500 py-8 hidden">No vehicles are currently in the inspection queue.</p>
+    </main>
+</div>
+
+<div id="inspection-remarks-modal" class="fixed inset-0 z-50 flex items-center justify-center modal-hidden">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative bg-white rounded-lg p-6 w-full max-w-md m-4 space-y-4">
+        <h3 id="remarks-modal-title" class="text-xl font-bold text-gray-800">Inspection Remarks</h3>
+        <p id="remarks-modal-text" class="text-gray-600"></p>
+        <div>
+            <label for="inspection-remarks-input" class="form-label">Remarks (Required):</label>
+            <textarea id="inspection-remarks-input" class="form-input" rows="3" placeholder="Enter remarks..."></textarea>
+        </div>
+        <div class="flex justify-end gap-4 pt-4">
+            <button onclick="hideModal('inspection-remarks-modal')" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">Cancel</button>
+            <button id="confirm-inspection-button" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold">Confirm</button>
+        </div>
     </div>
+</div>
     
     <!-- Customer Approval Screen -->
     <div id="customer-approval-screen" class="screen">
@@ -1612,75 +1707,70 @@ function handleCheckboxChange(checkbox) {
         };
 
 async function login() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            if (!username || !password) return showError('Username and password are required.');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    if (!username || !password) return showError('Username and password are required.');
 
-            const { data, error } = await sb
-                .from('users')
-                .select('*')
-                .ilike('username', username)
-                .single();
+    const { data, error } = await sb
+        .from('users')
+        .select('*')
+        .ilike('username', username)
+        .single();
 
-            if (error || !data || data.password !== password) {
-    	        return showError('Invalid credentials.');
-            }
-            
-            currentUser = data;
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
-            
-            if (currentUser.role === 'admin') {
-                showAdminScreen('admin-dashboard-screen');
-            } else if (currentUser.role === 'executive') {
-                document.getElementById('profile-username').textContent = currentUser.username;
-                document.getElementById('profile-role').textContent = currentUser.role;
-                await fetchAndApplyAppSettings(); 
-                showExecutiveScreen('job-card-screen');
-                setTimeout(checkInitialAuth, 1000);
-            } else if (currentUser.role === 'washer') { // ADDED
-                showScreen('washer-screen');
-                populateWashList();
-            } else {
-                return showError('Unknown user role.');
-            }
-            showSuccessMessage(`Welcome, ${currentUser.username}!`);
-        }
+    if (error || !data || data.password !== password) {
+        return showError('Invalid credentials.');
+    }
+    
+    currentUser = data;
+    sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+    
+    if (currentUser.role === 'admin') {
+        showAdminScreen('admin-dashboard-screen');
+    } else if (currentUser.role === 'executive') {
+        document.getElementById('profile-username').textContent = currentUser.username;
+        document.getElementById('profile-role').textContent = currentUser.role;
+        await fetchAndApplyAppSettings(); 
+        showExecutiveScreen('job-card-screen');
+        setTimeout(checkInitialAuth, 1000);
+    } else if (currentUser.role === 'washer') {
+        showScreen('washer-screen');
+        populateWashList();
+    } else if (currentUser.role === 'inspector') { // ADDED THIS BLOCK
+        showScreen('inspector-screen');
+        populateInspectionQueue();
+    } else {
+        return showError('Unknown user role.');
+    }
+    showSuccessMessage(`Welcome, ${currentUser.username}!`);
+}
 		
 // ADD NEW FUNCTION: Populates the list for the washer
-       
-// THIS IS THE COMPLETE, CORRECTED FUNCTION. REPLACE YOUR OLD ONE WITH THIS.
 async function populateWashList() {
     const listContainer = document.getElementById('wash-queue-list');
     const noJobsMsg = document.getElementById('no-wash-jobs-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
-
     // This query is now fixed to be specific about which user to get.
     const query = sb.from('reports')
         .select(`
-            id, 
-            vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)), 
+            id,
+            vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)),
             executive:executive_id(username)
         `)
         .eq('status', 'Sent To Wash')
         .order('created_at', { ascending: true });
-    
     const reports = await handleSupabaseQuery(query, 'Could not fetch wash queue.');
-
     if (reports === null) return;
-
     if (reports.length === 0) {
         noJobsMsg.classList.remove('hidden');
         return;
     }
-
     reports.forEach(report => {
         const card = document.createElement('div');
         const vehicle = report.vehicles;
         // The executive's data is now correctly accessed from 'report.executive'.
         const executive = report.executive;
         const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
-
         card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
         // Added optional chaining (?.) to prevent errors if the executive is not found.
         card.innerHTML = `
@@ -1768,117 +1858,371 @@ function logout() {
 		
 
 // ADD NEW FUNCTION: Handles tab switching on the Close page
-        function showCloseTab(tabName) {
-            document.querySelectorAll('#due-date-screen .tab-button').forEach(btn => btn.classList.remove('active-tab'));
-            document.querySelectorAll('#due-date-screen .tab-panel').forEach(panel => panel.classList.add('hidden'));
+// Replace your showCloseTab function with this new 4-tab version
+function showCloseTab(tabName) {
+    const allTabs = ['ready-to-close', 'inspection-pending', 'wash-pending', 'complete'];
+    
+    allTabs.forEach(tab => {
+        const btn = document.getElementById(`tab-btn-${tab}`);
+        const panel = document.getElementById(`${tab}-panel`);
+        if (btn) btn.classList.remove('active-tab');
+        if (panel) panel.classList.add('hidden');
+    });
 
-            if (tabName === 'wash-pending') {
-                document.getElementById('tab-btn-wash-pending').classList.add('active-tab');
-                document.getElementById('wash-pending-panel').classList.remove('hidden');
-                populateWashPendingJobs();
-            } else if (tabName === 'complete') {
-                document.getElementById('tab-btn-complete').classList.add('active-tab');
-                document.getElementById('complete-panel').classList.remove('hidden');
-                populateCompletedWashJobs();
-            }
+    const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+    const activePanel = document.getElementById(`${tabName}-panel`);
+    if (activeBtn) activeBtn.classList.add('active-tab');
+    if (activePanel) activePanel.classList.remove('hidden');
+
+    // Call the correct function to populate the active tab
+    if (tabName === 'ready-to-close') populateReadyToCloseJobs();
+    if (tabName === 'inspection-pending') populateInspectionPendingJobs();
+    if (tabName === 'wash-pending') populateWashPendingJobs();
+    if (tabName === 'complete') populateCompletedWashJobs();
+}
+
+// Add this new function to power the "Ready to Close" tab
+async function populateReadyToCloseJobs() {
+    if (!currentUser) return;
+    const listContainer = document.getElementById('ready-to-close-list');
+    const noJobsMsg = document.getElementById('no-ready-to-close-message');
+    
+    // Defensive check
+    if (!listContainer || !noJobsMsg) return console.error("Ready to close elements not found.");
+
+    listContainer.innerHTML = ''; // Safely clear only the list
+    noJobsMsg.classList.add('hidden');
+
+    const { data: reports, error } = await sb.from('reports')
+        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .eq('executive_id', currentUser.id)
+        .eq('status', 'Ongoing')
+        .not('approved', 'is', null)
+        .neq('approved', '[]');
+
+    if (error) return showError('Could not fetch ready jobs.');
+
+    if (!reports || reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
+
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        const brandAndModel = `${report.vehicles.vehicle_models.brand || ''} ${report.vehicles.vehicle_models.model || ''}`.trim();
+        card.className = 'p-4 border border-gray-200 rounded-lg';
+        card.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                    <p class="text-sm text-gray-600">${brandAndModel}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="updateJobStatus(${report.id}, 'pending_inspection', '${report.vehicles.vehicle_no}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded text-sm">
+                        Send for Inspection
+                    </button>
+                    <button onclick="updateJobStatus(${report.id}, 'Sent To Wash', '${report.vehicles.vehicle_no}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm">
+                        Skip & Wash
+                    </button>
+                </div>
+            </div>
+        `;
+        listContainer.appendChild(card);
+    });
+}
+
+function populateDueDateScreen() {
+            // Call the population function for each tab on the "Close" screen
+            populateReadyToCloseJobs();
+            populateInspectionPendingJobs();
+            populateWashPendingJobs();
+            populateCompletedWashJobs();
         }
 
+// Add this new function anywhere in your <script> tag
+async function populateInspectionPendingJobs() {
+    if (!currentUser) return;
+    const rejectedList = document.getElementById('rejected-jobs-list');
+    const noRejectedMsg = document.getElementById('no-rejected-jobs-message');
+    const pendingList = document.getElementById('pending-inspection-list');
+    const noPendingMsg = document.getElementById('no-inspection-pending-message');
+
+    if (!rejectedList || !noRejectedMsg || !pendingList || !noPendingMsg) {
+        return console.error("Required elements for inspection tab are missing.");
+    }
+
+    rejectedList.innerHTML = ''; // Safely clear only the lists
+    pendingList.innerHTML = '';
+    noRejectedMsg.classList.add('hidden');
+    noPendingMsg.classList.add('hidden');
+
+    // --- Query for REJECTED Jobs ---
+    const { data: rejectedReports, error: rejectedError } = await sb.from('reports')
+        .select(`id, inspection_remarks, vehicles!inner(vehicle_no, vehicle_models(brand, model)), inspector:inspector_id(username)`)
+        .eq('executive_id', currentUser.id)
+        .eq('status', 'rejected');
+    
+    if (rejectedError) showError('Could not fetch rejected jobs.');
+    
+    if (rejectedReports && rejectedReports.length > 0) {
+        rejectedReports.forEach(report => {
+            const card = document.createElement('div');
+            const brandAndModel = `${report.vehicles.vehicle_models.brand || ''} ${report.vehicles.vehicle_models.model || ''}`.trim();
+            card.className = 'p-4 border border-red-300 bg-red-50 rounded-lg';
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                        <p class="text-sm text-gray-600">${brandAndModel}</p>
+                    </div>
+                    <button onclick="resendForInspection(${report.id})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm flex-shrink-0">
+                        Resend for Inspection
+                    </button>
+                </div>
+                <div class="mt-2 pt-2 border-t border-red-200">
+                    <p class="text-sm text-red-800 font-semibold">Remarks from ${report.inspector?.username || 'Inspector'}:</p>
+                    <p class="text-sm text-gray-600 italic">"${report.inspection_remarks || 'No remarks provided.'}"</p>
+                </div>
+            `;
+            rejectedList.appendChild(card);
+        });
+    } else {
+        noRejectedMsg.classList.remove('hidden');
+    }
+
+    // --- Query for PENDING Inspection Jobs ---
+    const { data: pendingReports, error: pendingError } = await sb.from('reports')
+        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .eq('executive_id', currentUser.id)
+        .eq('status', 'pending_inspection');
+    
+    if (pendingError) showError('Could not fetch pending jobs.');
+
+    if (pendingReports && pendingReports.length > 0) {
+        pendingReports.forEach(report => {
+            const card = document.createElement('div');
+            const brandAndModel = `${report.vehicles.vehicle_models.brand || ''} ${report.vehicles.vehicle_models.model || ''}`.trim();
+            card.className = 'p-4 border border-gray-200 bg-gray-50 rounded-lg';
+            card.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                        <p class="text-sm text-gray-600">${brandAndModel}</p>
+                    </div>
+                    <p class="text-sm text-gray-500 font-semibold">Sent to Inspector</p>
+                </div>
+            `;
+            pendingList.appendChild(card);
+        });
+    } else {
+        noPendingMsg.classList.remove('hidden');
+    }
+}
 
 
+// Add this new function anywhere in your <script> tag
+async function resendForInspection(reportId) {
+    const { error } = await sb.from('reports')
+        .update({ status: 'pending_inspection' })
+        .eq('id', reportId);
+
+    if (error) {
+        return showError('Failed to resend for inspection.');
+    }
+
+    showSuccessMessage('Job has been resent to the inspector.');
+    populateInspectionPendingJobs(); // Refresh the list
+}
+
+
+
+// New functions for the inspector workflow
+async function populateInspectionQueue() {
+    const listContainer = document.getElementById('inspection-queue-list');
+    const noJobsMsg = document.getElementById('no-inspection-jobs-message');
+    listContainer.innerHTML = '';
+    noJobsMsg.classList.add('hidden');
+
+    const query = sb.from('reports')
+        .select(`id, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
+        .eq('status', 'pending_inspection')
+        .order('created_at', { ascending: true });
+    
+    const reports = await handleSupabaseQuery(query, 'Could not fetch inspection queue.');
+    if (reports === null || reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
+
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        card.className = 'p-4 border border-gray-200 rounded-lg';
+        card.innerHTML = `
+            <div class="flex justify-between items-center mb-2">
+                <div>
+                    <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                    <p class="text-sm text-gray-600">${report.vehicles.vehicle_name || ''}</p>
+                </div>
+                <p class="text-xs text-gray-500">From: ${report.executive?.username || 'N/A'}</p>
+            </div>
+            <div class="flex justify-end items-center gap-2 mt-3 border-t pt-3">
+                <button onclick="handleInspection('${report.id}', 'rejected', '${report.vehicles.vehicle_no}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 px-3 rounded text-sm">
+                    Reject
+                </button>
+                <button onclick="handleInspection('${report.id}', 'inspection_approved', '${report.vehicles.vehicle_no}')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 rounded text-sm">
+                    Approve
+                </button>
+            </div>
+        `;
+        listContainer.appendChild(card);
+    });
+}
+
+function handleInspection(reportId, outcome, vehicleNo) {
+    const modalTitle = document.getElementById('remarks-modal-title');
+    const modalText = document.getElementById('remarks-modal-text');
+    const confirmBtn = document.getElementById('confirm-inspection-button');
+    const remarksInput = document.getElementById('inspection-remarks-input');
+    remarksInput.value = '';
+
+    if (outcome === 'inspection_approved') {
+        modalTitle.textContent = 'Approve Inspection';
+        modalText.textContent = `Confirm approval for vehicle ${vehicleNo}. Remarks are required.`;
+        confirmBtn.className = 'px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold';
+    } else {
+        modalTitle.textContent = 'Reject Inspection';
+        modalText.textContent = `Confirm rejection for vehicle ${vehicleNo}. You must provide remarks explaining why.`;
+        confirmBtn.className = 'px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold';
+    }
+
+    confirmBtn.onclick = () => confirmInspection(reportId, outcome);
+    showModal('inspection-remarks-modal');
+}
+
+
+// Replace your existing confirmInspection function with this one
+// This function runs when the INSPECTOR clicks Approve/Reject
+async function confirmInspection(reportId, outcome) {
+    if (!currentUser) return showError('Session expired. Please log in.');
+    
+    const remarks = document.getElementById('inspection-remarks-input').value.trim();
+    if (!remarks) {
+        return showError('Remarks are required to proceed.');
+    }
+    
+    // THE KEY CHANGE: Set status to 'inspection_approved' on approval
+    const finalStatus = outcome === 'inspection_approved' ? 'inspection_approved' : 'rejected';
+
+    const updateData = {
+        status: finalStatus,
+        inspector_id: currentUser.id,
+        inspection_remarks: remarks,
+        inspection_date: new Date().toISOString()
+    };
+    
+    const { error } = await sb.from('reports').update(updateData).eq('id', reportId);
+    
+    hideModal('inspection-remarks-modal');
+    if (error) return showError(`Failed to update status: ${error.message}`);
+
+    showSuccessMessage('Inspection status updated successfully.');
+    populateInspectionQueue();
+}
+
+
+
+// Replace your existing populateWashPendingJobs function with this one
 async function populateWashPendingJobs() {
-            // ADDED: Guard clause to prevent crash if session is lost
-            if (!currentUser) {
-                console.error("populateWashPendingJobs: currentUser is null. Aborting.");
-                return showError("Session expired. Please log in again.");
-            }
+    if (!currentUser) return;
+    const listContainer = document.getElementById('wash-pending-list');
+    const noJobsMsg = document.getElementById('no-wash-pending-message');
+    
+    if (!listContainer || !noJobsMsg) return console.error("Wash pending elements not found.");
 
-            const listContainer = document.getElementById('wash-pending-panel');
-            const noJobsMsg = document.getElementById('no-wash-pending-message');
+    listContainer.innerHTML = ''; // Safely clear only the list
+    noJobsMsg.classList.add('hidden');
 
-            listContainer.querySelectorAll('.job-card-item').forEach(card => card.remove());
-            
-            const { data: reports, error } = await sb.from('reports')
-                .select(`id, vehicles!inner(vehicle_no, vehicle_name)`)
-                .eq('executive_id', currentUser.id)
-                .eq('status', 'Ongoing')
-                .not('approved', 'is', null)
-                .neq('approved', '[]')
-                .order('created_at', { ascending: true });
+    const { data: reports, error } = await sb.from('reports')
+        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .eq('executive_id', currentUser.id)
+        .eq('status', 'inspection_approved');
 
-            if (error) return showError('Could not fetch jobs for wash.');
+    if (error) return showError('Could not fetch jobs for wash.');
 
-            if (!reports || reports.length === 0) {
-                noJobsMsg.classList.remove('hidden');
-                return;
-            }
-            noJobsMsg.classList.add('hidden');
+    if (!reports || reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
 
-            reports.forEach(report => {
-                const card = document.createElement('div');
-                card.className = 'p-4 border border-gray-200 rounded-lg job-card-item';
-                card.innerHTML = `
-    <div class="flex justify-between items-center">
-        <div>
-            <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
-            <p class="text-sm text-gray-600">${report.vehicles.vehicle_name || ''}</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <button onclick="sendToWash(${report.id})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm">
-                Wash
-            </button>
-            <button onclick="markCompletedDirectly(${report.id}, '${report.vehicles.vehicle_no}')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded text-sm">
-                Complete
-            </button>
-        </div>
-    </div>
-`;
-                listContainer.appendChild(card);
-            });
-        }
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        const brandAndModel = `${report.vehicles.vehicle_models.brand || ''} ${report.vehicles.vehicle_models.model || ''}`.trim();
+        card.className = 'p-4 border border-yellow-300 bg-yellow-50 rounded-lg';
+        card.innerHTML = `
+            <div class="flex-grow">
+                <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                <p class="text-sm text-gray-600">${brandAndModel}</p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <button onclick="updateJobStatus(${report.id}, 'Sent To Wash', '${report.vehicles.vehicle_no}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm">
+                    Send for Wash
+                </button>
+                <button onclick="markCompletedDirectly(${report.id}, '${report.vehicles.vehicle_no}')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded text-sm">
+                    Skip & Complete
+                </button>
+            </div>
+        `;
+        listContainer.appendChild(card);
+    });
+}
 		
 		
         
+// Replace the existing function with this complete version
+// Replace the existing function with this complete version
 async function populateCompletedWashJobs() {
-            // ADDED: Guard clause to prevent crash if session is lost
-            if (!currentUser) {
-                console.error("populateCompletedWashJobs: currentUser is null. Aborting.");
-                return showError("Session expired. Please log in again.");
-            }
+    if (!currentUser) return;
+    
+    // THE FIX: Target the new, safe list container and the message element
+    const listContainer = document.getElementById('complete-list');
+    const noJobsMsg = document.getElementById('no-complete-message');
+    
+    if(!listContainer || !noJobsMsg) return console.error("Complete tab elements not found");
 
-            const listContainer = document.getElementById('complete-panel');
-            const noJobsMsg = document.getElementById('no-complete-message');
+    listContainer.innerHTML = ''; // Safely clear only the list
+    noJobsMsg.classList.add('hidden');
+    
+    const { data: reports, error } = await sb.from('reports')
+        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .eq('executive_id', currentUser.id)
+        .eq('status', 'Wash Completed')
+        .order('created_at', { ascending: true });
 
-            listContainer.querySelectorAll('.job-card-item').forEach(card => card.remove());
-            
-            const { data: reports, error } = await sb.from('reports')
-                .select(`id, vehicles!inner(vehicle_no, vehicle_name)`)
-                .eq('executive_id', currentUser.id)
-                .eq('status', 'Wash Completed')
-                .order('created_at', { ascending: true });
+    if (error) return showError('Could not fetch completed wash jobs.');
 
-            if (error) return showError('Could not fetch completed wash jobs.');
+    if (!reports || reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
 
-            if (!reports || reports.length === 0) {
-                noJobsMsg.classList.remove('hidden');
-                return;
-            }
-            noJobsMsg.classList.add('hidden');
-
-            reports.forEach(report => {
-                const card = document.createElement('div');
-                card.className = 'p-4 border border-green-300 bg-green-50 rounded-lg flex justify-between items-center job-card-item';
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
-                        <p class="text-sm text-green-700 font-semibold">Ready for delivery</p>
-                    </div>
-                    <button onclick="updateJobStatus(${report.id}, 'Completed', '${report.vehicles.vehicle_no}')" class="btn-primary !bg-green-600 hover:!bg-green-700 !w-auto !py-1.5 !px-3 text-sm">
-                        <span class="material-symbols-outlined !text-base">check_circle</span> Mark Completed
-                    </button>
-                `;
-                listContainer.appendChild(card);
-            });
-        }
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        const brandAndModel = `${report.vehicles.vehicle_models.brand || ''} ${report.vehicles.vehicle_models.model || ''}`.trim();
+        // THE FIX: The class 'job-card-item' is no longer needed
+        card.className = 'p-4 border border-green-300 bg-green-50 rounded-lg flex justify-between items-center';
+        card.innerHTML = `
+            <div>
+                <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
+                <p class="text-sm text-gray-600">${brandAndModel}</p>
+                <p class="text-sm text-green-700 font-semibold mt-1">Ready for delivery</p>
+            </div>
+            <button onclick="updateJobStatus(${report.id}, 'Completed', '${report.vehicles.vehicle_no}')" class="btn-primary !bg-green-600 hover:!bg-green-700 !w-auto !py-1.5 !px-3 text-sm">
+                <span class="material-symbols-outlined !text-base">check_circle</span> Mark Completed
+            </button>
+        `;
+        listContainer.appendChild(card);
+    });
+}
 
         // ADD NEW FUNCTION: Executive sends a job to the washer
         async function sendToWash(reportId) {
@@ -1913,11 +2257,11 @@ async function populateCompletedWashJobs() {
 
         // --- ADMIN: USER MANAGEMENT ---
 async function renderUserList(role) {
-    const listId = role === 'admin' ? 'admins-list' : (role === 'executive' ? 'executives-list' : 'washers-list');
+    // MODIFIED THIS LINE TO INCLUDE THE NEW INSPECTOR LIST ID
+    const listId = role === 'admin' ? 'admins-list' : (role === 'executive' ? 'executives-list' : (role === 'washer' ? 'washers-list' : 'inspectors-list'));
     const list = document.getElementById(listId);
     list.innerHTML = '';
 
-    // Step 1: Fetch the 'team' column from Supabase
     const { data, error } = await sb.from('users').select('id, username, team').eq('role', role);
     if (error) return showError(`Could not fetch ${role}s.`);
 
@@ -1925,10 +2269,8 @@ async function renderUserList(role) {
         const div = document.createElement('div');
         div.className = 'flex items-center justify-between bg-gray-50 p-3 rounded-lg';
 
-        // Step 2: Create the HTML to display the user and their team
         let userDisplayHtml;
 
-        // Only show the team badge if the user is an executive and has a team assigned
         if (role === 'executive' && user.team) {
             userDisplayHtml = `
                 <div class="flex-grow flex justify-between items-center mr-4">
@@ -1936,11 +2278,9 @@ async function renderUserList(role) {
                     <span class="text-xs font-medium text-gray-700 bg-gray-200 px-2 py-1 rounded-full">${user.team}</span>
                 </div>`;
         } else {
-            // For other roles or executives without a team, just show the username
             userDisplayHtml = `<p class="font-semibold flex-grow mr-4">${user.username}</p>`;
         }
 
-        // Combine the user display with the delete button
         div.innerHTML = `
             ${userDisplayHtml}
             <button onclick="confirmDeletion('user', ${user.id}, '${role}')" class="text-red-500 hover:text-red-700 shrink-0">
@@ -3150,57 +3490,55 @@ async function quickAccessUser(user) {
 
 
 
+
+
+
+// Replace your showUpdateTab function with this simpler version
+function showUpdateTab(tabName) {
+    document.querySelectorAll('#update-tab-container .tab-button').forEach(btn => btn.classList.remove('active-tab'));
+    document.querySelectorAll('#update-tab-container .tab-panel').forEach(panel => panel.classList.add('hidden'));
+
+    const tabMap = {
+        'pending': { btn: 'tab-btn-pending', panel: 'pending-jobs-panel', func: populateNotStartedJobs },
+        'awaiting': { btn: 'tab-btn-awaiting', panel: 'awaiting-response-panel', func: populateAwaitingResponseJobs },
+        'responses': { btn: 'tab-btn-responses', panel: 'responses-received-panel', func: populateCustomerResponseJobs }
+    };
+
+    if (tabMap[tabName]) {
+        document.getElementById(tabMap[tabName].btn).classList.add('active-tab');
+        document.getElementById(tabMap[tabName].panel).classList.remove('hidden');
+        tabMap[tabName].func();
+    }
+}
+
+// Replace your saveVehicleUpdate function to revert to the 'Ongoing' status
 async function saveVehicleUpdate(shouldReset = true) {
-            if (!currentReportId) return showError('No report selected for update.');
+    if (!currentReportId) return showError('No report selected for update.');
 
-            const deliveryDate = document.getElementById('delivery-date').value;
-            if (!deliveryDate) return showError('Please select an expected delivery date.');
+    const deliveryDate = document.getElementById('delivery-date').value;
+    if (!deliveryDate) return showError('Please select an expected delivery date.');
 
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
-            const selectedDate = new Date(deliveryDate);
-            selectedDate.setMinutes(selectedDate.getMinutes() + selectedDate.getTimezoneOffset());
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        try { approvedItems.push(JSON.parse(checkbox.value)); } catch (e) {}
+    });
 
-            if (selectedDate < today) {
-                return showError('The delivery date cannot be in the past. Please select today or a future date.');
-            }
-            
-            const approvedItems = [];
-            document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-                try {
-                    approvedItems.push(JSON.parse(checkbox.value));
-                } catch (e) { console.error("Could not parse approved item from checkbox", checkbox.value); }
-            });
+    const allItemsForApproval = [...originalComplaintsForUpdate, ...newSuggestions];
 
-            const allItemsForApproval = [
-                ...originalComplaintsForUpdate,
-                ...newSuggestions
-            ];
+    const updateData = {
+        complaint: JSON.stringify(originalComplaintsForUpdate),
+        suggested: JSON.stringify(allItemsForApproval),
+        approved: JSON.stringify(approvedItems),
+        status: 'Ongoing', // Reverted to 'Ongoing'
+        expected_delivery: deliveryDate
+    };
+    
+    const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
+    if (error) return showError(`Failed to save update: ${error.message}`);
 
-            const updateData = {
-                complaint: JSON.stringify(originalComplaintsForUpdate),
-                suggested: JSON.stringify(allItemsForApproval),
-                approved: JSON.stringify(approvedItems),
-                expected_delivery: deliveryDate,
-                status: 'Ongoing'
-            };
-
-            const { error } = await sb.from('reports').update(updateData).eq('id', currentReportId);
-            if (error) return showError(`Failed to save update: ${error.message}`);
-
-            showSuccessMessage('Update saved successfully!');
-            
-            if (shouldReset) {
-                // THIS IS THE NEW LOGIC
-                if (document.getElementById('tab-btn-responses').classList.contains('active-tab')) {
-                    // If we saved from the "Responses Received" tab, navigate to the "Close" page.
-                    showExecutiveScreen('due-date-screen');
-                } else {
-                    // Otherwise, just reset the current screen.
-                    resetVehicleUpdateScreen();
-                }
-            }
-        }
+    showSuccessMessage('Update saved successfully!');
+    resetVehicleUpdateScreen();
+}
 
 
                 
@@ -3346,24 +3684,8 @@ async function sendApprovalLink() {
             });
         }
 
-        function showUpdateTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active-tab'));
-            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.add('hidden'));
 
-            if (tabName === 'pending') {
-                document.getElementById('tab-btn-pending').classList.add('active-tab');
-                document.getElementById('pending-jobs-panel').classList.remove('hidden');
-                populateNotStartedJobs();
-            } else if (tabName === 'awaiting') {
-                document.getElementById('tab-btn-awaiting').classList.add('active-tab');
-                document.getElementById('awaiting-response-panel').classList.remove('hidden');
-                populateAwaitingResponseJobs();
-            } else if (tabName === 'responses') {
-                document.getElementById('tab-btn-responses').classList.add('active-tab');
-                document.getElementById('responses-received-panel').classList.remove('hidden');
-                populateCustomerResponseJobs();
-            }
-        }
+
         async function populateCustomerResponseJobs() {
             const listContainer = document.getElementById('customer-response-list');
             const noJobsMsg = document.getElementById('no-customer-response-message');
@@ -3953,38 +4275,42 @@ function resetVehicleUpdateScreen() {
         function showScreen(screenId) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById(screenId).classList.add('active-screen'); }
         
 function showAdminScreen(screenId) {
-            document.querySelectorAll('#admin-screens .admin-screen').forEach(s => s.style.display = 'none');
-            document.getElementById(screenId).style.display = 'block';
-            
-            if (screenId === 'admin-vehicle-management-screen') renderVehicleModelList();
-            if (screenId === 'admin-reports-screen') fetchAndPopulateReports(true);
-            if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
-            if (screenId === 'admin-executive-management-screen') renderUserList('executive');
-            if (screenId === 'admin-admin-management-screen') renderUserList('admin');
-            if (screenId === 'admin-washer-management-screen') renderUserList('washer'); // ADDED
-            if (screenId === 'admin-settings-screen') renderSettingsToggles();
-            
-            showScreen('admin-screens');
-        }
+    document.querySelectorAll('#admin-screens .admin-screen').forEach(s => s.style.display = 'none');
+    document.getElementById(screenId).style.display = 'block';
+    
+    if (screenId === 'admin-vehicle-management-screen') renderVehicleModelList();
+    if (screenId === 'admin-reports-screen') fetchAndPopulateReports(true);
+    if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
+    if (screenId === 'admin-executive-management-screen') renderUserList('executive');
+    if (screenId === 'admin-admin-management-screen') renderUserList('admin');
+    if (screenId === 'admin-washer-management-screen') renderUserList('washer');
+    if (screenId === 'admin-inspector-management-screen') renderUserList('inspector'); // ADDED THIS LINE
+    if (screenId === 'admin-settings-screen') renderSettingsToggles();
+    
+    showScreen('admin-screens');
+}
 
 
+// Replace the existing function with this complete version
 function showExecutiveScreen(screenId) {
-            document.querySelectorAll('#executive-screens .executive-screen').forEach(s => s.style.display = 'none');
-            document.getElementById(screenId).style.display = 'block';
-            setActiveNav(screenId);
+    document.querySelectorAll('#executive-screens .executive-screen').forEach(s => s.style.display = 'none');
+    document.getElementById(screenId).style.display = 'block';
+    setActiveNav(screenId);
 
-            // THE FIX IS ON THE NEXT LINE
-            if (screenId === 'report-screen') clearReportFilters(); // This now clears filters every time the page is viewed.
-            if (screenId === 'due-date-screen') showCloseTab('wash-pending'); 
-            if (screenId === 'job-card-screen') {
-                resetJobCardState();
-            }
-            if (screenId === 'vehicle-update-screen') {
-                resetVehicleUpdateScreen();
-            }
+    if (screenId === 'report-screen') fetchAndPopulateReports(false);
+    
+    // THE FIX: The default tab is now 'ready-to-close'
+    if (screenId === 'due-date-screen') showCloseTab('ready-to-close'); 
+    
+    if (screenId === 'job-card-screen') {
+        resetJobCardState();
+    }
+    if (screenId === 'vehicle-update-screen') {
+        resetVehicleUpdateScreen();
+    }
 
-            showScreen('executive-screens');
-        }
+    showScreen('executive-screens');
+}
 
         function setActiveNav(targetId) {
             const headerTitle = document.getElementById('executive-header-title');
