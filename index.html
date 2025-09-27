@@ -1647,48 +1647,56 @@ async function login() {
         }
 		
 // ADD NEW FUNCTION: Populates the list for the washer
-        async function populateWashList() {
-            const listContainer = document.getElementById('wash-queue-list');
-            const noJobsMsg = document.getElementById('no-wash-jobs-message');
-            listContainer.innerHTML = '';
-            noJobsMsg.classList.add('hidden');
+       
+// THIS IS THE COMPLETE, CORRECTED FUNCTION. REPLACE YOUR OLD ONE WITH THIS.
+async function populateWashList() {
+    const listContainer = document.getElementById('wash-queue-list');
+    const noJobsMsg = document.getElementById('no-wash-jobs-message');
+    listContainer.innerHTML = '';
+    noJobsMsg.classList.add('hidden');
 
-            const query = sb.from('reports')
-                .select(`id, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)), users!inner(username)`)
-                .eq('status', 'Sent To Wash')
-                .order('created_at', { ascending: true });
-            
-            const reports = await handleSupabaseQuery(query, 'Could not fetch wash queue.');
+    // This query is now fixed to be specific about which user to get.
+    const query = sb.from('reports')
+        .select(`
+            id, 
+            vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)), 
+            executive:executive_id(username)
+        `)
+        .eq('status', 'Sent To Wash')
+        .order('created_at', { ascending: true });
+    
+    const reports = await handleSupabaseQuery(query, 'Could not fetch wash queue.');
 
-            // If the helper returned null, an error already occurred and was shown. Just stop.
-            if (reports === null) return;
+    if (reports === null) return;
 
-            if (reports.length === 0) {
-                noJobsMsg.classList.remove('hidden');
-                return;
-            }
+    if (reports.length === 0) {
+        noJobsMsg.classList.remove('hidden');
+        return;
+    }
 
-            reports.forEach(report => {
-                const card = document.createElement('div');
-                const vehicle = report.vehicles;
-                const executive = report.users;
-                const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
+    reports.forEach(report => {
+        const card = document.createElement('div');
+        const vehicle = report.vehicles;
+        // The executive's data is now correctly accessed from 'report.executive'.
+        const executive = report.executive;
+        const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
 
-                card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
-                card.innerHTML = `
-                    <div>
-                        <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
-                        <p class="text-sm text-gray-600 mt-1">${brandAndModel}</p>
-                        <p class="text-xs text-gray-500 mt-1">From: ${executive.username}</p>
-                    </div>
-                    <button onclick="completeWash(${report.id})" class="btn-primary !w-auto flex-shrink-0 !py-2 !px-3">
-                        <span class="material-symbols-outlined">check_circle</span>
-                        <span>Wash Completed</span>
-                    </button>
-                `;
-                listContainer.appendChild(card);
-            });
-        }
+        card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
+        // Added optional chaining (?.) to prevent errors if the executive is not found.
+        card.innerHTML = `
+            <div>
+                <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
+                <p class="text-sm text-gray-600 mt-1">${brandAndModel}</p>
+                <p class="text-xs text-gray-500 mt-1">From: ${executive?.username || 'N/A'}</p>
+            </div>
+            <button onclick="completeWash(${report.id})" class="btn-primary !w-auto flex-shrink-0 !py-2 !px-3">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Wash Completed</span>
+            </button>
+        `;
+        listContainer.appendChild(card);
+    });
+}
 
         // ADD NEW FUNCTION: Washer marks a job as done
         async function completeWash(reportId) {
