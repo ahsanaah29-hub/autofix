@@ -10,36 +10,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
+    <!-- FIXED: Removed duplicate Tailwind script -->
     <script src="https://cdn.tailwindcss.com"></script>
-<!-- Use the full CDN with all plugins -->
-<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.12.1/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.12.1/polyfill.min.js"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style type="text/tailwindcss">
-	/* Add at the very top of your  tag */
-.screen { display: none !important; }
-.active-screen { display: block !important; }
+        /* Critical: Ensure screens toggle correctly */
+        .screen { display: none !important; }
+        .active-screen { display: block !important; }
+        
         :root {
-            --primary-color: #2563eb; /* Blue 600 */
-            --primary-hover: #1d4ed8; /* Blue 700 */
-            --background-color: #f9fafb; /* Gray 50 */
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --background-color: #f9fafb;
             --card-background: #ffffff;
-            --border-color: #e5e7eb; /* Gray 200 */
-            --text-primary: #111827; /* Gray 900 */
-            --text-secondary: #6b7280; /* Gray 500 */
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
             --text-on-primary: #ffffff;
         }
+        
         body {
             font-family: 'Manrope', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
         }
-        .screen { display: none; }
-        .active-screen { display: block; }
+        
         .modal-hidden { display: none; }
         
         /* Component Styles */
@@ -70,56 +69,32 @@
 
         /* Voice Note Button Animation */
         @keyframes pulse-ring {
-          0% {
-            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
-          }
-          70% {
-            box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
-          }
+          0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+          70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
         }
         .record-button.is-recording {
             @apply bg-blue-600 hover:bg-blue-700 text-white;
             animation: pulse-ring 1.5s infinite;
         }
 
-        /* Styles for the accordion list in Due Date page */
+        /* Accordion and Print Styles */
         .due-date-details {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
         }
-        .due-date-item.expanded .due-date-details {
-            max-height: 500px; /* Large enough to fit content */
-        }
-        .due-date-item.expanded .due-date-header .material-symbols-outlined {
-            transform: rotate(180deg);
-        }
-
-		/* Styles for Printing */
-        .printable-area {
-            display: none;
-        }
-		
+        .due-date-item.expanded .due-date-details { max-height: 500px; }
+        .due-date-item.expanded .due-date-header .material-symbols-outlined { transform: rotate(180deg); }
+        .printable-area { display: none; }
+        
         /* Tab Styles */
-        .tab-button {
-            @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
-        }
-        .tab-button.active-tab {
-            @apply border-blue-600 text-blue-600;
-        }
+        .tab-button { @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700; }
+        .tab-button.active-tab { @apply border-blue-600 text-blue-600; }
 
         /* Dropdown Menu Styles */
-        .menu-container {
-            position: relative;
-        }
-        .menu-button {
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
+        .menu-container { position: relative; }
+        .menu-button { background: none; border: none; cursor: pointer; }
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -131,9 +106,7 @@
             z-index: 20;
             width: 120px;
         }
-        .menu-container:hover .dropdown-menu {
-            display: block;
-        }
+        .menu-container:hover .dropdown-menu { display: block; }
         .dropdown-item {
             display: flex;
             align-items: center;
@@ -143,20 +116,12 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
         }
-        .dropdown-item:hover {
-            background-color: #f3f4f6; /* Gray 100 */
-        }
-        .dropdown-item .material-symbols-outlined {
-            font-size: 1.25rem;
-        }
+        .dropdown-item:hover { background-color: #f3f4f6; }
+        .dropdown-item .material-symbols-outlined { font-size: 1.25rem; }
 
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .printable-area, .printable-area * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            .printable-area, .printable-area * { visibility: visible; }
             .printable-area {
                 display: block;
                 position: absolute;
