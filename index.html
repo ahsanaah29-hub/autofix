@@ -2,29 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Replace your existing viewport meta tag with: -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AutoFix Application</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-	<script>
-if (typeof tailwind === "undefined") {
-  const link = document.createElement("link");
-  link.rel = "stylesheet";
-  link.href = "https://unpkg.com/tailwindcss@3.3.3/dist/tailwind.min.css";
-  document.head.appendChild(link);
-}
+<!-- Add this BEFORE the Tailwind script tag: -->
+<script>
+    // Polyfill for older browsers
+    if (!window.ResizeObserver) {
+        window.ResizeObserver = class ResizeObserver {
+            constructor(callback) {}
+            observe() {}
+            unobserve() {}
+            disconnect() {}
+        };
+    }
 </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style type="text/tailwindcss">
+	* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+	}
+
+	body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+	}
         :root {
             --primary-color: #2563eb; /* Blue 600 */
             --primary-hover: #1d4ed8; /* Blue 700 */
@@ -170,6 +183,28 @@ if (typeof tailwind === "undefined") {
     </style>
 </head>
 <body>
+
+<!-- ADD THIS ENTIRE BLOCK HERE: -->
+<div id="browser-warning" style="display:none; position: fixed; top: 0; left: 0; right: 0; background: #f59e0b; color: white; padding: 16px; text-align: center; z-index: 9999;">
+    <strong>Compatibility Issue:</strong> This browser may not support all features. Please use Chrome, Firefox, or Safari.
+</div>
+
+<script>
+(function() {
+    const isCompatible = 
+        window.Promise && 
+        window.fetch && 
+        Array.prototype.includes &&
+        Object.assign &&
+        window.sessionStorage;
+    
+    if (!isCompatible) {
+        document.getElementById('browser-warning').style.display = 'block';
+    }
+})();
+</script>
+
+
     <div id="login-screen" class="screen active-screen">
         <div class="flex flex-col min-h-screen justify-center items-center p-4 bg-gray-50">
             <div class="w-full max-w-sm">
@@ -321,9 +356,8 @@ if (typeof tailwind === "undefined") {
                     <div><label for="new-admin-username" class="form-label">Username <span class="text-red-500">*</span></label><input id="new-admin-username" class="form-input" placeholder="Enter Username" required /></div>
                     <div><label for="new-admin-pass" class="form-label">Password <span class="text-red-500">*</span></label><input id="new-admin-pass" class="form-input" placeholder="Enter Password" type="password" required /></div>
                     <button type="submit" class="btn-primary"><span class="material-symbols-outlined">add</span>Create Admin</button></form></div>
-                <div class="card space-y-3"><h2 class="text-xl font-bold">Admin List</h2><div id="admins-list"></div></div>
+<div class="card space-y-3"><h2 class="text-xl font-bold">Admin List</h2><div id="admins-list"></div></div>
             </main>
-			</div> 
 			<div id="admin-settings-screen" class="admin-screen" style="display: none;">
             <header class="app-header">
                 <div class="app-header-content">
@@ -495,76 +529,72 @@ if (typeof tailwind === "undefined") {
                     </div>
                 </div><div class="mt-6"><button type="submit" class="btn-primary"><span class="material-symbols-outlined">save</span>Save Vehicle</button></div></form></div>
                 
-                <div id="new-complaint-section" class="card hidden">
-                    <h2 class="text-xl font-bold mb-4">Register New Complaint(s)</h2>
-                    <div class="border-t pt-4 space-y-4">
-                        <div id="complaints-list" class="space-y-2">
-                            <p class="text-sm text-gray-500">No complaints added yet.</p>
-                        </div>
-                        <!-- REPLACE this div inside #new-complaint-section -->
-<!-- New simplified input for the Job Card page -->
-<div class="flex items-center gap-2">
-    <input id="complaint-input" type="text" class="form-input flex-grow" placeholder="e.g., Engine noise on startup">
-    <button type="button" onclick="addComplaint()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
-        <span class="material-symbols-outlined">add</span>
-    </button>
-</div>
-                        
-                        <div class="mt-4 pt-4 border-t">
-                          <label class="form-label">Mark Damages on Vehicle</label>
-                          <div class="relative inline-block border border-gray-300 rounded-lg overflow-hidden">
-							<img src="https://thumbs.dreamstime.com/b/car-line-art-ilustration-vector-car-line-art-ilustration-vector-car-line-art-ilustration-vector-118291586.jpg?w=768" id="carImage" alt="Car Outline" class="block w-full max-w-sm bg-white" crossorigin="anonymous"/>
-							<canvas id="damageCanvas" class="absolute top-0 left-0"></canvas>
-							<canvas id="checkCanvas" class="hidden"></canvas>
-						  </div>
-                          <p class="text-sm text-gray-500 mt-2">Click on the car image to mark scratches/damages.</p>
-                          <div class="flex items-center gap-3 mt-3">
-    <!-- MODIFIED "Undo" BUTTON -->
-    <button type="button" onclick="undoLastMark()" class="inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors">
-        <span class="material-symbols-outlined !text-base">undo</span>
-        <span>Undo Last</span>
-    </button>
-    <!-- MODIFIED "Clear" BUTTON -->
-    <button type="button" onclick="clearDamageCanvas()" class="inline-flex items-center gap-1 rounded-lg bg-red-100 text-red-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-red-200 transition-colors">
-        <span class="material-symbols-outlined !text-base">delete_sweep</span>
-        <span>Clear All</span>
-    </button>
-</div>
-                        
-                        <!-- The updated section with smaller, blue buttons -->
-<div class="mt-4 pt-4 border-t space-y-3">
-    <label class="form-label">Attach Photos & Voice Note</label>
-    <!-- Photo Upload -->
-    <div>
-        <input type="file" id="photo-upload-input" multiple accept="image/*" class="hidden" onchange="handlePhotoUploads(event)">
-        <!-- MODIFIED BUTTON -->
-        <button type="button" onclick="document.getElementById('photo-upload-input').click()" class="inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors">
-            <span class="material-symbols-outlined !text-base">add_a_photo</span>
-            <span>Add Photos</span>
-        </button>
-        <div id="photo-previews" class="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
-    </div>
-    <!-- Voice Note -->
-    <div>
-        <div class="flex items-center gap-3">
-            <!-- MODIFIED BUTTON -->
-            <button id="record-toggle-btn" type="button" onclick="handleRecordingToggle()" class="record-button inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors duration-300">
-                <span id="record-icon" class="material-symbols-outlined !text-base">mic</span>
-                <span id="record-text">Record Note</span>
+<div id="new-complaint-section" class="card hidden">
+    <h2 class="text-xl font-bold mb-4">Register New Complaint(s)</h2>
+
+    <div class="border-t pt-4 space-y-4">
+        
+        <div id="complaints-list" class="space-y-2">
+            <p class="text-sm text-gray-500">No complaints added yet.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <input id="complaint-input" type="text" class="form-input flex-grow" placeholder="e.g., Engine noise on startup">
+            <button type="button" onclick="addComplaint()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
+                <span class="material-symbols-outlined">add</span>
             </button>
         </div>
-        <div id="audio-playback" class="mt-3"></div>
-         <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
+        
+        <div id="damage-marking-section">
+            <div class="mt-4 pt-4 border-t">
+                <label class="form-label">Mark Damages on Vehicle</label>
+                <div class="relative inline-block border border-gray-300 rounded-lg overflow-hidden">
+                    <img src="https://thumbs.dreamstime.com/b/car-line-art-ilustration-vector-car-line-art-ilustration-vector-car-line-art-ilustration-vector-118291586.jpg?w=768" id="carImage" alt="Car Outline" class="block w-full max-w-sm bg-white" crossorigin="anonymous"/>
+                    <canvas id="damageCanvas" class="absolute top-0 left-0"></canvas>
+                    <canvas id="checkCanvas" class="hidden"></canvas>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Click on the car image to mark scratches/damages.</p>
+                <div class="flex items-center gap-3 mt-3">
+                    <button type="button" onclick="undoLastMark()" class="inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors">
+                        <span class="material-symbols-outlined !text-base">undo</span>
+                        <span>Undo Last</span>
+                    </button>
+                    <button type="button" onclick="clearDamageCanvas()" class="inline-flex items-center gap-1 rounded-lg bg-red-100 text-red-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-red-200 transition-colors">
+                        <span class="material-symbols-outlined !text-base">delete_sweep</span>
+                        <span>Clear All</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="media-upload-section">
+            <div class="mt-4 pt-4 border-t space-y-3">
+                <label class="form-label">Attach Photos & Voice Note</label>
+                <div>
+                    <input type="file" id="photo-upload-input" multiple accept="image/*" class="hidden" onchange="handlePhotoUploads(event)">
+                    <button type="button" onclick="document.getElementById('photo-upload-input').click()" class="inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors">
+                        <span class="material-symbols-outlined !text-base">add_a_photo</span>
+                        <span>Add Photos</span>
+                    </button>
+                    <div id="photo-previews" class="mt-3 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3">
+                        <button id="record-toggle-btn" type="button" onclick="handleRecordingToggle()" class="record-button inline-flex items-center gap-1 rounded-lg bg-blue-100 text-blue-700 font-bold py-1.5 px-3 text-xs shadow-sm hover:bg-blue-200 transition-colors duration-300">
+                            <span id="record-icon" class="material-symbols-outlined !text-base">mic</span>
+                            <span id="record-text">Record Note</span>
+                        </button>
+                    </div>
+                    <div id="audio-playback" class="mt-3"></div>
+                    <p id="recording-status" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+            </div>
+        </div>
+		    <div class="mt-6 pt-4 border-t">
+        <button onclick="saveComplaints()" class="btn-primary"><span class="material-symbols-outlined">add_task</span>Save Complaints</button>
+    </div>
     </div>
 </div>
-
-                        <div class="mt-6">
-                            <button onclick="saveComplaints()" class="btn-primary"><span class="material-symbols-outlined">add_task</span>Save Complaints & Media</button>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+</div>
 
 <div id="vehicle-update-screen" class="executive-screen" style="display: none;">
     <main class="app-main">
@@ -613,32 +643,37 @@ if (typeof tailwind === "undefined") {
         
         <div id="customer-complaints-update-section">
             <h3 class="text-base font-bold mb-2">Customer's Registered Complaints</h3>
-            <p class="text-xs text-gray-500 -mt-2 mb-3">Add the estimated cost for each complaint registered by the customer.</p>
             <div id="customer-complaints-list" class="space-y-2">
-                </div>
+                <p class="text-sm text-gray-500">No original complaints were registered.</p>
+            </div>
         </div>
         
-        <div class="border-t pt-4">
-            <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
-                
-                <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
-                
-                <div class="flex items-center justify-end gap-2 shrink-0">
-                    <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
-                    <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost" oninput="updateApproxTotalInRealTime()">
-                    <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
-                        <span class="material-symbols-outlined">add</span>
-                    </button>
-                </div>
-            </div>
-            <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
+        <!-- The new, cleaner layout for adding mechanic suggestions -->
+<!-- This new layout ensures the repair input is always wide enough -->
+<div  class="border-t pt-4">
+    <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
+    <!-- This container will now stack its children vertically on small screens -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
+        
+        <!-- The complaint input will take full width on all screen sizes -->
+        <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
+        
+        <!-- This group contains the amount and button, and will appear below the input on small screens -->
+        <div class="flex items-center justify-end gap-2 shrink-0">
+            <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
+            <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost">
+            <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
+                <span class="material-symbols-outlined">add</span>
+            </button>
         </div>
+    </div>
+    <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
+</div>
 
         <div>
             <h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved suggestions</h3>
             <div id="customer-approval-list" class="space-y-2">
-                <p class="text-sm text-gray-500">Add suggestions to see them here for approval.</p>
+                <p class="text-sm text-gray-500">Add mechanic suggestions above to see them here for approval.</p>
             </div>
         </div>
         
@@ -647,6 +682,8 @@ if (typeof tailwind === "undefined") {
             <p id="approx-total-amount" class="text-2xl font-bold text-gray-800">₹ 0.00</p>
             <p class="text-xs text-gray-500">This is an estimated total based on all customer complaints and suggested repairs.</p>
         </div>
+
+        
 
         <div>
             <label for="delivery-date" class="form-label border-t pt-4">Expected Delivery Date <span class="text-red-500">*</span></label>
@@ -658,7 +695,9 @@ if (typeof tailwind === "undefined") {
                 <span class="material-symbols-outlined">save</span>Save Update
             </button>
             <button type="button" id="send-whatsapp-btn" onclick="sendApprovalLink()" class="btn-whatsapp">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path>
+                </svg>
                 Send Approval via WhatsApp
             </button>
         </div>
@@ -870,10 +909,14 @@ if (typeof tailwind === "undefined") {
         </div>
 
         <div class="pt-2">
-    <h4 class="font-bold text-gray-700 mb-2">Customer Approved Repairs</h4>
-    <div id="inspector-modal-approved-list" class="space-y-1 text-sm text-gray-600 bg-green-50 p-3 rounded-lg">
+            <h4 class="font-bold text-gray-700 mb-2">Customer Complaints</h4>
+            <div id="inspector-modal-complaints" class="space-y-1 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg"></div>
         </div>
-</div>
+        
+        <div class="pt-2">
+            <h4 class="font-bold text-gray-700 mb-2">Mechanic's Suggested Repairs</h4>
+            <div id="inspector-modal-suggestions" class="space-y-1 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"></div>
+        </div>
 
         <div id="inspector-modal-actions" class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t">
             </div>
@@ -1269,10 +1312,33 @@ if (typeof tailwind === "undefined") {
 </div>
     
     <script>
+	
+    // ADD THESE TWO BLOCKS FIRST, BEFORE ANY OTHER CODE:
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; background: red; color: white; padding: 10px; z-index: 99999; font-size: 12px; max-height: 200px; overflow: auto;';
+        errorDiv.innerHTML = `<strong>Error:</strong> ${msg}<br><small>Line: ${lineNo}, Column: ${columnNo}</small>`;
+        document.body.appendChild(errorDiv);
+        return false;
+    };
+
+    console.log('Browser Info:', {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine
+    });
         const { createClient } = supabase;
         const supabaseUrl = 'https://gfylsjfljnwyomfouwvs.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmeWxzamZsam53eW9tZm91d3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MDc5MTYsImV4cCI6MjA3Mjk4MzkxNn0.hMvLvCDVaFtq0rXToHGOJPSFe-QnJ6_S-MYsI0d5zOs';
-        const sb = createClient(supabaseUrl, supabaseKey);
+        let sb;
+try {
+    const { createClient } = supabase;
+    sb = createClient(supabaseUrl, supabaseKey);
+} catch (error) {
+    console.error('Supabase initialization failed:', error);
+    alert('App initialization failed. Please reload the page.');
+}
 
         // --- Google Drive API Configuration ---
         const CLIENT_ID = '903962440902-olb0km18p980o04na5hi4ah4f6lanms1.apps.googleusercontent.com'; // Paste your OAuth 2.0 Client ID here
@@ -1312,26 +1378,36 @@ if (typeof tailwind === "undefined") {
 		
 
         // --- Google API Client Loader Functions ---
-        function gapiLoaded() {
-            gapi.load('client', initializeGapiClient);
-        }
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (resp) => { // Centralized callback
-                    if (resp.error !== undefined) {
-                        showError('Authorization failed. Please try again.');
-                        throw (resp);
-                    }
-                    updateAuthUI(true);
-                    showSuccessMessage('Google Drive access authorized.');
-                },
-            });
-            gisInited = true;
-            checkInitialAuth();
-        }
+        // REPLACE your gapiLoaded and gisLoaded functions with:
+function gapiLoaded() {
+    try {
+        gapi.load('client', initializeGapiClient);
+    } catch (error) {
+        console.error('GAPI load failed:', error);
+        document.querySelectorAll('[id*="gdrive"]').forEach(el => el.style.display = 'none');
+    }
+}
 
+function gisLoaded() {
+    try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: (resp) => {
+                if (resp.error !== undefined) {
+                    showError('Authorization failed. Please try again.');
+                    throw (resp);
+                }
+                updateAuthUI(true);
+                showSuccessMessage('Google Drive access authorized.');
+            },
+        });
+        gisInited = true;
+        checkInitialAuth();
+    } catch (error) {
+        console.error('GIS load failed:', error);
+    }
+}
 
 
         // --- Global State ---
@@ -1599,8 +1675,10 @@ if (typeof tailwind === "undefined") {
 		
 
 function handleCheckboxChange(checkbox) {
+    // This helper function re-renders the list to show/hide the materials input correctly.
     const reRenderList = () => {
         const approvedItems = [];
+        // Get the current list of approved items directly from the checkboxes
         document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(cb => {
             try { 
                 approvedItems.push(JSON.parse(cb.value)); 
@@ -1608,6 +1686,7 @@ function handleCheckboxChange(checkbox) {
                 console.error("Error parsing checkbox value on change:", e);
             }
         });
+        // Call the main render function with the current state and the new approved list
         renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
     };
 
@@ -1618,16 +1697,19 @@ function handleCheckboxChange(checkbox) {
 
         confirmBtn.onclick = () => {
             hideModal('change-confirmation-modal');
-            reRenderList();
+            reRenderList(); // Re-render the list after user confirmation
         };
         cancelBtn.onclick = () => {
-            checkbox.checked = !checkbox.checked;
+            checkbox.checked = !checkbox.checked; // Revert the checkbox if the user cancels
             hideModal('change-confirmation-modal');
         };
     } else {
-        reRenderList();
+        reRenderList(); // If customer hasn't approved yet, just re-render directly
     }
 }
+
+
+
 
         function handleRecordingToggle() {
             if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -1728,6 +1810,9 @@ function handleCheckboxChange(checkbox) {
             return cleaned;
         };
 
+
+
+// REPLACE this entire function
 async function login() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -1744,20 +1829,35 @@ async function login() {
     }
     
     currentUser = data;
-    sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
+    // IMPORTANT: We now set the session *after* the feature check passes.
     
+    await fetchAndApplyAppSettings();
+
     if (currentUser.role === 'admin') {
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
         showAdminScreen('admin-dashboard-screen');
     } else if (currentUser.role === 'executive') {
         document.getElementById('profile-username').textContent = currentUser.username;
         document.getElementById('profile-role').textContent = currentUser.role;
-        await fetchAndApplyAppSettings(); 
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
         showExecutiveScreen('job-card-screen');
         setTimeout(checkInitialAuth, 1000);
     } else if (currentUser.role === 'washer') {
+        if (!appSettings.feature_wash_module) {
+            // This now logs the user out, clearing the invalid attempt.
+            logout();
+            return showError('Wash module is not enabled for this account.');
+        }
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
         showScreen('washer-screen');
         populateWashList();
-    } else if (currentUser.role === 'inspector') { // ADDED THIS BLOCK
+    } else if (currentUser.role === 'inspector') {
+        if (!appSettings.feature_inspection_module) {
+            // This now logs the user out, clearing the invalid attempt.
+            logout();
+            return showError('Inspection module is not enabled for this account.');
+        }
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser)); 
         showScreen('inspector-screen');
         populateInspectionQueue();
     } else {
@@ -1765,11 +1865,57 @@ async function login() {
     }
     showSuccessMessage(`Welcome, ${currentUser.username}!`);
 }
+
+
+
+// Helper function to determine the next status in the workflow
+function getNextWorkflowStatus(currentStatus) {
+    const hasInspection = appSettings.feature_inspection_module === true;
+    const hasWash = appSettings.feature_wash_module === true;
+
+    // Map out the workflow based on enabled features
+    if (currentStatus === 'Ongoing') {
+        // Job is ready to move forward
+        if (hasInspection) {
+            return 'pending_inspection';
+        } else if (hasWash) {
+            return 'Sent To Wash';
+        } else {
+            return 'Completed';
+        }
+    }
+
+    if (currentStatus === 'inspection_approved') {
+        if (hasWash) {
+            return 'Sent To Wash';
+        } else {
+            return 'Completed';
+        }
+    }
+
+    if (currentStatus === 'Wash Completed') {
+        return 'Completed';
+    }
+
+    // Default: return the same status if we can't determine next step
+    return currentStatus;
+}
+
+// Helper function to get user-friendly button text for next action
+function getNextActionLabel(currentStatus) {
+    const nextStatus = getNextWorkflowStatus(currentStatus);
+    
+    if (nextStatus === 'pending_inspection') return 'Send for Inspection';
+    if (nextStatus === 'Sent To Wash') return 'Send for Wash';
+    if (nextStatus === 'Completed') return 'Mark Completed';
+    
+    return 'Next Step';
+}
+
+
 		
 // ADD NEW FUNCTION: Populates the list for the washer
 // REPLACE this function
-// REPLACE your existing populateWashList function with this corrected version
-
 async function populateWashList() {
     const listContainer = document.getElementById('wash-queue-list');
     const noJobsMsg = document.getElementById('no-wash-jobs-message');
@@ -1784,29 +1930,26 @@ async function populateWashList() {
         `)
         .eq('status', 'Sent To Wash')
         .order('created_at', { ascending: true });
-
     const reports = await handleSupabaseQuery(query, 'Could not fetch wash queue.');
     if (reports === null) return;
     if (reports.length === 0) {
         noJobsMsg.classList.remove('hidden');
         return;
     }
-
     reports.forEach(report => {
         const card = document.createElement('div');
         const vehicle = report.vehicles;
         const executive = report.executive;
+        const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
         
-        // **THE FIX IS HERE:** This line now safely checks if 'vehicle_models' exists.
-        // If it doesn't, it will show an empty string instead of crashing.
-        const brandAndModel = `${vehicle.vehicle_models?.brand || ''} ${vehicle.vehicle_models?.model || ''}`.trim();
-        
+        // THE FIX: Added classes to make the card stack vertically on mobile
         card.className = 'p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
         
+        // THE FIX: Added responsive width to the button and aligned text left on mobile
         card.innerHTML = `
             <div class="w-full sm:w-auto text-left">
                 <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
-                <p class="text-sm text-gray-600 mt-1">${brandAndModel || 'Brand/Model not specified'}</p>
+                <p class="text-sm text-gray-600 mt-1">${brandAndModel}</p>
                 <p class="text-xs text-gray-500 mt-1">From: ${executive?.username || 'N/A'}</p>
             </div>
             <button onclick="completeWash(${report.id})" class="btn-primary w-full sm:w-auto flex-shrink-0 !py-2 !px-3">
@@ -1911,8 +2054,8 @@ function showCloseTab(tabName) {
     if (tabName === 'complete') populateCompletedWashJobs();
 }
 
-// Add this new function to power the "Ready to Close" tab
-// REPLACE this function
+// REPLACE this entire function
+// REPLACE this entire function
 async function populateReadyToCloseJobs() {
     if (!currentUser) return;
     const listContainer = document.getElementById('ready-to-close-list');
@@ -1926,9 +2069,7 @@ async function populateReadyToCloseJobs() {
     const { data: reports, error } = await sb.from('reports')
         .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
-        .eq('status', 'Ongoing')
-        .not('approved', 'is', null)
-        .neq('approved', '[]');
+        .eq('status', 'Ongoing');
 
     if (error) return showError('Could not fetch ready jobs.');
 
@@ -1939,8 +2080,34 @@ async function populateReadyToCloseJobs() {
 
     reports.forEach(report => {
         const card = document.createElement('div');
-        // THE FIX: Added optional chaining (?.) to safely access brand and model
         const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
+        
+        // --- NEW LOGIC TO BUILD MULTIPLE BUTTONS ---
+        let buttonsHtml = '';
+        const hasInspection = appSettings.feature_inspection_module === true;
+        const hasWash = appSettings.feature_wash_module === true;
+
+        if (hasInspection) {
+            buttonsHtml += `
+                <button onclick="updateJobStatus(${report.id}, 'pending_inspection', '${report.vehicles.vehicle_no}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
+                    Send for Inspection
+                </button>`;
+        }
+        
+        if (hasWash) {
+            const washButtonLabel = hasInspection ? 'Skip & Wash' : 'Send for Wash';
+            buttonsHtml += `
+                <button onclick="updateJobStatus(${report.id}, 'Sent To Wash', '${report.vehicles.vehicle_no}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
+                    ${washButtonLabel}
+                </button>`;
+        }
+
+        if (!hasInspection && !hasWash) {
+            buttonsHtml += `
+                <button onclick="updateJobStatus(${report.id}, 'Completed', '${report.vehicles.vehicle_no}')" class="btn-primary !py-1.5 !px-3 text-sm w-full">
+                    Mark Completed
+                </button>`;
+        }
         
         card.className = 'p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
         card.innerHTML = `
@@ -1949,12 +2116,7 @@ async function populateReadyToCloseJobs() {
                 <p class="text-sm text-gray-600">${brandAndModel}</p>
             </div>
             <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-shrink-0">
-                <button onclick="updateJobStatus(${report.id}, 'pending_inspection', '${report.vehicles.vehicle_no}')" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
-                    Send for Inspection
-                </button>
-                <button onclick="updateJobStatus(${report.id}, 'Sent To Wash', '${report.vehicles.vehicle_no}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
-                    Skip & Wash
-                </button>
+                ${buttonsHtml}
             </div>
         `;
         listContainer.appendChild(card);
@@ -1971,31 +2133,44 @@ function populateDueDateScreen() {
 		
 
 // REPLACE this function
-// REPLACE this entire function
 function showInspectionDetails(report) {
     document.getElementById('inspector-modal-vehicle-no').textContent = report.vehicles.vehicle_no;
     document.getElementById('inspector-modal-executive').textContent = report.executive?.username || 'N/A';
 
-    const approvedListContainer = document.getElementById('inspector-modal-approved-list');
-    approvedListContainer.innerHTML = ''; // Clear previous content
-
-    const approvedItems = JSON.parse(report.approved || '[]');
-
-    if (approvedItems && approvedItems.length > 0) {
+    const complaintsList = document.getElementById('inspector-modal-complaints');
+    complaintsList.innerHTML = '';
+    const complaints = JSON.parse(report.complaint || '[]');
+    if (complaints.length > 0) {
         const ul = document.createElement('ul');
         ul.className = 'list-disc list-inside space-y-1';
-        approvedItems.forEach(item => {
+        complaints.forEach(c => {
             const li = document.createElement('li');
-            // Display the text and amount for each approved item
-            li.textContent = `${item.text} (₹${(item.amount || 0).toFixed(2)})`;
+            li.textContent = c.text || c;
             ul.appendChild(li);
         });
-        approvedListContainer.appendChild(ul);
+        complaintsList.appendChild(ul);
     } else {
-        approvedListContainer.innerHTML = '<p class="italic">No services were approved by the customer for this job.</p>';
+        complaintsList.innerHTML = '<p class="italic">No complaints registered.</p>';
+    }
+
+    const suggestionsList = document.getElementById('inspector-modal-suggestions');
+    suggestionsList.innerHTML = '';
+    const suggestions = JSON.parse(report.suggested || '[]');
+     if (suggestions.length > 0) {
+        const ul = document.createElement('ul');
+        ul.className = 'list-disc list-inside space-y-1';
+        suggestions.forEach(s => {
+            const li = document.createElement('li');
+            li.textContent = `${s.text} (₹${s.amount || 0})`;
+            ul.appendChild(li);
+        });
+        suggestionsList.appendChild(ul);
+    } else {
+        suggestionsList.innerHTML = '<p class="italic">No mechanic suggestions added yet.</p>';
     }
 
     const actionsContainer = document.getElementById('inspector-modal-actions');
+    // THE FIX: Added w-full sm:w-auto to make buttons responsive
     actionsContainer.innerHTML = `
         <button onclick="handleInspection('${report.id}', 'rejected', '${report.vehicles.vehicle_no}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">
             Reject
@@ -2007,6 +2182,7 @@ function showInspectionDetails(report) {
     
     showModal('inspector-details-modal');
 }
+
 
 // Add this new function anywhere in your <script> tag
 // REPLACE this function
@@ -2108,17 +2284,15 @@ async function resendForInspection(reportId) {
 
 // New functions for the inspector workflow
 // REPLACE this function
-// REPLACE this entire function to fix the login error
 async function populateInspectionQueue() {
     const listContainer = document.getElementById('inspection-queue-list');
     const noJobsMsg = document.getElementById('no-inspection-jobs-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // THE FIX: The 'query' variable is now correctly defined only once.
-    // This query now correctly selects 'approved' and 'inspection_remarks' for the modal.
+    // THE FIX: Added 'inspection_remarks' to the query
     const query = sb.from('reports')
-        .select(`id, complaint, suggested, approved, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
+        .select(`id, complaint, suggested, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
         .eq('status', 'pending_inspection')
         .order('created_at', { ascending: true });
     
@@ -2132,6 +2306,7 @@ async function populateInspectionQueue() {
         const card = document.createElement('div');
         card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
 
+        // THE FIX: Check for remarks and create the badge if they exist
         const isReinspection = report.inspection_remarks && report.inspection_remarks.trim() !== '';
         const reinspectionBadge = isReinspection 
             ? '<span class="ml-2 text-xs font-semibold text-orange-800 bg-orange-200 px-2 py-0.5 rounded-full">Re-inspection</span>' 
@@ -2222,8 +2397,7 @@ async function confirmInspection(reportId, outcome) {
 
 
 
-// REPLACE this function
-// REPLACE this function
+// REPLACE this entire function
 async function populateWashPendingJobs() {
     if (!currentUser) return;
     const listContainer = document.getElementById('wash-pending-list');
@@ -2248,26 +2422,26 @@ async function populateWashPendingJobs() {
 
     reports.forEach(report => {
         const card = document.createElement('div');
-        // THE FIX: Added optional chaining (?.)
         const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
         
         if (report.status === 'inspection_approved') {
+            // --- NEW: Get the intelligent next step after inspection ---
+            const nextStatus = getNextWorkflowStatus('inspection_approved');
+            const nextLabel = getNextActionLabel('inspection_approved');
+
             card.className = 'p-4 border border-yellow-300 bg-yellow-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
             card.innerHTML = `
                 <div class="w-full text-left">
                     <p class="font-bold text-gray-800">${report.vehicles.vehicle_no}</p>
                     <p class="text-sm text-gray-600">${brandAndModel}</p>
                 </div>
-                <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-shrink-0">
-                    <button onclick="updateJobStatus(${report.id}, 'Sent To Wash', '${report.vehicles.vehicle_no}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
-                        Send for Wash
-                    </button>
-                    <button onclick="markCompletedDirectly(${report.id}, '${report.vehicles.vehicle_no}')" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1.5 px-3 rounded text-sm w-full sm:w-auto">
-                        Skip & Complete
+                <div class="flex items-center gap-2 w-full sm:w-auto flex-shrink-0">
+                     <button onclick="updateJobStatus(${report.id}, '${nextStatus}', '${report.vehicles.vehicle_no}')" class="btn-primary !py-1.5 !px-3 text-sm w-full">
+                        ${nextLabel}
                     </button>
                 </div>
             `;
-        } else {
+        } else { // Status is 'Sent To Wash'
             card.className = 'p-4 border border-blue-300 bg-blue-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
             card.innerHTML = `
                 <div class="w-full text-left">
@@ -2425,6 +2599,8 @@ async function renderUserList(role) {
     });
 }
 
+
+
 async function addUser(role) {
     const usernameInputId = `new-${role}-username`;
     const passwordInputId = `new-${role}-pass`;
@@ -2435,45 +2611,74 @@ async function addUser(role) {
 
     if (!username || !password) return showError('Username and password are required.');
 
-    const userData = { username, password, role };
-    
-    if (role === 'executive') {
-        const team = document.getElementById('new-exec-team').value;
-        if (!team) return showError('Please select a team for the executive.');
-        userData.team = team;
-    }
+    try {
+        // 1. Check the locally synced user limits
+        const { data: limitData, error: limitError } = await sb
+            .from('app_limits')
+            .select('limit')
+            .eq('role', role)
+            .single();
 
-    const { error } = await sb.from('users').insert(userData);
-    if (error) return showError(`Could not create ${role}: ${error.message}`);
-    
-    showSuccessMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created.`);
-    document.getElementById(formId).reset();
-    renderUserList(role);
+        // Ignore "no rows found" error, as limit might not be set
+        if (limitError && limitError.code !== 'PGRST116') throw limitError;
+
+        // 2. Check the current user count
+        const { count, error: countError } = await sb
+            .from('users')
+            .select('*', { count: 'exact', head: true })
+            .eq('role', role);
+
+        if (countError) throw countError;
+
+        // 3. Enforce the limit
+        const limit = limitData ? limitData.limit : 0;
+        if (limit > 0 && count >= limit) {
+            return showError(`User limit for '${role}' (${limit}) has been reached. Please contact the administrator.`);
+        }
+
+        // --- Proceed with user creation if limit is not reached ---
+        const userData = { username, password, role };
+
+        if (role === 'executive') {
+            const team = document.getElementById('new-exec-team').value;
+            if (!team) return showError('Please select a team for the executive.');
+            userData.team = team;
+        }
+
+        const { error } = await sb.from('users').insert(userData);
+        if (error) throw error;
+
+        showSuccessMessage(`${role.charAt(0).toUpperCase() + role.slice(1)} created.`);
+        document.getElementById(formId).reset();
+        renderUserList(role);
+    } catch (e) {
+        showError(`Could not create ${role}: ${e.message}`);
+    }
 }
+
+
 
         // --- ADMIN & EXECUTIVE: REPORTS ---
 
 //
 // THIS IS THE FINAL, MORE ROBUST FUNCTION. PLEASE REPLACE THE OLD ONE WITH THIS.
 //
-// REPLACE your entire fetchAndPopulateReports function with this one
-
 async function fetchAndPopulateReports(isAdmin = false) {
     const tableContainerId = isAdmin ? 'admin-reports-screen' : 'report-screen';
     const tableBodyId = isAdmin ? 'admin-report-table-body' : 'report-table-body';
     const tableEl = document.querySelector(`#${tableContainerId} .report-table`);
     const tableBody = document.getElementById(tableBodyId);
     const noReportsMsg = document.getElementById(isAdmin ? 'admin-no-reports-message' : 'no-reports-message');
-    
     // --- Define all possible columns and their render logic ---
     const allColumns = [
-        { key: 'vehicle_no', label: 'Vehicle No.', render: (row) => `<button onclick='printJobCardById(${row.id})' class="text-gray-500 hover:text-green-600 p-1 rounded-full shrink-0"><span class="material-symbols-outlined">download</span></button><span>${row.vehicles.vehicle_no}</span>`, className: 'flex items-center gap-x-2' },
+        { key: 'vehicle_no', label: 'Vehicle No.', render: (row) => {
+			const downloadButton = appSettings.feature_reports_download ? `<button onclick='printJobCardById(${row.id})' class="text-gray-500 hover:text-green-600 p-1 rounded-full shrink-0"><span class="material-symbols-outlined">download</span></button>` : '';
+			return `${downloadButton}<span>${row.vehicles.vehicle_no}</span>`;
+		}, 
+		className: 'flex items-center gap-x-2' },
         { key: 'vehicle_name', label: 'Vehicle Name', render: (row) => row.vehicles.vehicle_name || 'N/A' },
-        
-        // **FIX PART 2: Added optional chaining (?.) to prevent errors**
-        { key: 'model', label: 'Model', render: (row) => row.vehicles?.vehicle_models?.model || 'N/A' },
-        { key: 'brand', label: 'Brand', render: (row) => row.vehicles?.vehicle_models?.brand || 'N/A' },
-
+        { key: 'model', label: 'Model', render: (row) => row.vehicles.vehicle_models.model },
+        { key: 'brand', label: 'Brand', render: (row) => row.vehicles.vehicle_models.brand },
         { key: 'color', label: 'Color', render: (row) => row.vehicles.color || 'N/A' },
         { key: 'engine_no', label: 'Engine No', render: (row) => row.vehicles.engine_no || 'N/A' },
         { key: 'chassis_no', label: 'Chassis No', render: (row) => row.vehicles.chassis_no || 'N/A' },
@@ -2494,22 +2699,23 @@ async function fetchAndPopulateReports(isAdmin = false) {
     ];
     const visibleColumnKeys = appSettings.visible_report_columns || allColumns.map(c => c.key);
     const columnsToRender = allColumns.filter(c => visibleColumnKeys.includes(c.key));
-
+    // --- Dynamically build the table header ---
     let thead = tableEl.querySelector('thead');
     if (!thead) {
         thead = document.createElement('thead');
         tableEl.prepend(thead);
     }
     thead.innerHTML = `<tr>${columnsToRender.map(col => `<th>${col.label}</th>`).join('')}</tr>`;
-    
+    // --- Get Filter Values ---
     const fromDate = document.getElementById(isAdmin ? 'admin-filter-from-date' : 'filter-from-date').value;
     const toDate = document.getElementById(isAdmin ? 'admin-filter-to-date' : 'filter-to-date').value;
     const vehicleNo = document.getElementById(isAdmin ? 'admin-filter-vehicle-no' : 'filter-vehicle-no').value.trim().toUpperCase();
     const brand = document.getElementById(isAdmin ? 'admin-filter-brand' : 'filter-brand').value.trim();
     const execName = isAdmin ? document.getElementById('admin-filter-exec-name').value.trim() : '';
-    
+    // --- NEW: More Robust Executive Filter Logic ---
     let executiveIdsToFilter = [];
     if (isAdmin && execName) {
+        // Step 1: Find the IDs of executives matching the name.
         const { data: users, error: userError } = await sb
             .from('users')
             .select('id')
@@ -2519,58 +2725,65 @@ async function fetchAndPopulateReports(isAdmin = false) {
             return;
         }
         if (users.length === 0) {
+            // If no executives match the name, show an empty table immediately.
             tableBody.innerHTML = '';
             noReportsMsg.classList.remove('hidden');
             return;
         }
         executiveIdsToFilter = users.map(user => user.id);
     }
-    
-    // **FIX PART 1: Changed 'vehicles!inner' and 'vehicle_models!inner' to regular joins**
+    // --- End of New Logic ---
+    // --- Build The Query ---
     let query = sb.from('reports').select(`
         id, created_at, status, complaint, suggested, approved, marks,
         odometer_reading, client_name, client_phone,
         gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
-        vehicles(
+        vehicles!inner(
           id, vehicle_no, vehicle_name, color, engine_no, chassis_no,
-          vehicle_models(brand, model)
+          vehicle_models!inner(brand, model)
         ),
         executive:executive_id(username, id),
         inspector:inspector_id(username, id)
     `).order('created_at', { ascending: false });
-
+    // --- Apply Filters To The Query ---
     if (isAdmin) {
+        // Step 2: Use the IDs we found to filter the main reports query.
         if (executiveIdsToFilter.length > 0) {
             query = query.in('executive_id', executiveIdsToFilter);
         }
     } else {
+        // For executives, STRICTLY filter by their own ID.
         query = query.eq('executive_id', currentUser.id);
     }
-    if (fromDate) query = query.gte('created_at', `${fromDate}T00:00:00`);
-    if (toDate) query = query.lte('created_at', `${toDate}T23:59:59`);
-    if (vehicleNo) query = query.ilike('vehicles.vehicle_no', `%${vehicleNo}%`);
-    if (brand) query = query.ilike('vehicles.vehicle_models.brand', `%${brand}%`);
-    
+    if (fromDate) {
+        query = query.gte('created_at', `${fromDate}T00:00:00`);
+    }
+    if (toDate) {
+        query = query.lte('created_at', `${toDate}T23:59:59`);
+    }
+    if (vehicleNo) {
+        query = query.ilike('vehicles.vehicle_no', `%${vehicleNo}%`);
+    }
+    if (brand) {
+        query = query.ilike('vehicles.vehicle_models.brand', `%${brand}%`);
+    }
     const reports = await handleSupabaseQuery(query, "Failed to fetch reports.");
     if (reports === null) return;
-
     reportsDataStore = {};
     reports.forEach(row => { reportsDataStore[row.id] = row; });
-    
+    // --- Dynamically build the table body ---
     tableBody.innerHTML = '';
     if (reports.length === 0) {
         noReportsMsg.classList.remove('hidden');
         return;
     }
-
     noReportsMsg.classList.add('hidden');
     reports.forEach(row => {
-        if (!row.vehicles) return; // Add a safety check in case vehicle data is missing entirely
         const tr = document.createElement('tr');
         columnsToRender.forEach(col => {
             const td = document.createElement('td');
             if (col.className) td.className = col.className;
-            if (['complaint', 'suggested', 'approved', 'feedback_text'].includes(col.key)) {
+            if (col.key === 'complaint' || col.key === 'suggested' || col.key === 'approved' || col.key === 'feedback_text') {
                 td.title = formatArrayCell(row[col.key]);
             }
             td.innerHTML = col.render(row);
@@ -2694,8 +2907,9 @@ async function searchVehicle() {
         // --- START OF FIX ---
         // Safely access brand and model using optional chaining (?.)
         // This prevents the "Cannot read properties of null" error.
-        document.getElementById('detail-brand').textContent = data.vehicle_models?.brand || 'N/A';
-        document.getElementById('detail-model').textContent = data.vehicle_models?.model || 'N/A';
+// Safely access brand and model using optional chaining (?.)
+document.getElementById('detail-brand').textContent = data.vehicle_models?.brand || 'N/A';
+document.getElementById('detail-model').textContent = data.vehicle_models?.model || 'N/A';
         // --- END OF FIX ---
 
         document.getElementById('detail-fuel-type').textContent = data.fuel_type || 'N/A';
@@ -2964,16 +3178,28 @@ async function saveComplaints() {
             
             showSuccessMessage('Saving report...');
 
-            const { data: reportData, error: reportError } = await sb.from('reports').insert({
-                vehicle_id: currentVehicleId,
-                executive_id: currentUser.id,
-                complaint: JSON.stringify(currentComplaints),
-                status: 'Not Started',
-                marks: JSON.stringify(damageMarks),
-                odometer_reading: serviceOdometer,
-                client_name: serviceClientName,
-                client_phone: serviceClientPhone
-            }).select('id').single();
+// Step 1: Prepare the basic report data
+const reportInsertData = {
+    vehicle_id: currentVehicleId,
+    executive_id: currentUser.id,
+    complaint: JSON.stringify(currentComplaints),
+    status: 'Not Started',
+    odometer_reading: serviceOdometer,
+    client_name: serviceClientName,
+    client_phone: serviceClientPhone
+};
+
+// Step 2: Conditionally add damage marks ONLY if the feature is enabled
+if (appSettings.feature_damage_marking) {
+    reportInsertData.marks = JSON.stringify(damageMarks);
+}
+
+// Step 3: Insert the prepared data into the database
+const { data: reportData, error: reportError } = await sb
+    .from('reports')
+    .insert(reportInsertData)
+    .select('id')
+    .single();
 
             if(reportError) {
                 console.error("Error saving report:", reportError);
@@ -3093,6 +3319,7 @@ function executeAddSuggestion() {
     suggestionInput.focus();
 }
 
+
 // REPLACE the existing deleteSuggestion function
 function deleteSuggestion(index) {
     newSuggestions.splice(index, 1);
@@ -3108,102 +3335,56 @@ function deleteSuggestion(index) {
 }
 function updateCustomerTotal() {
     const totalAmountEl = document.getElementById('cust-total-amount');
-    if (!totalAmountEl) return;
-    
     let total = 0;
     document.querySelectorAll('#approval-suggestions-list input[type="checkbox"]:checked').forEach(checkbox => {
         try {
             const item = JSON.parse(checkbox.value);
-            total += parseFloat(item.amount) || 0;
-        } catch (e) {
-            console.error('Error parsing checkbox value:', e);
-        }
+            total += item.amount || 0;
+        } catch {}
     });
-    
-    totalAmountEl.textContent = `₹ ${total.toFixed(2)}`;
-}
-// ADD THIS NEW FUNCTION to your  tag
-// Provides real-time updates to the total amount as the mechanic types.
-function updateApproxTotalInRealTime() {
-    const totalAmountEl = document.getElementById('approx-total-amount');
-    if (!totalAmountEl) return;
-
-    let totalAmount = 0;
-
-    // 1. Sum amounts from original customer complaint inputs
-    document.querySelectorAll('#customer-complaints-list input[type="number"]').forEach(input => {
-        totalAmount += parseFloat(input.value) || 0;
-    });
-    
-    // 2. Sum amounts from already-added new mechanic suggestions
-    newSuggestions.forEach(suggestion => {
-        totalAmount += parseFloat(suggestion.amount) || 0;
-    });
-
-    // 3. Add the current, not-yet-saved amount from the "Add New" input field
-    const currentSuggestionAmountInput = document.getElementById('suggestion-amount-input');
-    if (currentSuggestionAmountInput) {
-        totalAmount += parseFloat(currentSuggestionAmountInput.value) || 0;
+    if (totalAmountEl) {
+        totalAmountEl.textContent = `₹ ${total.toFixed(2)}`;
     }
-    
-    totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
 }
-
-// ALSO, make a small change to the 'updateComplaintCost' function
-// to ensure totals update correctly when you edit original complaint costs.
-// REPLACE the existing 'updateComplaintCost' function with this new version
+// ADD THIS NEW FUNCTION
+// Updates the cost of a complaint in the state array when the executive types in the input field.
 function updateComplaintCost(text, newAmount) {
-    // Find the specific complaint in the state array and update its amount
     const complaint = originalComplaintsForUpdate.find(c => c.text === text);
     if (complaint) {
         complaint.amount = parseFloat(newAmount) || 0;
     }
-
-    // To maintain the user's selections, we need to read which items are currently checked
-    const approvedItems = [];
-    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-        try {
-            // The checkbox value is a JSON string of the item object
-            approvedItems.push(JSON.parse(checkbox.value));
-        } catch (e) {
-             console.error("Could not parse checkbox value during cost update:", e);
-        }
-    });
-    
-    // Now, re-render the entire suggestions and approval section.
-    // This will update the displayed cost for the item in the "Customer Approved suggestions" list
-    // and also recalculate the total amount correctly.
-    renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+    recalculateAndUpdateTotal();
 }
-// ADD THIS MISSING FUNCTION
-// Calculates the total cost from the data arrays and updates the UI.
+
+// ADD THIS NEW FUNCTION
+// Calculates the total cost from both original complaints and new suggestions and updates the UI.
 function recalculateAndUpdateTotal() {
     const totalAmountEl = document.getElementById('approx-total-amount');
-    if (!totalAmountEl) return;
-    
     let totalAmount = 0;
-    
-    // 1. Sum amounts from the original customer complaints array
-    originalComplaintsForUpdate.forEach(complaint => {
-        totalAmount += parseFloat(complaint.amount) || 0;
+    // Find all checked checkboxes in the list and sum their values
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        try {
+            // The checkbox value is a stringified JSON object, so we parse it
+            const item = JSON.parse(checkbox.value);
+            if (item && typeof item.amount === 'number') {
+                totalAmount += item.amount;
+            }
+        } catch (e) {
+            console.error("Could not parse checkbox value for total calculation:", checkbox.value);
+        }
     });
-    
-    // 2. Sum amounts from the new mechanic suggestions array
-    newSuggestions.forEach(suggestion => {
-        totalAmount += parseFloat(suggestion.amount) || 0;
-    });
-    
     totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
 }
-// REPLACE the existing 'renderSuggestions' function with this new version
+
 function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const executiveList = document.getElementById('executive-suggestions-list');
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
+    // ADD THIS LINE: Check which tab is currently active.
     const isPendingTabActive = document.getElementById('tab-btn-pending').classList.contains('active-tab');
 
-    // --- 1. Render editable customer complaints ---
+    // 1. Render editable customer complaints
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
         complaints.forEach((item) => {
@@ -3214,12 +3395,11 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
                 <div class="flex-1">
                     <span class="font-medium break-words">${item.text}</span>
                 </div>
-                <div class="flex items-center gap-1 shrink-0">
+                <div class="flex items-center gap-1">
                     <span class="font-bold text-gray-500">₹</span>
-                    <input type="number" class="form-input !py-1 !px-2 w-24 text-right" 
+                    <input type="number" class="form-input !py-1 !px-2 w-20 text-right" 
                            value="${item.amount || 0}" placeholder="Cost"
-                           data-text="${sanitizedText}" 
-                           oninput="updateComplaintCost(this.dataset.text, this.value)">
+                           data-text="${sanitizedText}" oninput="updateComplaintCost(this.dataset.text, this.value)">
                 </div>
             `;
             customerComplaintsList.appendChild(complaintItem);
@@ -3228,14 +3408,14 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerComplaintsList.innerHTML = '<p class="text-sm text-gray-500">No original complaints were registered.</p>';
     }
     
-    // --- 2. Render NEW mechanic suggestions ---
+    // 2. Render NEW mechanic suggestions
     executiveList.innerHTML = '';
     if (suggestions.length > 0) {
         suggestions.forEach((item, index) => {
             const execItem = document.createElement('div');
-            execItem.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-lg text-sm';
+            execItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm';
             execItem.innerHTML = `
-                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${(item.amount || 0).toFixed(2)}</span></p>
+                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${item.amount.toFixed(2)}</span></p>
                 <button type="button" onclick="deleteSuggestion(${index})" class="text-red-500 hover:text-red-700 shrink-0">
                     <span class="material-symbols-outlined">delete</span>
                 </button>
@@ -3244,8 +3424,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // --- 3. Render the COMBINED list for the final approval checklist ---
-    // (This logic remains the same to handle approved jobs correctly)
+    // 3. Render the COMBINED list for the final approval checklist
     customerApprovalList.innerHTML = '';
     const allItemsForApproval = [...complaints, ...suggestions]; 
 
@@ -3259,6 +3438,7 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
             const sanitizedText = item.text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const materialsValue = item.materials || '';
             
             const isOriginalComplaint = item.type === 'complaint';
             const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
@@ -3271,26 +3451,60 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             let materialsInputHtml = '';
             
-            if (hasCustomerResponded && isChecked && !isPendingTabActive) {
-                const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
-                
-                materialsInputHtml = `
-                    <div class="mt-2 pt-2 border-t border-gray-300/50">
-                        <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
-                            <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0"><span class="material-symbols-outlined text-sm">add</span></button>
+            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
+            // The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
+            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
+// The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
+if (hasCustomerResponded && isChecked && !isPendingTabActive) {
+    // Parse existing materials into an array (split by comma or newline)
+    const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
+    
+    materialsInputHtml = `
+        <div class="mt-2 pt-2 border-t border-gray-300/50">
+            <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
+                <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
+                    <span class="material-symbols-outlined text-sm">add</span>
+                </button>
+            </div>
+            <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
+                ${existingMaterials.length > 0 
+                    ? existingMaterials.map((material, index) => `
+                        <div class="flex items-center gap-2">
+                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
+                                   value="${material}"
+                                   placeholder="e.g., Oil filter, 4L synthetic oil"
+                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
+                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
+                                <span class="material-symbols-outlined text-sm">remove</span>
+                            </button>
                         </div>
-                        <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
-                            ${existingMaterials.map((material, index) => `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="${material}" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`).join('') || `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`}
+                      `).join('')
+                    : `
+                        <div class="flex items-center gap-2">
+                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
+                                   value=""
+                                   placeholder="e.g., Oil filter, 4L synthetic oil"
+                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
+                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
+                                <span class="material-symbols-outlined text-sm">remove</span>
+                            </button>
                         </div>
-                    </div>`;
-            }
+                      `
+                }
+            </div>
+        </div>
+    `;
+}
 
             approvalItemContainer.innerHTML = `
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value=${checkboxValue} ${isChecked ? 'checked' : ''} onchange="handleCheckboxChange(this)">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                           value=${checkboxValue} 
+                           ${isChecked ? 'checked' : ''}
+                           onchange="handleCheckboxChange(this)">
                     <div class="flex-1 flex justify-between items-center">
-                       <span class="font-medium">${item.text}</span>
+                       <span class="font-medium break-all">${item.text}</span>
                         <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                     </div>
                     ${tag}
@@ -3303,7 +3517,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
     
-    // Recalculate total at the end of every render
     recalculateAndUpdateTotal();
 }
 function addMaterialField(itemText) {
@@ -3613,14 +3826,23 @@ async function quickAccessUser(user) {
             }
         }
 
-// FIND AND REPLACE this function
-        async function fetchAndApplyAppSettings() {
-            // Set defaults first
-            appSettings = { 
-                enable_vehicle_scanner: true, 
-                show_full_vehicle_form: true,
-                visible_report_columns: ['vehicle_no', 'client_name', 'executive', 'date_time', 'status', 'media'] // Sensible default
-            };
+
+
+async function fetchAndApplyAppSettings() {
+		// Set defaults first
+		appSettings = { 
+			// "enable_vehicle_scanner: true," has been removed as it's an obsolete key
+			show_full_vehicle_form: true,
+			visible_report_columns: ['vehicle_no', 'client_name', 'executive', 'date_time', 'status', 'media'],
+			feature_inspection_module: false,
+			feature_wash_module: false,
+			feature_reports_download: false,
+			feature_scanner: true,
+			feature_damage_marking: true,
+			feature_gdrive: true,
+			feature_whatsapp_approval: false,
+			feature_analytics_page: true
+		};
 
             const query = sb.from('app_settings').select('*');
             const settingsData = await handleSupabaseQuery(query, "Failed to load app settings.");
@@ -3639,18 +3861,38 @@ async function quickAccessUser(user) {
             }
             applyFeatureToggles();
         }
+		
 
 
-// REPLACE this function
+
+// REPLACE this entire function
 function applyFeatureToggles() {
+    // Helper to toggle visibility by ID
+    const toggleElement = (elementId, isEnabled) => {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.style.display = isEnabled ? '' : 'none';
+        }
+    };
+    
+    // Toggles for Job Card & Update Pages
+    toggleElement('damage-marking-section', appSettings.feature_damage_marking);
+    toggleElement('media-upload-section', appSettings.feature_gdrive);
+    toggleElement('send-whatsapp-btn', appSettings.feature_whatsapp_approval); // This line is crucial
+
+    // Toggles for the "Close" Screen Tabs
+    toggleElement('tab-btn-inspection-pending', appSettings.feature_inspection_module);
+    toggleElement('tab-btn-wash-pending', appSettings.feature_wash_module);
+
+    // Scanner button
     const scannerButton = document.querySelector("button[onclick=\"document.getElementById('image-upload-input').click()\"]");
     if (scannerButton) {
-        scannerButton.style.display = appSettings.enable_vehicle_scanner ? 'flex' : 'none';
+        scannerButton.style.display = appSettings.feature_scanner ? 'flex' : 'none';
     }
 
+    // Vehicle form fields
     const form = document.getElementById('create-vehicle-form');
     if (form) {
-        // THE FIX: 'new-client-name' has been removed from this list so it's never hidden.
         const fieldsToToggle = [
             'new-vehicle-name', 'new-vehicle-brand-exec', 'new-vehicle-model-exec', 
             'new-color', 'new-fuel-type', 'new-engine-no', 'new-chassis-no', 
@@ -3659,18 +3901,29 @@ function applyFeatureToggles() {
         const showFullForm = appSettings.show_full_vehicle_form === true;
         fieldsToToggle.forEach(fieldId => {
             const input = document.getElementById(fieldId);
-            const wrapper = input.parentElement;
-            if (wrapper) {
-                wrapper.style.display = showFullForm ? 'block' : 'none';
-            }
-            if (input) {
-                input.required = showFullForm;
-            }
+            const wrapper = input?.parentElement;
+            if (wrapper) wrapper.style.display = showFullForm ? 'block' : 'none';
+            if (input) input.required = showFullForm;
         });
     }
+
+    // Download buttons
+    document.querySelectorAll('button[onclick="downloadReport()"]').forEach(btn => {
+        btn.style.display = appSettings.feature_reports_download ? 'flex' : 'none';
+    });
+    
+    // Admin dashboard links
+    if (currentUser && currentUser.role === 'admin') {
+        const inspectorMgmt = document.querySelector('a[onclick="showAdminScreen(\'admin-inspector-management-screen\')"]');
+        if (inspectorMgmt) inspectorMgmt.closest('.card').style.display = appSettings.feature_inspection_module ? 'flex' : 'none';
+
+        const washerMgmt = document.querySelector('a[onclick="showAdminScreen(\'admin-washer-management-screen\')"]');
+        if (washerMgmt) washerMgmt.closest('.card').style.display = appSettings.feature_wash_module ? 'flex' : 'none';
+
+        const analyticsLink = document.querySelector('a[onclick="showAdminScreen(\'admin-analytics-screen\')"]');
+        if (analyticsLink) analyticsLink.closest('.card').style.display = appSettings.feature_analytics_page ? 'flex' : 'none';
+    }
 }
-
-
 
 
 
@@ -3724,63 +3977,34 @@ async function saveVehicleUpdate(shouldReset = true) {
 
 
                 
+// REPLACE this entire function
 async function sendApprovalLink() {
     if (!currentReportId) {
         return showError('No report is currently selected.');
     }
 
     try {
+        // 1. Give the user immediate feedback that something is happening.
         showSuccessMessage('Saving and preparing link...');
 
-        // Gather the amounts that the executive entered for each complaint
-        const updatedComplaints = [];
-        originalComplaintsForUpdate.forEach(complaint => {
-            const sanitizedText = complaint.text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const input = document.querySelector(`input[data-text="${sanitizedText}"]`);
-            
-            if (input) {
-                updatedComplaints.push({
-                    text: complaint.text,
-                    amount: parseFloat(input.value) || 0,
-                    type: 'complaint',
-                    materials: complaint.materials || ''
-                });
-            } else {
-                updatedComplaints.push({
-                    text: complaint.text,
-                    amount: complaint.amount || 0,
-                    type: 'complaint',
-                    materials: complaint.materials || ''
-                });
-            }
-        });
-
-        // Combine updated complaints with new suggestions
+        // 2. Combine and save all required data to the database first.
         const allItemsForApproval = [
-            ...updatedComplaints,
+            ...originalComplaintsForUpdate,
             ...newSuggestions
         ];
-
-        // Validate that at least one item has been added
-        if (allItemsForApproval.length === 0) {
-            return showError('Please add at least one repair item before sending approval link.');
-        }
-
-        // Save the complete list with amounts to the database
         const { error: saveDataError } = await sb.from('reports')
             .update({
-                complaint: JSON.stringify(updatedComplaints),
                 suggested: JSON.stringify(allItemsForApproval),
                 status: 'Ongoing'
             })
             .eq('id', currentReportId);
 
         if (saveDataError) {
-            console.error('Error saving to database:', saveDataError);
+            // If saving fails, stop here and show an error.
             throw saveDataError;
         }
 
-        // Fetch the report data to get client's phone number
+        // 3. Fetch the report data again to get the client's phone number.
         const { data: reportData, error: reportError } = await sb
             .from('reports')
             .select('client_phone, vehicles(*)')
@@ -3791,27 +4015,33 @@ async function sendApprovalLink() {
             throw reportError;
         }
 
+        // 4. Explicitly check if a phone number exists.
         const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
         if (!clientPhone) {
+            // This is a clear error message instead of getting stuck.
             return showError("Cannot send: Client phone number is missing for this job card.");
         }
 
-        // Construct and send the WhatsApp link
+        // 5. Construct the final URL.
         const approvalUrl = `${window.location.origin}${window.location.pathname}?report_id=${currentReportId}`;
         const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
         const encodedText = encodeURIComponent(messageText);
         const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
+        // 6. **THE FIX:** Use window.location.href for better mobile compatibility.
         window.location.href = whatsappUrl;
 
         showSuccessMessage("Approval link sent! Job moved to 'Awaiting Response'.");
         resetVehicleUpdateScreen();
 
     } catch (error) {
+        // This will catch any error from the steps above.
         console.error('Error in sendApprovalLink:', error);
         showError(`An error occurred: ${error.message}`);
     }
 }
+
+
         async function populateNotStartedJobs() {
             if (!currentUser) {
                 console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
@@ -4371,12 +4601,11 @@ function selectReportForUpdate(report) {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('delivery-date').setAttribute('min', today);
 
-            const whatsappButton = document.getElementById('send-whatsapp-btn');
-            if (report.approved && report.approved !== '[]') {
-                whatsappButton.style.display = 'none';
-            } else {
-                whatsappButton.style.display = 'flex';
-            }
+			const whatsappButton = document.getElementById('send-whatsapp-btn');
+            // This new logic checks BOTH the feature setting and the report status
+            const shouldShowButton = (!report.approved || report.approved === '[]') && appSettings.feature_whatsapp_approval === true;
+            whatsappButton.style.display = shouldShowButton ? 'flex' : 'none';
+			
         }
 
         function selectReportForUpdateById(reportId) {
@@ -4484,7 +4713,7 @@ function showAdminScreen(screenId) {
     document.getElementById(screenId).style.display = 'block';
     
     if (screenId === 'admin-vehicle-management-screen') renderVehicleModelList();
-    if (screenId === 'admin-reports-screen') clearAdminReportFilters();
+    if (screenId === 'admin-reports-screen') fetchAndPopulateReports(true);
     if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
     if (screenId === 'admin-executive-management-screen') renderUserList('executive');
     if (screenId === 'admin-admin-management-screen') renderUserList('admin');
@@ -4502,7 +4731,7 @@ function showExecutiveScreen(screenId) {
     document.getElementById(screenId).style.display = 'block';
     setActiveNav(screenId);
 
-    if (screenId === 'report-screen') clearReportFilters();
+    if (screenId === 'report-screen') fetchAndPopulateReports(false);
     
     // THE FIX: The default tab is now 'ready-to-close'
     if (screenId === 'due-date-screen') showCloseTab('ready-to-close'); 
@@ -4639,110 +4868,77 @@ function showError(message, errorObject = null) {
         // --- Customer Approval Flow ---
        // This new version correctly displays all items and costs for the customer.
 // This new version correctly displays all items and costs for the customer.
-// REPLACE this entire function
-async function loadApprovalScreen(reportId) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-screens').style.display = 'none';
-    document.getElementById('executive-screens').style.display = 'none';
-    document.getElementById('customer-approval-screen').classList.add('active-screen');
+        async function loadApprovalScreen(reportId) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('admin-screens').style.display = 'none';
+            document.getElementById('executive-screens').style.display = 'none';
+            document.getElementById('customer-approval-screen').classList.add('active-screen');
 
-    const suggestionsList = document.getElementById('approval-suggestions-list');
-    suggestionsList.innerHTML = '<p class="text-center text-gray-500">Loading repair details...</p>';
+            // We now only need the 'suggested' column, as it contains the complete list.
+            const { data: report, error } = await sb.from('reports')
+                .select(`suggested, approved, vehicles ( vehicle_no )`)
+                .eq('id', reportId)
+                .single();
 
-    try {
-        const { data: report, error } = await sb
-            .from('reports')
-            .select('id, suggested, approved, vehicles!inner(vehicle_no)')
-            .eq('id', reportId)
-            .single();
+            if (error || !report) {
+                console.error('Error fetching report for approval:', error);
+                document.getElementById('approval-content').innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid.</p>';
+                return;
+            }
 
-        if (error) {
-            console.error('Error fetching report for approval:', error);
-            suggestionsList.innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid or has expired.</p>';
-            return;
+            document.getElementById('approval-vehicle-no').textContent = report.vehicles.vehicle_no;
+
+            if (report.approved && report.approved !== '[]') {
+                document.getElementById('approval-content').classList.add('hidden');
+                const successMsg = document.getElementById('approval-success-message');
+                successMsg.querySelector('h3').textContent = 'Response Already Submitted';
+                successMsg.querySelector('p').textContent = 'Thank you, we have already received your feedback for this service request.';
+                successMsg.classList.remove('hidden');
+                document.querySelector('#customer-approval-card h2').textContent = 'Response Received';
+            } else {
+                const suggestionsList = document.getElementById('approval-suggestions-list');
+                suggestionsList.innerHTML = '';
+                try {
+                    // This now gets the complete, correct list from the 'suggested' column
+                    const allItems = JSON.parse(report.suggested || '[]');
+
+                    if (allItems.length > 0) {
+                         allItems.forEach(item => {
+                            const isOriginalComplaint = item.type === 'complaint';
+                            const label = document.createElement('label');
+                            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
+                            const tag = isOriginalComplaint 
+                                ? `<span class="text-xs text-gray-500">(Your Request)</span>` 
+                                : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
+                            
+                            // CRITICAL FIX: Display amount as text, not an input field.
+                            const amountDisplay = `<span class="font-bold text-gray-800 shrink-0">₹${(item.amount || 0).toFixed(2)}</span>`;
+                            const checkboxValue = `'${JSON.stringify(item)}'`;
+
+                            label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
+                            
+                            // THE FIX IS ON THE NEXT LINE: Added 'break-all' class to the span
+                            label.innerHTML = `
+                                <input type="checkbox" value=${checkboxValue} class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()">
+                                <div class="flex-1 flex justify-between items-center gap-3">
+                                     <span class="text-sm font-medium break-words">${item.text}</span>
+                                     ${amountDisplay}
+                                </div>
+                                ${tag}
+                            `;
+                            suggestionsList.appendChild(label);
+                        });
+                    } else {
+                        suggestionsList.innerHTML = '<p class="text-sm text-gray-500">No specific repairs were suggested.</p>';
+                    }
+                } catch (e) {
+                    console.error("Error parsing items for approval:", e);
+                    suggestionsList.innerHTML = '<p class="text-sm text-red-500">Could not display suggested repairs.</p>';
+                }
+                updateCustomerTotal();
+            }
         }
 
-        if (!report) {
-            suggestionsList.innerHTML = '<p class="text-center text-red-600">Report not found. The link may be invalid.</p>';
-            return;
-        }
-
-        document.getElementById('approval-vehicle-no').textContent = report.vehicles?.vehicle_no || 'Unknown';
-
-        if (report.approved && report.approved !== '[]') {
-            document.getElementById('approval-content').classList.add('hidden');
-            const successMsg = document.getElementById('approval-success-message');
-            successMsg.querySelector('h3').textContent = 'Response Already Submitted';
-            successMsg.querySelector('p').textContent = 'Thank you, we have already received your feedback for this service request.';
-            successMsg.classList.remove('hidden');
-            document.querySelector('#customer-approval-card h2').textContent = 'Response Received';
-            return;
-        }
-
-        suggestionsList.innerHTML = '';
-        
-        if (!report.suggested || report.suggested === '[]') {
-            suggestionsList.innerHTML = '<p class="text-sm text-gray-500">The executive has not added repair details yet. Please wait for the approval link to be sent.</p>';
-            return;
-        }
-
-        let allItems;
-        try {
-            allItems = JSON.parse(report.suggested);
-        } catch (parseError) {
-            console.error('Error parsing suggested items:', parseError);
-            suggestionsList.innerHTML = '<p class="text-center text-red-600">Error loading repair details. Please try again or contact support.</p>';
-            return;
-        }
-
-        if (!Array.isArray(allItems) || allItems.length === 0) {
-            suggestionsList.innerHTML = '<p class="text-sm text-gray-500">No repair items found. Please contact the service center.</p>';
-            return;
-        }
-
-        allItems.forEach((item) => {
-            const isOriginalComplaint = item.type === 'complaint';
-            const label = document.createElement('label');
-            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
-            const tag = isOriginalComplaint 
-                ? `<span class="text-xs text-gray-500">(Your Request)</span>` 
-                : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
-            
-            const amountDisplay = `<span class="font-bold text-gray-800 shrink-0">₹${(item.amount || 0).toFixed(2)}</span>`;
-            
-            const itemForCheckbox = {
-                text: item.text,
-                amount: item.amount || 0,
-                type: item.type,
-                materials: item.materials || ''
-            };
-            const checkboxValue = JSON.stringify(itemForCheckbox).replace(/"/g, '&quot;');
-            
-            // **THE FIX: Conditionally add the 'checked' attribute**
-            // Original customer complaints are checked by default, mechanic suggestions are not.
-            const isChecked = isOriginalComplaint ? 'checked' : '';
-
-            label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
-            
-            label.innerHTML = `
-                <input type="checkbox" value="${checkboxValue}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()" ${isChecked}>
-                <div class="flex-1 flex justify-between items-center gap-3">
-                     <span class="text-sm font-medium">${item.text}</span>
-                     ${amountDisplay}
-                </div>
-                ${tag}
-            `;
-            suggestionsList.appendChild(label);
-        });
-        
-        // This function will now correctly calculate the initial total based on the pre-checked items.
-        updateCustomerTotal();
-        
-    } catch (error) {
-        console.error('Unexpected error in loadApprovalScreen:', error);
-        suggestionsList.innerHTML = '<p class="text-center text-red-600">An unexpected error occurred. Please try again.</p>';
-    }
-}
 
         async function submitCustomerFeedback() {
     const params = new URLSearchParams(window.location.search);
@@ -4792,58 +4988,92 @@ async function loadApprovalScreen(reportId) {
     document.getElementById('approval-success-message').classList.remove('hidden');
 }
 
+// Wrap your DOMContentLoaded listener more defensively:
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    initializeApp();
+}
 
-document.addEventListener('DOMContentLoaded', async () => { // Make this async
-            const params = new URLSearchParams(window.location.search);
-            const reportId = params.get('report_id');
-            const feedbackId = params.get('feedback_id');
-            if (reportId) {
-                loadApprovalScreen(reportId);
-            } else if (feedbackId) {
-                loadFeedbackScreen(feedbackId);
-            } else {
-                const savedUser = sessionStorage.getItem('currentUser');
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
-                    if (currentUser.role === 'admin') {
-                        showAdminScreen('admin-dashboard-screen');
-                    } else if (currentUser.role === 'executive') {
-                        document.getElementById('profile-username').textContent = currentUser.username;
-                        document.getElementById('profile-role').textContent = currentUser.role;
-                        // ADDED THIS LINE TO FIX THE BUG
-                        await fetchAndApplyAppSettings(); 
-                        showExecutiveScreen('job-card-screen');
-                    } else if (currentUser.role === 'washer') {
-                        showScreen('washer-screen');
-                        populateWashList();
-                    }
-                }
+async function initializeApp() {
+    const params = new URLSearchParams(window.location.search);
+    const reportId = params.get('report_id');
+    const feedbackId = params.get('feedback_id');
+
+    if (reportId) {
+        return loadApprovalScreen(reportId);
+    }
+    if (feedbackId) {
+        return loadFeedbackScreen(feedbackId);
+    }
+	    
+
+
+    if (reportId) {
+        return loadApprovalScreen(reportId);
+    }
+    if (feedbackId) {
+        return loadFeedbackScreen(feedbackId);
+    }
+
+    const savedUser = sessionStorage.getItem('currentUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        
+        // This is the critical addition: reload settings on page load
+        await fetchAndApplyAppSettings(); 
+
+        if (currentUser.role === 'admin') {
+            showAdminScreen('admin-dashboard-screen');
+        } else if (currentUser.role === 'executive') {
+            document.getElementById('profile-username').textContent = currentUser.username;
+            document.getElementById('profile-role').textContent = currentUser.role;
+            showExecutiveScreen('job-card-screen');
+        } else if (currentUser.role === 'washer') {
+            // ADDED: Check if the module is enabled before showing the screen
+            if (!appSettings.feature_wash_module) {
+                logout(); // Log out the invalid session
+                return showError('Wash module is not enabled for this account.');
             }
-            carImage = document.getElementById("carImage");
-            damageCanvas = document.getElementById("damageCanvas");
-            checkCanvas = document.getElementById("checkCanvas");
-            if (carImage && damageCanvas && checkCanvas) {
-                damageCtx = damageCanvas.getContext("2d");
-                checkCtx = checkCanvas.getContext("2d", { willReadFrequently: true });
-                carImage.onload = resizeCanvas;
-                window.addEventListener("resize", resizeCanvas);
-                damageCanvas.addEventListener("click", (e) => {
-                    if (!checkCtx) return;
-                    const rect = damageCanvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const pixel = checkCtx.getImageData(x, y, 1, 1).data;
-                    const alpha = pixel[3];
-                    if (alpha > 0) {
-                        damageCtx.fillStyle = "red";
-                        damageCtx.beginPath();
-                        damageCtx.arc(x, y, 5, 0, Math.PI * 2);
-                        damageCtx.fill();
-                        damageMarks.push({ x, y });
-                    }
-                });
+            showScreen('washer-screen');
+            populateWashList();
+        } else if (currentUser.role === 'inspector') {
+            // ADDED: Check for the inspector module as well
+            if (!appSettings.feature_inspection_module) {
+                logout(); // Log out the invalid session
+                return showError('Inspection module is not enabled for this account.');
+            }
+            showScreen('inspector-screen');
+            populateInspectionQueue();
+        }
+    }
+
+    // This part remains the same
+    carImage = document.getElementById("carImage");
+    damageCanvas = document.getElementById("damageCanvas");
+    checkCanvas = document.getElementById("checkCanvas");
+    if (carImage && damageCanvas && checkCanvas) {
+        damageCtx = damageCanvas.getContext("2d");
+        checkCtx = checkCanvas.getContext("2d", { willReadFrequently: true });
+        carImage.onload = resizeCanvas;
+        window.addEventListener("resize", resizeCanvas);
+        damageCanvas.addEventListener("click", (e) => {
+            if (!checkCtx) return;
+            const rect = damageCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const pixel = checkCtx.getImageData(x, y, 1, 1).data;
+            const alpha = pixel[3];
+            if (alpha > 0) {
+                damageCtx.fillStyle = "red";
+                damageCtx.beginPath();
+                damageCtx.arc(x, y, 5, 0, Math.PI * 2);
+                damageCtx.fill();
+                damageMarks.push({ x, y });
             }
         });
+    }
+});
 		
 		
         function printJobCardById(reportId) {
@@ -4856,81 +5086,78 @@ document.addEventListener('DOMContentLoaded', async () => { // Make this async
             }
         }
 
-       // REPLACE your existing printJobCard function with this corrected version
+        function printJobCard(reportData) {
+            document.getElementById('print-report-date').textContent = new Date(reportData.created_at).toLocaleString();
+            document.getElementById('print-executive-name').textContent = reportData.executive?.username || 'N/A';
+            document.getElementById('print-vehicle-no').textContent = reportData.vehicles.vehicle_no || 'N/A';
+            document.getElementById('print-vehicle-name').textContent = `${reportData.vehicles.vehicle_models.brand} ${reportData.vehicles.vehicle_models.model}`;
+            document.getElementById('print-engine-chassis').textContent = `${reportData.vehicles.engine_no || 'N/A'} / ${reportData.vehicles.chassis_no || 'N/A'}`;
+			document.getElementById('print-client-name').textContent = reportData.client_name || 'N/A';
+			document.getElementById('print-client-phone').textContent = reportData.client_phone || 'N/A';
+			document.getElementById('print-odometer').textContent = reportData.odometer_reading || 'N/A';
 
-function printJobCard(reportData) {
-    document.getElementById('print-report-date').textContent = new Date(reportData.created_at).toLocaleString();
-    document.getElementById('print-executive-name').textContent = reportData.executive?.username || 'N/A';
-    document.getElementById('print-vehicle-no').textContent = reportData.vehicles.vehicle_no || 'N/A';
-    
-    // **THE FIX IS HERE: Safely access brand and model to prevent crashing**
-    document.getElementById('print-vehicle-name').textContent = `${reportData.vehicles?.vehicle_models?.brand || ''} ${reportData.vehicles?.vehicle_models?.model || ''}`.trim();
-    
-    document.getElementById('print-engine-chassis').textContent = `${reportData.vehicles.engine_no || 'N/A'} / ${reportData.vehicles.chassis_no || 'N/A'}`;
-    document.getElementById('print-client-name').textContent = reportData.client_name || 'N/A';
-    document.getElementById('print-client-phone').textContent = reportData.client_phone || 'N/A';
-    document.getElementById('print-odometer').textContent = reportData.odometer_reading || 'N/A';
-
-    
-    const populateList = (listId, dataString) => {
-        const list = document.getElementById(listId);
-        list.innerHTML = '';
-        try {
-            const items = JSON.parse(dataString || '[]');
-            if (items && items.length > 0) {
-                items.forEach(item => {
-                    const li = document.createElement('li');
-                    if (typeof item === 'object' && item !== null && item.text) {
-                        li.textContent = item.text;
+            
+            const populateList = (listId, dataString) => {
+                const list = document.getElementById(listId);
+                list.innerHTML = '';
+                try {
+                    const items = JSON.parse(dataString || '[]'); // Safely parse the data
+                    if (items && items.length > 0) {
+                        items.forEach(item => {
+                            const li = document.createElement('li');
+                            // **THE FIX: Check if the item is an object and use its .text property**
+                            if (typeof item === 'object' && item !== null && item.text) {
+                                li.textContent = item.text;
+                            } else {
+                                // Fallback for older data that might just be strings
+                                li.textContent = item;
+                            }
+                            list.appendChild(li);
+                        });
                     } else {
-                        li.textContent = item;
+                        list.innerHTML = '<li>N/A</li>';
                     }
-                    list.appendChild(li);
-                });
+                } catch (e) {
+                    list.innerHTML = '<li>Error loading data</li>';
+                }
+            };
+            populateList('print-complaints-list', reportData.complaint);
+            populateList('print-suggested-list', reportData.suggested);
+            populateList('print-approved-list', reportData.approved);
+
+            const printImage = document.getElementById('print-car-image');
+            const printCanvas = document.getElementById('print-damage-canvas');
+            const marksArray = reportData.marks ? JSON.parse(reportData.marks) : [];
+
+            const drawMarksAndPrint = () => {
+                const sourceWidth = 384; 
+                const aspectRatio = printImage.naturalWidth / printImage.naturalHeight;
+                const sourceHeight = sourceWidth / aspectRatio;
+
+                const destWidth = 400;
+                const destHeight = destWidth / aspectRatio;
+                
+                printCanvas.width = destWidth;
+                printCanvas.height = destHeight;
+
+                const widthRatio = destWidth / sourceWidth;
+                const heightRatio = destHeight / sourceHeight;
+
+                const scaledMarks = marksArray.map(mark => ({
+                    x: mark.x * widthRatio,
+                    y: mark.y * heightRatio
+                }));
+
+                redrawDamageMarks(printCanvas, scaledMarks);
+                window.print();
+            };
+
+            if (printImage.complete) {
+                drawMarksAndPrint();
             } else {
-                list.innerHTML = '<li>N/A</li>';
+                printImage.onload = drawMarksAndPrint;
             }
-        } catch (e) {
-            list.innerHTML = '<li>Error loading data</li>';
         }
-    };
-    populateList('print-complaints-list', reportData.complaint);
-    populateList('print-suggested-list', reportData.suggested);
-    populateList('print-approved-list', reportData.approved);
-
-    const printImage = document.getElementById('print-car-image');
-    const printCanvas = document.getElementById('print-damage-canvas');
-    const marksArray = reportData.marks ? JSON.parse(reportData.marks) : [];
-
-    const drawMarksAndPrint = () => {
-        const sourceWidth = 384; 
-        const aspectRatio = printImage.naturalWidth / printImage.naturalHeight;
-        const sourceHeight = sourceWidth / aspectRatio;
-
-        const destWidth = 400;
-        const destHeight = destWidth / aspectRatio;
-        
-        printCanvas.width = destWidth;
-        printCanvas.height = destHeight;
-
-        const widthRatio = destWidth / sourceWidth;
-        const heightRatio = destHeight / sourceHeight;
-
-        const scaledMarks = marksArray.map(mark => ({
-            x: mark.x * widthRatio,
-            y: mark.y * heightRatio
-        }));
-
-        redrawDamageMarks(printCanvas, scaledMarks);
-        window.print();
-    };
-
-    if (printImage.complete) {
-        drawMarksAndPrint();
-    } else {
-        printImage.onload = drawMarksAndPrint;
-    }
-}
 
 		function downloadReport() {
             const isAdminScreenActive = document.getElementById('admin-screens').classList.contains('active-screen');
