@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoFix Application</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -10,35 +10,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-    <!-- FIXED: Removed duplicate Tailwind script -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.12.1/polyfill.min.js"></script>
+    <link href="https://unpkg.com/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style type="text/tailwindcss">
-        /* Critical: Ensure screens toggle correctly */
-        .screen { display: none !important; }
-        .active-screen { display: block !important; }
-        
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --background-color: #f9fafb;
+            --primary-color: #2563eb; /* Blue 600 */
+            --primary-hover: #1d4ed8; /* Blue 700 */
+            --background-color: #f9fafb; /* Gray 50 */
             --card-background: #ffffff;
-            --border-color: #e5e7eb;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
+            --border-color: #e5e7eb; /* Gray 200 */
+            --text-primary: #111827; /* Gray 900 */
+            --text-secondary: #6b7280; /* Gray 500 */
             --text-on-primary: #ffffff;
         }
-        
         body {
             font-family: 'Manrope', sans-serif;
             background-color: var(--background-color);
             color: var(--text-primary);
         }
-        
+        .screen { display: none; }
+        .active-screen { display: block; }
         .modal-hidden { display: none; }
         
         /* Component Styles */
@@ -69,32 +65,56 @@
 
         /* Voice Note Button Animation */
         @keyframes pulse-ring {
-          0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
-          70% { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+          0% {
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+          }
+          70% {
+            box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+          }
         }
         .record-button.is-recording {
             @apply bg-blue-600 hover:bg-blue-700 text-white;
             animation: pulse-ring 1.5s infinite;
         }
 
-        /* Accordion and Print Styles */
+        /* Styles for the accordion list in Due Date page */
         .due-date-details {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
         }
-        .due-date-item.expanded .due-date-details { max-height: 500px; }
-        .due-date-item.expanded .due-date-header .material-symbols-outlined { transform: rotate(180deg); }
-        .printable-area { display: none; }
-        
+        .due-date-item.expanded .due-date-details {
+            max-height: 500px; /* Large enough to fit content */
+        }
+        .due-date-item.expanded .due-date-header .material-symbols-outlined {
+            transform: rotate(180deg);
+        }
+
+		/* Styles for Printing */
+        .printable-area {
+            display: none;
+        }
+		
         /* Tab Styles */
-        .tab-button { @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700; }
-        .tab-button.active-tab { @apply border-blue-600 text-blue-600; }
+        .tab-button {
+            @apply -mb-px border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700;
+        }
+        .tab-button.active-tab {
+            @apply border-blue-600 text-blue-600;
+        }
 
         /* Dropdown Menu Styles */
-        .menu-container { position: relative; }
-        .menu-button { background: none; border: none; cursor: pointer; }
+        .menu-container {
+            position: relative;
+        }
+        .menu-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
         .dropdown-menu {
             display: none;
             position: absolute;
@@ -106,7 +126,9 @@
             z-index: 20;
             width: 120px;
         }
-        .menu-container:hover .dropdown-menu { display: block; }
+        .menu-container:hover .dropdown-menu {
+            display: block;
+        }
         .dropdown-item {
             display: flex;
             align-items: center;
@@ -116,12 +138,20 @@
             font-size: 0.875rem;
             color: var(--text-secondary);
         }
-        .dropdown-item:hover { background-color: #f3f4f6; }
-        .dropdown-item .material-symbols-outlined { font-size: 1.25rem; }
+        .dropdown-item:hover {
+            background-color: #f3f4f6; /* Gray 100 */
+        }
+        .dropdown-item .material-symbols-outlined {
+            font-size: 1.25rem;
+        }
 
         @media print {
-            body * { visibility: hidden; }
-            .printable-area, .printable-area * { visibility: visible; }
+            body * {
+                visibility: hidden;
+            }
+            .printable-area, .printable-area * {
+                visibility: visible;
+            }
             .printable-area {
                 display: block;
                 position: absolute;
@@ -576,37 +606,32 @@
         
         <div id="customer-complaints-update-section">
             <h3 class="text-base font-bold mb-2">Customer's Registered Complaints</h3>
+            <p class="text-xs text-gray-500 -mt-2 mb-3">Add the estimated cost for each complaint registered by the customer.</p>
             <div id="customer-complaints-list" class="space-y-2">
-                <p class="text-sm text-gray-500">No original complaints were registered.</p>
+                </div>
+        </div>
+        
+        <div class="border-t pt-4">
+            <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                
+                <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
+                
+                <div class="flex items-center justify-end gap-2 shrink-0">
+                    <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
+                    <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost" oninput="updateApproxTotalInRealTime()">
+                    <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
             </div>
+            <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
         </div>
-        
-        <!-- The new, cleaner layout for adding mechanic suggestions -->
-<!-- This new layout ensures the repair input is always wide enough -->
-<div  class="border-t pt-4">
-    <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
-    <!-- This container will now stack its children vertically on small screens -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
-        
-        <!-- The complaint input will take full width on all screen sizes -->
-        <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
-        
-        <!-- This group contains the amount and button, and will appear below the input on small screens -->
-        <div class="flex items-center justify-end gap-2 shrink-0">
-            <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
-            <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost">
-            <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
-                <span class="material-symbols-outlined">add</span>
-            </button>
-        </div>
-    </div>
-    <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
-</div>
 
         <div>
             <h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved suggestions</h3>
             <div id="customer-approval-list" class="space-y-2">
-                <p class="text-sm text-gray-500">Add mechanic suggestions above to see them here for approval.</p>
+                <p class="text-sm text-gray-500">Add suggestions to see them here for approval.</p>
             </div>
         </div>
         
@@ -615,8 +640,6 @@
             <p id="approx-total-amount" class="text-2xl font-bold text-gray-800">₹ 0.00</p>
             <p class="text-xs text-gray-500">This is an estimated total based on all customer complaints and suggested repairs.</p>
         </div>
-
-        
 
         <div>
             <label for="delivery-date" class="form-label border-t pt-4">Expected Delivery Date <span class="text-red-500">*</span></label>
@@ -628,9 +651,7 @@
                 <span class="material-symbols-outlined">save</span>Save Update
             </button>
             <button type="button" id="send-whatsapp-btn" onclick="sendApprovalLink()" class="btn-whatsapp">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path></svg>
                 Send Approval via WhatsApp
             </button>
         </div>
@@ -842,14 +863,10 @@
         </div>
 
         <div class="pt-2">
-            <h4 class="font-bold text-gray-700 mb-2">Customer Complaints</h4>
-            <div id="inspector-modal-complaints" class="space-y-1 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg"></div>
+    <h4 class="font-bold text-gray-700 mb-2">Customer Approved Repairs</h4>
+    <div id="inspector-modal-approved-list" class="space-y-1 text-sm text-gray-600 bg-green-50 p-3 rounded-lg">
         </div>
-        
-        <div class="pt-2">
-            <h4 class="font-bold text-gray-700 mb-2">Mechanic's Suggested Repairs</h4>
-            <div id="inspector-modal-suggestions" class="space-y-1 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"></div>
-        </div>
+</div>
 
         <div id="inspector-modal-actions" class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t">
             </div>
@@ -1575,10 +1592,8 @@
 		
 
 function handleCheckboxChange(checkbox) {
-    // This helper function re-renders the list to show/hide the materials input correctly.
     const reRenderList = () => {
         const approvedItems = [];
-        // Get the current list of approved items directly from the checkboxes
         document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(cb => {
             try { 
                 approvedItems.push(JSON.parse(cb.value)); 
@@ -1586,7 +1601,6 @@ function handleCheckboxChange(checkbox) {
                 console.error("Error parsing checkbox value on change:", e);
             }
         });
-        // Call the main render function with the current state and the new approved list
         renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
     };
 
@@ -1597,19 +1611,16 @@ function handleCheckboxChange(checkbox) {
 
         confirmBtn.onclick = () => {
             hideModal('change-confirmation-modal');
-            reRenderList(); // Re-render the list after user confirmation
+            reRenderList();
         };
         cancelBtn.onclick = () => {
-            checkbox.checked = !checkbox.checked; // Revert the checkbox if the user cancels
+            checkbox.checked = !checkbox.checked;
             hideModal('change-confirmation-modal');
         };
     } else {
-        reRenderList(); // If customer hasn't approved yet, just re-render directly
+        reRenderList();
     }
 }
-
-
-
 
         function handleRecordingToggle() {
             if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -1750,6 +1761,8 @@ async function login() {
 		
 // ADD NEW FUNCTION: Populates the list for the washer
 // REPLACE this function
+// REPLACE your existing populateWashList function with this corrected version
+
 async function populateWashList() {
     const listContainer = document.getElementById('wash-queue-list');
     const noJobsMsg = document.getElementById('no-wash-jobs-message');
@@ -1764,26 +1777,29 @@ async function populateWashList() {
         `)
         .eq('status', 'Sent To Wash')
         .order('created_at', { ascending: true });
+
     const reports = await handleSupabaseQuery(query, 'Could not fetch wash queue.');
     if (reports === null) return;
     if (reports.length === 0) {
         noJobsMsg.classList.remove('hidden');
         return;
     }
+
     reports.forEach(report => {
         const card = document.createElement('div');
         const vehicle = report.vehicles;
         const executive = report.executive;
-        const brandAndModel = `${vehicle.vehicle_models.brand || ''} ${vehicle.vehicle_models.model || ''}`.trim();
         
-        // THE FIX: Added classes to make the card stack vertically on mobile
+        // **THE FIX IS HERE:** This line now safely checks if 'vehicle_models' exists.
+        // If it doesn't, it will show an empty string instead of crashing.
+        const brandAndModel = `${vehicle.vehicle_models?.brand || ''} ${vehicle.vehicle_models?.model || ''}`.trim();
+        
         card.className = 'p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
         
-        // THE FIX: Added responsive width to the button and aligned text left on mobile
         card.innerHTML = `
             <div class="w-full sm:w-auto text-left">
                 <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
-                <p class="text-sm text-gray-600 mt-1">${brandAndModel}</p>
+                <p class="text-sm text-gray-600 mt-1">${brandAndModel || 'Brand/Model not specified'}</p>
                 <p class="text-xs text-gray-500 mt-1">From: ${executive?.username || 'N/A'}</p>
             </div>
             <button onclick="completeWash(${report.id})" class="btn-primary w-full sm:w-auto flex-shrink-0 !py-2 !px-3">
@@ -1917,9 +1933,7 @@ async function populateReadyToCloseJobs() {
     reports.forEach(report => {
         const card = document.createElement('div');
         // THE FIX: Added optional chaining (?.) to safely access brand and model
-        const brand = report.vehicles.vehicle_models && report.vehicles.vehicle_models.brand ? report.vehicles.vehicle_models.brand : '';
-const model = report.vehicles.vehicle_models && report.vehicles.vehicle_models.model ? report.vehicles.vehicle_models.model : '';
-const brandAndModel = `${brand} ${model}`.trim();
+        const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
         
         card.className = 'p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
         card.innerHTML = `
@@ -1950,44 +1964,31 @@ function populateDueDateScreen() {
 		
 
 // REPLACE this function
+// REPLACE this entire function
 function showInspectionDetails(report) {
     document.getElementById('inspector-modal-vehicle-no').textContent = report.vehicles.vehicle_no;
-    document.getElementById('inspector-modal-executive').textContent = report.executive && report.executive.username ? report.executive.username : 'N/A';
+    document.getElementById('inspector-modal-executive').textContent = report.executive?.username || 'N/A';
 
-    const complaintsList = document.getElementById('inspector-modal-complaints');
-    complaintsList.innerHTML = '';
-    const complaints = JSON.parse(report.complaint || '[]');
-    if (complaints.length > 0) {
+    const approvedListContainer = document.getElementById('inspector-modal-approved-list');
+    approvedListContainer.innerHTML = ''; // Clear previous content
+
+    const approvedItems = JSON.parse(report.approved || '[]');
+
+    if (approvedItems && approvedItems.length > 0) {
         const ul = document.createElement('ul');
         ul.className = 'list-disc list-inside space-y-1';
-        complaints.forEach(c => {
+        approvedItems.forEach(item => {
             const li = document.createElement('li');
-            li.textContent = c.text || c;
+            // Display the text and amount for each approved item
+            li.textContent = `${item.text} (₹${(item.amount || 0).toFixed(2)})`;
             ul.appendChild(li);
         });
-        complaintsList.appendChild(ul);
+        approvedListContainer.appendChild(ul);
     } else {
-        complaintsList.innerHTML = '<p class="italic">No complaints registered.</p>';
-    }
-
-    const suggestionsList = document.getElementById('inspector-modal-suggestions');
-    suggestionsList.innerHTML = '';
-    const suggestions = JSON.parse(report.suggested || '[]');
-     if (suggestions.length > 0) {
-        const ul = document.createElement('ul');
-        ul.className = 'list-disc list-inside space-y-1';
-        suggestions.forEach(s => {
-            const li = document.createElement('li');
-            li.textContent = `${s.text} (₹${s.amount || 0})`;
-            ul.appendChild(li);
-        });
-        suggestionsList.appendChild(ul);
-    } else {
-        suggestionsList.innerHTML = '<p class="italic">No mechanic suggestions added yet.</p>';
+        approvedListContainer.innerHTML = '<p class="italic">No services were approved by the customer for this job.</p>';
     }
 
     const actionsContainer = document.getElementById('inspector-modal-actions');
-    // THE FIX: Added w-full sm:w-auto to make buttons responsive
     actionsContainer.innerHTML = `
         <button onclick="handleInspection('${report.id}', 'rejected', '${report.vehicles.vehicle_no}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">
             Reject
@@ -1999,7 +2000,6 @@ function showInspectionDetails(report) {
     
     showModal('inspector-details-modal');
 }
-
 
 // Add this new function anywhere in your <script> tag
 // REPLACE this function
@@ -2030,9 +2030,7 @@ async function populateInspectionPendingJobs() {
         rejectedReports.forEach(report => {
             const card = document.createElement('div');
             // THE FIX: Added optional chaining (?.)
-            const brand = report.vehicles.vehicle_models && report.vehicles.vehicle_models.brand ? report.vehicles.vehicle_models.brand : '';
-const model = report.vehicles.vehicle_models && report.vehicles.vehicle_models.model ? report.vehicles.vehicle_models.model : '';
-const brandAndModel = `${brand} ${model}`.trim();
+            const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
             card.className = 'p-4 border border-red-300 bg-red-50 rounded-lg';
             card.innerHTML = `
                 <div class="flex justify-between items-start">
@@ -2045,7 +2043,7 @@ const brandAndModel = `${brand} ${model}`.trim();
                     </button>
                 </div>
                 <div class="mt-2 pt-2 border-t border-red-200">
-                    <p class="text-sm text-red-800 font-semibold">Remarks from ${report.inspector && report.inspector.username ? report.inspector.username : 'Inspector'}:</p>
+                    <p class="text-sm text-red-800 font-semibold">Remarks from ${report.inspector?.username || 'Inspector'}:</p>
                     <p class="text-sm text-gray-600 italic">"${report.inspection_remarks || 'No remarks provided.'}"</p>
                 </div>
             `;
@@ -2103,15 +2101,17 @@ async function resendForInspection(reportId) {
 
 // New functions for the inspector workflow
 // REPLACE this function
+// REPLACE this entire function to fix the login error
 async function populateInspectionQueue() {
     const listContainer = document.getElementById('inspection-queue-list');
     const noJobsMsg = document.getElementById('no-inspection-jobs-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // THE FIX: Added 'inspection_remarks' to the query
+    // THE FIX: The 'query' variable is now correctly defined only once.
+    // This query now correctly selects 'approved' and 'inspection_remarks' for the modal.
     const query = sb.from('reports')
-        .select(`id, complaint, suggested, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
+        .select(`id, complaint, suggested, approved, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
         .eq('status', 'pending_inspection')
         .order('created_at', { ascending: true });
     
@@ -2125,7 +2125,6 @@ async function populateInspectionQueue() {
         const card = document.createElement('div');
         card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
 
-        // THE FIX: Check for remarks and create the badge if they exist
         const isReinspection = report.inspection_remarks && report.inspection_remarks.trim() !== '';
         const reinspectionBadge = isReinspection 
             ? '<span class="ml-2 text-xs font-semibold text-orange-800 bg-orange-200 px-2 py-0.5 rounded-full">Re-inspection</span>' 
@@ -2138,7 +2137,7 @@ async function populateInspectionQueue() {
                 ${reinspectionBadge}
             </div>
             <p class="text-sm text-gray-600">${report.vehicles.vehicle_name || ''}</p>
-            <p class="text-xs text-gray-500 mt-1">From: ${report.executive && report.executive.username ? report.executive.username : 'N/A'}</p>
+            <p class="text-xs text-gray-500 mt-1">From: ${report.executive?.username || 'N/A'}</p>
         `;
 
         const viewButton = document.createElement('button');
@@ -2243,9 +2242,7 @@ async function populateWashPendingJobs() {
     reports.forEach(report => {
         const card = document.createElement('div');
         // THE FIX: Added optional chaining (?.)
-        const brand = report.vehicles.vehicle_models && report.vehicles.vehicle_models.brand ? report.vehicles.vehicle_models.brand : '';
-const model = report.vehicles.vehicle_models && report.vehicles.vehicle_models.model ? report.vehicles.vehicle_models.model : '';
-const brandAndModel = `${brand} ${model}`.trim();
+        const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
         
         if (report.status === 'inspection_approved') {
             card.className = 'p-4 border border-yellow-300 bg-yellow-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
@@ -2309,9 +2306,7 @@ async function populateCompletedWashJobs() {
     reports.forEach(report => {
         const card = document.createElement('div');
         // THE FIX: Added optional chaining (?.)
-        const brand = report.vehicles.vehicle_models && report.vehicles.vehicle_models.brand ? report.vehicles.vehicle_models.brand : '';
-const model = report.vehicles.vehicle_models && report.vehicles.vehicle_models.model ? report.vehicles.vehicle_models.model : '';
-const brandAndModel = `${brand} ${model}`.trim();
+        const brandAndModel = `${report.vehicles.vehicle_models?.brand || ''} ${report.vehicles.vehicle_models?.model || ''}`.trim();
         
         card.className = 'p-4 border border-green-300 bg-green-50 rounded-lg flex justify-between items-center';
         card.innerHTML = `
@@ -2454,18 +2449,24 @@ async function addUser(role) {
 //
 // THIS IS THE FINAL, MORE ROBUST FUNCTION. PLEASE REPLACE THE OLD ONE WITH THIS.
 //
+// REPLACE your entire fetchAndPopulateReports function with this one
+
 async function fetchAndPopulateReports(isAdmin = false) {
     const tableContainerId = isAdmin ? 'admin-reports-screen' : 'report-screen';
     const tableBodyId = isAdmin ? 'admin-report-table-body' : 'report-table-body';
     const tableEl = document.querySelector(`#${tableContainerId} .report-table`);
     const tableBody = document.getElementById(tableBodyId);
     const noReportsMsg = document.getElementById(isAdmin ? 'admin-no-reports-message' : 'no-reports-message');
+    
     // --- Define all possible columns and their render logic ---
     const allColumns = [
         { key: 'vehicle_no', label: 'Vehicle No.', render: (row) => `<button onclick='printJobCardById(${row.id})' class="text-gray-500 hover:text-green-600 p-1 rounded-full shrink-0"><span class="material-symbols-outlined">download</span></button><span>${row.vehicles.vehicle_no}</span>`, className: 'flex items-center gap-x-2' },
         { key: 'vehicle_name', label: 'Vehicle Name', render: (row) => row.vehicles.vehicle_name || 'N/A' },
-        { key: 'model', label: 'Model', render: (row) => row.vehicles.vehicle_models.model },
-        { key: 'brand', label: 'Brand', render: (row) => row.vehicles.vehicle_models.brand },
+        
+        // **FIX PART 2: Added optional chaining (?.) to prevent errors**
+        { key: 'model', label: 'Model', render: (row) => row.vehicles?.vehicle_models?.model || 'N/A' },
+        { key: 'brand', label: 'Brand', render: (row) => row.vehicles?.vehicle_models?.brand || 'N/A' },
+
         { key: 'color', label: 'Color', render: (row) => row.vehicles.color || 'N/A' },
         { key: 'engine_no', label: 'Engine No', render: (row) => row.vehicles.engine_no || 'N/A' },
         { key: 'chassis_no', label: 'Chassis No', render: (row) => row.vehicles.chassis_no || 'N/A' },
@@ -2486,23 +2487,22 @@ async function fetchAndPopulateReports(isAdmin = false) {
     ];
     const visibleColumnKeys = appSettings.visible_report_columns || allColumns.map(c => c.key);
     const columnsToRender = allColumns.filter(c => visibleColumnKeys.includes(c.key));
-    // --- Dynamically build the table header ---
+
     let thead = tableEl.querySelector('thead');
     if (!thead) {
         thead = document.createElement('thead');
         tableEl.prepend(thead);
     }
     thead.innerHTML = `<tr>${columnsToRender.map(col => `<th>${col.label}</th>`).join('')}</tr>`;
-    // --- Get Filter Values ---
+    
     const fromDate = document.getElementById(isAdmin ? 'admin-filter-from-date' : 'filter-from-date').value;
     const toDate = document.getElementById(isAdmin ? 'admin-filter-to-date' : 'filter-to-date').value;
     const vehicleNo = document.getElementById(isAdmin ? 'admin-filter-vehicle-no' : 'filter-vehicle-no').value.trim().toUpperCase();
     const brand = document.getElementById(isAdmin ? 'admin-filter-brand' : 'filter-brand').value.trim();
     const execName = isAdmin ? document.getElementById('admin-filter-exec-name').value.trim() : '';
-    // --- NEW: More Robust Executive Filter Logic ---
+    
     let executiveIdsToFilter = [];
     if (isAdmin && execName) {
-        // Step 1: Find the IDs of executives matching the name.
         const { data: users, error: userError } = await sb
             .from('users')
             .select('id')
@@ -2512,65 +2512,58 @@ async function fetchAndPopulateReports(isAdmin = false) {
             return;
         }
         if (users.length === 0) {
-            // If no executives match the name, show an empty table immediately.
             tableBody.innerHTML = '';
             noReportsMsg.classList.remove('hidden');
             return;
         }
         executiveIdsToFilter = users.map(user => user.id);
     }
-    // --- End of New Logic ---
-    // --- Build The Query ---
+    
+    // **FIX PART 1: Changed 'vehicles!inner' and 'vehicle_models!inner' to regular joins**
     let query = sb.from('reports').select(`
         id, created_at, status, complaint, suggested, approved, marks,
         odometer_reading, client_name, client_phone,
         gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
-        vehicles!inner(
+        vehicles(
           id, vehicle_no, vehicle_name, color, engine_no, chassis_no,
-          vehicle_models!inner(brand, model)
+          vehicle_models(brand, model)
         ),
         executive:executive_id(username, id),
         inspector:inspector_id(username, id)
     `).order('created_at', { ascending: false });
-    // --- Apply Filters To The Query ---
+
     if (isAdmin) {
-        // Step 2: Use the IDs we found to filter the main reports query.
         if (executiveIdsToFilter.length > 0) {
             query = query.in('executive_id', executiveIdsToFilter);
         }
     } else {
-        // For executives, STRICTLY filter by their own ID.
         query = query.eq('executive_id', currentUser.id);
     }
-    if (fromDate) {
-        query = query.gte('created_at', `${fromDate}T00:00:00`);
-    }
-    if (toDate) {
-        query = query.lte('created_at', `${toDate}T23:59:59`);
-    }
-    if (vehicleNo) {
-        query = query.ilike('vehicles.vehicle_no', `%${vehicleNo}%`);
-    }
-    if (brand) {
-        query = query.ilike('vehicles.vehicle_models.brand', `%${brand}%`);
-    }
+    if (fromDate) query = query.gte('created_at', `${fromDate}T00:00:00`);
+    if (toDate) query = query.lte('created_at', `${toDate}T23:59:59`);
+    if (vehicleNo) query = query.ilike('vehicles.vehicle_no', `%${vehicleNo}%`);
+    if (brand) query = query.ilike('vehicles.vehicle_models.brand', `%${brand}%`);
+    
     const reports = await handleSupabaseQuery(query, "Failed to fetch reports.");
     if (reports === null) return;
+
     reportsDataStore = {};
     reports.forEach(row => { reportsDataStore[row.id] = row; });
-    // --- Dynamically build the table body ---
+    
     tableBody.innerHTML = '';
     if (reports.length === 0) {
         noReportsMsg.classList.remove('hidden');
         return;
     }
+
     noReportsMsg.classList.add('hidden');
     reports.forEach(row => {
+        if (!row.vehicles) return; // Add a safety check in case vehicle data is missing entirely
         const tr = document.createElement('tr');
         columnsToRender.forEach(col => {
             const td = document.createElement('td');
             if (col.className) td.className = col.className;
-            if (col.key === 'complaint' || col.key === 'suggested' || col.key === 'approved' || col.key === 'feedback_text') {
+            if (['complaint', 'suggested', 'approved', 'feedback_text'].includes(col.key)) {
                 td.title = formatArrayCell(row[col.key]);
             }
             td.innerHTML = col.render(row);
@@ -2694,8 +2687,8 @@ async function searchVehicle() {
         // --- START OF FIX ---
         // Safely access brand and model using optional chaining (?.)
         // This prevents the "Cannot read properties of null" error.
-        document.getElementById('detail-brand').textContent = data.vehicle_models && data.vehicle_models.brand ? data.vehicle_models.brand : 'N/A';
-        document.getElementById('detail-model').textContent = data.vehicle_models && data.vehicle_models.model ? data.vehicle_models.model : 'N/A';
+        document.getElementById('detail-brand').textContent = data.vehicle_models?.brand || 'N/A';
+        document.getElementById('detail-model').textContent = data.vehicle_models?.model || 'N/A';
         // --- END OF FIX ---
 
         document.getElementById('detail-fuel-type').textContent = data.fuel_type || 'N/A';
@@ -3093,7 +3086,6 @@ function executeAddSuggestion() {
     suggestionInput.focus();
 }
 
-
 // REPLACE the existing deleteSuggestion function
 function deleteSuggestion(index) {
     newSuggestions.splice(index, 1);
@@ -3109,56 +3101,102 @@ function deleteSuggestion(index) {
 }
 function updateCustomerTotal() {
     const totalAmountEl = document.getElementById('cust-total-amount');
+    if (!totalAmountEl) return;
+    
     let total = 0;
     document.querySelectorAll('#approval-suggestions-list input[type="checkbox"]:checked').forEach(checkbox => {
         try {
             const item = JSON.parse(checkbox.value);
-            total += item.amount || 0;
-        } catch {}
+            total += parseFloat(item.amount) || 0;
+        } catch (e) {
+            console.error('Error parsing checkbox value:', e);
+        }
     });
-    if (totalAmountEl) {
-        totalAmountEl.textContent = `₹ ${total.toFixed(2)}`;
-    }
+    
+    totalAmountEl.textContent = `₹ ${total.toFixed(2)}`;
 }
-// ADD THIS NEW FUNCTION
-// Updates the cost of a complaint in the state array when the executive types in the input field.
+// ADD THIS NEW FUNCTION to your  tag
+// Provides real-time updates to the total amount as the mechanic types.
+function updateApproxTotalInRealTime() {
+    const totalAmountEl = document.getElementById('approx-total-amount');
+    if (!totalAmountEl) return;
+
+    let totalAmount = 0;
+
+    // 1. Sum amounts from original customer complaint inputs
+    document.querySelectorAll('#customer-complaints-list input[type="number"]').forEach(input => {
+        totalAmount += parseFloat(input.value) || 0;
+    });
+    
+    // 2. Sum amounts from already-added new mechanic suggestions
+    newSuggestions.forEach(suggestion => {
+        totalAmount += parseFloat(suggestion.amount) || 0;
+    });
+
+    // 3. Add the current, not-yet-saved amount from the "Add New" input field
+    const currentSuggestionAmountInput = document.getElementById('suggestion-amount-input');
+    if (currentSuggestionAmountInput) {
+        totalAmount += parseFloat(currentSuggestionAmountInput.value) || 0;
+    }
+    
+    totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
+}
+
+// ALSO, make a small change to the 'updateComplaintCost' function
+// to ensure totals update correctly when you edit original complaint costs.
+// REPLACE the existing 'updateComplaintCost' function with this new version
 function updateComplaintCost(text, newAmount) {
+    // Find the specific complaint in the state array and update its amount
     const complaint = originalComplaintsForUpdate.find(c => c.text === text);
     if (complaint) {
         complaint.amount = parseFloat(newAmount) || 0;
     }
-    recalculateAndUpdateTotal();
-}
 
-// ADD THIS NEW FUNCTION
-// Calculates the total cost from both original complaints and new suggestions and updates the UI.
-function recalculateAndUpdateTotal() {
-    const totalAmountEl = document.getElementById('approx-total-amount');
-    let totalAmount = 0;
-    // Find all checked checkboxes in the list and sum their values
+    // To maintain the user's selections, we need to read which items are currently checked
+    const approvedItems = [];
     document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
         try {
-            // The checkbox value is a stringified JSON object, so we parse it
-            const item = JSON.parse(checkbox.value);
-            if (item && typeof item.amount === 'number') {
-                totalAmount += item.amount;
-            }
+            // The checkbox value is a JSON string of the item object
+            approvedItems.push(JSON.parse(checkbox.value));
         } catch (e) {
-            console.error("Could not parse checkbox value for total calculation:", checkbox.value);
+             console.error("Could not parse checkbox value during cost update:", e);
         }
     });
+    
+    // Now, re-render the entire suggestions and approval section.
+    // This will update the displayed cost for the item in the "Customer Approved suggestions" list
+    // and also recalculate the total amount correctly.
+    renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+}
+// ADD THIS MISSING FUNCTION
+// Calculates the total cost from the data arrays and updates the UI.
+function recalculateAndUpdateTotal() {
+    const totalAmountEl = document.getElementById('approx-total-amount');
+    if (!totalAmountEl) return;
+    
+    let totalAmount = 0;
+    
+    // 1. Sum amounts from the original customer complaints array
+    originalComplaintsForUpdate.forEach(complaint => {
+        totalAmount += parseFloat(complaint.amount) || 0;
+    });
+    
+    // 2. Sum amounts from the new mechanic suggestions array
+    newSuggestions.forEach(suggestion => {
+        totalAmount += parseFloat(suggestion.amount) || 0;
+    });
+    
     totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
 }
-
+// REPLACE the existing 'renderSuggestions' function with this new version
 function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const executiveList = document.getElementById('executive-suggestions-list');
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
-    // ADD THIS LINE: Check which tab is currently active.
     const isPendingTabActive = document.getElementById('tab-btn-pending').classList.contains('active-tab');
 
-    // 1. Render editable customer complaints
+    // --- 1. Render editable customer complaints ---
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
         complaints.forEach((item) => {
@@ -3169,11 +3207,12 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
                 <div class="flex-1">
                     <span class="font-medium break-words">${item.text}</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 shrink-0">
                     <span class="font-bold text-gray-500">₹</span>
-                    <input type="number" class="form-input !py-1 !px-2 w-20 text-right" 
+                    <input type="number" class="form-input !py-1 !px-2 w-24 text-right" 
                            value="${item.amount || 0}" placeholder="Cost"
-                           data-text="${sanitizedText}" oninput="updateComplaintCost(this.dataset.text, this.value)">
+                           data-text="${sanitizedText}" 
+                           oninput="updateComplaintCost(this.dataset.text, this.value)">
                 </div>
             `;
             customerComplaintsList.appendChild(complaintItem);
@@ -3182,14 +3221,14 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerComplaintsList.innerHTML = '<p class="text-sm text-gray-500">No original complaints were registered.</p>';
     }
     
-    // 2. Render NEW mechanic suggestions
+    // --- 2. Render NEW mechanic suggestions ---
     executiveList.innerHTML = '';
     if (suggestions.length > 0) {
         suggestions.forEach((item, index) => {
             const execItem = document.createElement('div');
-            execItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm';
+            execItem.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-lg text-sm';
             execItem.innerHTML = `
-                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${item.amount.toFixed(2)}</span></p>
+                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${(item.amount || 0).toFixed(2)}</span></p>
                 <button type="button" onclick="deleteSuggestion(${index})" class="text-red-500 hover:text-red-700 shrink-0">
                     <span class="material-symbols-outlined">delete</span>
                 </button>
@@ -3198,7 +3237,8 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // 3. Render the COMBINED list for the final approval checklist
+    // --- 3. Render the COMBINED list for the final approval checklist ---
+    // (This logic remains the same to handle approved jobs correctly)
     customerApprovalList.innerHTML = '';
     const allItemsForApproval = [...complaints, ...suggestions]; 
 
@@ -3212,7 +3252,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
             const sanitizedText = item.text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const materialsValue = item.materials || '';
             
             const isOriginalComplaint = item.type === 'complaint';
             const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
@@ -3225,60 +3264,26 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             let materialsInputHtml = '';
             
-            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
-            // The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
-            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
-// The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
-if (hasCustomerResponded && isChecked && !isPendingTabActive) {
-    // Parse existing materials into an array (split by comma or newline)
-    const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
-    
-    materialsInputHtml = `
-        <div class="mt-2 pt-2 border-t border-gray-300/50">
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
-                <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                </button>
-            </div>
-            <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
-                ${existingMaterials.length > 0 
-                    ? existingMaterials.map((material, index) => `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
-                                   value="${material}"
-                                   placeholder="e.g., Oil filter, 4L synthetic oil"
-                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
-                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
+            if (hasCustomerResponded && isChecked && !isPendingTabActive) {
+                const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
+                
+                materialsInputHtml = `
+                    <div class="mt-2 pt-2 border-t border-gray-300/50">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
+                            <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0"><span class="material-symbols-outlined text-sm">add</span></button>
                         </div>
-                      `).join('')
-                    : `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
-                                   value=""
-                                   placeholder="e.g., Oil filter, 4L synthetic oil"
-                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
-                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
+                        <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
+                            ${existingMaterials.map((material, index) => `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="${material}" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`).join('') || `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`}
                         </div>
-                      `
-                }
-            </div>
-        </div>
-    `;
-}
+                    </div>`;
+            }
 
             approvalItemContainer.innerHTML = `
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                           value=${checkboxValue} 
-                           ${isChecked ? 'checked' : ''}
-                           onchange="handleCheckboxChange(this)">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value=${checkboxValue} ${isChecked ? 'checked' : ''} onchange="handleCheckboxChange(this)">
                     <div class="flex-1 flex justify-between items-center">
-                       <span class="font-medium break-all">${item.text}</span>
+                       <span class="font-medium">${item.text}</span>
                         <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                     </div>
                     ${tag}
@@ -3291,6 +3296,7 @@ if (hasCustomerResponded && isChecked && !isPendingTabActive) {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
     
+    // Recalculate total at the end of every render
     recalculateAndUpdateTotal();
 }
 function addMaterialField(itemText) {
@@ -3711,34 +3717,63 @@ async function saveVehicleUpdate(shouldReset = true) {
 
 
                 
-// REPLACE this entire function
 async function sendApprovalLink() {
     if (!currentReportId) {
         return showError('No report is currently selected.');
     }
 
     try {
-        // 1. Give the user immediate feedback that something is happening.
         showSuccessMessage('Saving and preparing link...');
 
-        // 2. Combine and save all required data to the database first.
+        // Gather the amounts that the executive entered for each complaint
+        const updatedComplaints = [];
+        originalComplaintsForUpdate.forEach(complaint => {
+            const sanitizedText = complaint.text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const input = document.querySelector(`input[data-text="${sanitizedText}"]`);
+            
+            if (input) {
+                updatedComplaints.push({
+                    text: complaint.text,
+                    amount: parseFloat(input.value) || 0,
+                    type: 'complaint',
+                    materials: complaint.materials || ''
+                });
+            } else {
+                updatedComplaints.push({
+                    text: complaint.text,
+                    amount: complaint.amount || 0,
+                    type: 'complaint',
+                    materials: complaint.materials || ''
+                });
+            }
+        });
+
+        // Combine updated complaints with new suggestions
         const allItemsForApproval = [
-            ...originalComplaintsForUpdate,
+            ...updatedComplaints,
             ...newSuggestions
         ];
+
+        // Validate that at least one item has been added
+        if (allItemsForApproval.length === 0) {
+            return showError('Please add at least one repair item before sending approval link.');
+        }
+
+        // Save the complete list with amounts to the database
         const { error: saveDataError } = await sb.from('reports')
             .update({
+                complaint: JSON.stringify(updatedComplaints),
                 suggested: JSON.stringify(allItemsForApproval),
                 status: 'Ongoing'
             })
             .eq('id', currentReportId);
 
         if (saveDataError) {
-            // If saving fails, stop here and show an error.
+            console.error('Error saving to database:', saveDataError);
             throw saveDataError;
         }
 
-        // 3. Fetch the report data again to get the client's phone number.
+        // Fetch the report data to get client's phone number
         const { data: reportData, error: reportError } = await sb
             .from('reports')
             .select('client_phone, vehicles(*)')
@@ -3749,33 +3784,27 @@ async function sendApprovalLink() {
             throw reportError;
         }
 
-        // 4. Explicitly check if a phone number exists.
-       const clientPhone = reportData.client_phone || (reportData.vehicles && reportData.vehicles.client_phone);
+        const clientPhone = reportData.client_phone || reportData.vehicles?.client_phone;
         if (!clientPhone) {
-            // This is a clear error message instead of getting stuck.
             return showError("Cannot send: Client phone number is missing for this job card.");
         }
 
-        // 5. Construct the final URL.
+        // Construct and send the WhatsApp link
         const approvalUrl = `${window.location.origin}${window.location.pathname}?report_id=${currentReportId}`;
         const messageText = `Dear Customer,\n\nPlease review and approve the suggested repairs for your vehicle using the link below:\n${approvalUrl}\n\nThank you,\nAutoFix Service`;
         const encodedText = encodeURIComponent(messageText);
         const whatsappUrl = `https://wa.me/91${clientPhone}?text=${encodedText}`;
 
-        // 6. **THE FIX:** Use window.location.href for better mobile compatibility.
         window.location.href = whatsappUrl;
 
         showSuccessMessage("Approval link sent! Job moved to 'Awaiting Response'.");
         resetVehicleUpdateScreen();
 
     } catch (error) {
-        // This will catch any error from the steps above.
         console.error('Error in sendApprovalLink:', error);
         showError(`An error occurred: ${error.message}`);
     }
 }
-
-
         async function populateNotStartedJobs() {
             if (!currentUser) {
                 console.error("populateNotStartedJobs: currentUser is null. Cannot fetch data.");
@@ -4448,7 +4477,7 @@ function showAdminScreen(screenId) {
     document.getElementById(screenId).style.display = 'block';
     
     if (screenId === 'admin-vehicle-management-screen') renderVehicleModelList();
-    if (screenId === 'admin-reports-screen') fetchAndPopulateReports(true);
+    if (screenId === 'admin-reports-screen') clearAdminReportFilters();
     if (screenId === 'admin-analytics-screen') { populateAnalyticsFilters(); renderAnalytics(); }
     if (screenId === 'admin-executive-management-screen') renderUserList('executive');
     if (screenId === 'admin-admin-management-screen') renderUserList('admin');
@@ -4466,7 +4495,7 @@ function showExecutiveScreen(screenId) {
     document.getElementById(screenId).style.display = 'block';
     setActiveNav(screenId);
 
-    if (screenId === 'report-screen') fetchAndPopulateReports(false);
+    if (screenId === 'report-screen') clearReportFilters();
     
     // THE FIX: The default tab is now 'ready-to-close'
     if (screenId === 'due-date-screen') showCloseTab('ready-to-close'); 
@@ -4603,77 +4632,110 @@ function showError(message, errorObject = null) {
         // --- Customer Approval Flow ---
        // This new version correctly displays all items and costs for the customer.
 // This new version correctly displays all items and costs for the customer.
-        async function loadApprovalScreen(reportId) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('admin-screens').style.display = 'none';
-            document.getElementById('executive-screens').style.display = 'none';
-            document.getElementById('customer-approval-screen').classList.add('active-screen');
+// REPLACE this entire function
+async function loadApprovalScreen(reportId) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screens').style.display = 'none';
+    document.getElementById('executive-screens').style.display = 'none';
+    document.getElementById('customer-approval-screen').classList.add('active-screen');
 
-            // We now only need the 'suggested' column, as it contains the complete list.
-            const { data: report, error } = await sb.from('reports')
-                .select(`suggested, approved, vehicles ( vehicle_no )`)
-                .eq('id', reportId)
-                .single();
+    const suggestionsList = document.getElementById('approval-suggestions-list');
+    suggestionsList.innerHTML = '<p class="text-center text-gray-500">Loading repair details...</p>';
 
-            if (error || !report) {
-                console.error('Error fetching report for approval:', error);
-                document.getElementById('approval-content').innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid.</p>';
-                return;
-            }
+    try {
+        const { data: report, error } = await sb
+            .from('reports')
+            .select('id, suggested, approved, vehicles!inner(vehicle_no)')
+            .eq('id', reportId)
+            .single();
 
-            document.getElementById('approval-vehicle-no').textContent = report.vehicles.vehicle_no;
-
-            if (report.approved && report.approved !== '[]') {
-                document.getElementById('approval-content').classList.add('hidden');
-                const successMsg = document.getElementById('approval-success-message');
-                successMsg.querySelector('h3').textContent = 'Response Already Submitted';
-                successMsg.querySelector('p').textContent = 'Thank you, we have already received your feedback for this service request.';
-                successMsg.classList.remove('hidden');
-                document.querySelector('#customer-approval-card h2').textContent = 'Response Received';
-            } else {
-                const suggestionsList = document.getElementById('approval-suggestions-list');
-                suggestionsList.innerHTML = '';
-                try {
-                    // This now gets the complete, correct list from the 'suggested' column
-                    const allItems = JSON.parse(report.suggested || '[]');
-
-                    if (allItems.length > 0) {
-                         allItems.forEach(item => {
-                            const isOriginalComplaint = item.type === 'complaint';
-                            const label = document.createElement('label');
-                            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
-                            const tag = isOriginalComplaint 
-                                ? `<span class="text-xs text-gray-500">(Your Request)</span>` 
-                                : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
-                            
-                            // CRITICAL FIX: Display amount as text, not an input field.
-                            const amountDisplay = `<span class="font-bold text-gray-800 shrink-0">₹${(item.amount || 0).toFixed(2)}</span>`;
-                            const checkboxValue = `'${JSON.stringify(item)}'`;
-
-                            label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
-                            
-                            // THE FIX IS ON THE NEXT LINE: Added 'break-all' class to the span
-                            label.innerHTML = `
-                                <input type="checkbox" value=${checkboxValue} class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()">
-                                <div class="flex-1 flex justify-between items-center gap-3">
-                                     <span class="text-sm font-medium break-words">${item.text}</span>
-                                     ${amountDisplay}
-                                </div>
-                                ${tag}
-                            `;
-                            suggestionsList.appendChild(label);
-                        });
-                    } else {
-                        suggestionsList.innerHTML = '<p class="text-sm text-gray-500">No specific repairs were suggested.</p>';
-                    }
-                } catch (e) {
-                    console.error("Error parsing items for approval:", e);
-                    suggestionsList.innerHTML = '<p class="text-sm text-red-500">Could not display suggested repairs.</p>';
-                }
-                updateCustomerTotal();
-            }
+        if (error) {
+            console.error('Error fetching report for approval:', error);
+            suggestionsList.innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid or has expired.</p>';
+            return;
         }
 
+        if (!report) {
+            suggestionsList.innerHTML = '<p class="text-center text-red-600">Report not found. The link may be invalid.</p>';
+            return;
+        }
+
+        document.getElementById('approval-vehicle-no').textContent = report.vehicles?.vehicle_no || 'Unknown';
+
+        if (report.approved && report.approved !== '[]') {
+            document.getElementById('approval-content').classList.add('hidden');
+            const successMsg = document.getElementById('approval-success-message');
+            successMsg.querySelector('h3').textContent = 'Response Already Submitted';
+            successMsg.querySelector('p').textContent = 'Thank you, we have already received your feedback for this service request.';
+            successMsg.classList.remove('hidden');
+            document.querySelector('#customer-approval-card h2').textContent = 'Response Received';
+            return;
+        }
+
+        suggestionsList.innerHTML = '';
+        
+        if (!report.suggested || report.suggested === '[]') {
+            suggestionsList.innerHTML = '<p class="text-sm text-gray-500">The executive has not added repair details yet. Please wait for the approval link to be sent.</p>';
+            return;
+        }
+
+        let allItems;
+        try {
+            allItems = JSON.parse(report.suggested);
+        } catch (parseError) {
+            console.error('Error parsing suggested items:', parseError);
+            suggestionsList.innerHTML = '<p class="text-center text-red-600">Error loading repair details. Please try again or contact support.</p>';
+            return;
+        }
+
+        if (!Array.isArray(allItems) || allItems.length === 0) {
+            suggestionsList.innerHTML = '<p class="text-sm text-gray-500">No repair items found. Please contact the service center.</p>';
+            return;
+        }
+
+        allItems.forEach((item) => {
+            const isOriginalComplaint = item.type === 'complaint';
+            const label = document.createElement('label');
+            const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
+            const tag = isOriginalComplaint 
+                ? `<span class="text-xs text-gray-500">(Your Request)</span>` 
+                : `<span class="text-xs text-blue-600">(Mechanic Suggestion)</span>`;
+            
+            const amountDisplay = `<span class="font-bold text-gray-800 shrink-0">₹${(item.amount || 0).toFixed(2)}</span>`;
+            
+            const itemForCheckbox = {
+                text: item.text,
+                amount: item.amount || 0,
+                type: item.type,
+                materials: item.materials || ''
+            };
+            const checkboxValue = JSON.stringify(itemForCheckbox).replace(/"/g, '&quot;');
+            
+            // **THE FIX: Conditionally add the 'checked' attribute**
+            // Original customer complaints are checked by default, mechanic suggestions are not.
+            const isChecked = isOriginalComplaint ? 'checked' : '';
+
+            label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
+            
+            label.innerHTML = `
+                <input type="checkbox" value="${checkboxValue}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()" ${isChecked}>
+                <div class="flex-1 flex justify-between items-center gap-3">
+                     <span class="text-sm font-medium">${item.text}</span>
+                     ${amountDisplay}
+                </div>
+                ${tag}
+            `;
+            suggestionsList.appendChild(label);
+        });
+        
+        // This function will now correctly calculate the initial total based on the pre-checked items.
+        updateCustomerTotal();
+        
+    } catch (error) {
+        console.error('Unexpected error in loadApprovalScreen:', error);
+        suggestionsList.innerHTML = '<p class="text-center text-red-600">An unexpected error occurred. Please try again.</p>';
+    }
+}
 
         async function submitCustomerFeedback() {
     const params = new URLSearchParams(window.location.search);
@@ -4787,78 +4849,81 @@ document.addEventListener('DOMContentLoaded', async () => { // Make this async
             }
         }
 
-        function printJobCard(reportData) {
-            document.getElementById('print-report-date').textContent = new Date(reportData.created_at).toLocaleString();
-            document.getElementById('print-executive-name').textContent = reportData.executive && reportData.executive.username ? reportData.executive.username : 'N/A';
-            document.getElementById('print-vehicle-no').textContent = reportData.vehicles.vehicle_no || 'N/A';
-            document.getElementById('print-vehicle-name').textContent = `${reportData.vehicles.vehicle_models.brand} ${reportData.vehicles.vehicle_models.model}`;
-            document.getElementById('print-engine-chassis').textContent = `${reportData.vehicles.engine_no || 'N/A'} / ${reportData.vehicles.chassis_no || 'N/A'}`;
-			document.getElementById('print-client-name').textContent = reportData.client_name || 'N/A';
-			document.getElementById('print-client-phone').textContent = reportData.client_phone || 'N/A';
-			document.getElementById('print-odometer').textContent = reportData.odometer_reading || 'N/A';
+       // REPLACE your existing printJobCard function with this corrected version
 
-            
-            const populateList = (listId, dataString) => {
-                const list = document.getElementById(listId);
-                list.innerHTML = '';
-                try {
-                    const items = JSON.parse(dataString || '[]'); // Safely parse the data
-                    if (items && items.length > 0) {
-                        items.forEach(item => {
-                            const li = document.createElement('li');
-                            // **THE FIX: Check if the item is an object and use its .text property**
-                            if (typeof item === 'object' && item !== null && item.text) {
-                                li.textContent = item.text;
-                            } else {
-                                // Fallback for older data that might just be strings
-                                li.textContent = item;
-                            }
-                            list.appendChild(li);
-                        });
+function printJobCard(reportData) {
+    document.getElementById('print-report-date').textContent = new Date(reportData.created_at).toLocaleString();
+    document.getElementById('print-executive-name').textContent = reportData.executive?.username || 'N/A';
+    document.getElementById('print-vehicle-no').textContent = reportData.vehicles.vehicle_no || 'N/A';
+    
+    // **THE FIX IS HERE: Safely access brand and model to prevent crashing**
+    document.getElementById('print-vehicle-name').textContent = `${reportData.vehicles?.vehicle_models?.brand || ''} ${reportData.vehicles?.vehicle_models?.model || ''}`.trim();
+    
+    document.getElementById('print-engine-chassis').textContent = `${reportData.vehicles.engine_no || 'N/A'} / ${reportData.vehicles.chassis_no || 'N/A'}`;
+    document.getElementById('print-client-name').textContent = reportData.client_name || 'N/A';
+    document.getElementById('print-client-phone').textContent = reportData.client_phone || 'N/A';
+    document.getElementById('print-odometer').textContent = reportData.odometer_reading || 'N/A';
+
+    
+    const populateList = (listId, dataString) => {
+        const list = document.getElementById(listId);
+        list.innerHTML = '';
+        try {
+            const items = JSON.parse(dataString || '[]');
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    if (typeof item === 'object' && item !== null && item.text) {
+                        li.textContent = item.text;
                     } else {
-                        list.innerHTML = '<li>N/A</li>';
+                        li.textContent = item;
                     }
-                } catch (e) {
-                    list.innerHTML = '<li>Error loading data</li>';
-                }
-            };
-            populateList('print-complaints-list', reportData.complaint);
-            populateList('print-suggested-list', reportData.suggested);
-            populateList('print-approved-list', reportData.approved);
-
-            const printImage = document.getElementById('print-car-image');
-            const printCanvas = document.getElementById('print-damage-canvas');
-            const marksArray = reportData.marks ? JSON.parse(reportData.marks) : [];
-
-            const drawMarksAndPrint = () => {
-                const sourceWidth = 384; 
-                const aspectRatio = printImage.naturalWidth / printImage.naturalHeight;
-                const sourceHeight = sourceWidth / aspectRatio;
-
-                const destWidth = 400;
-                const destHeight = destWidth / aspectRatio;
-                
-                printCanvas.width = destWidth;
-                printCanvas.height = destHeight;
-
-                const widthRatio = destWidth / sourceWidth;
-                const heightRatio = destHeight / sourceHeight;
-
-                const scaledMarks = marksArray.map(mark => ({
-                    x: mark.x * widthRatio,
-                    y: mark.y * heightRatio
-                }));
-
-                redrawDamageMarks(printCanvas, scaledMarks);
-                window.print();
-            };
-
-            if (printImage.complete) {
-                drawMarksAndPrint();
+                    list.appendChild(li);
+                });
             } else {
-                printImage.onload = drawMarksAndPrint;
+                list.innerHTML = '<li>N/A</li>';
             }
+        } catch (e) {
+            list.innerHTML = '<li>Error loading data</li>';
         }
+    };
+    populateList('print-complaints-list', reportData.complaint);
+    populateList('print-suggested-list', reportData.suggested);
+    populateList('print-approved-list', reportData.approved);
+
+    const printImage = document.getElementById('print-car-image');
+    const printCanvas = document.getElementById('print-damage-canvas');
+    const marksArray = reportData.marks ? JSON.parse(reportData.marks) : [];
+
+    const drawMarksAndPrint = () => {
+        const sourceWidth = 384; 
+        const aspectRatio = printImage.naturalWidth / printImage.naturalHeight;
+        const sourceHeight = sourceWidth / aspectRatio;
+
+        const destWidth = 400;
+        const destHeight = destWidth / aspectRatio;
+        
+        printCanvas.width = destWidth;
+        printCanvas.height = destHeight;
+
+        const widthRatio = destWidth / sourceWidth;
+        const heightRatio = destHeight / sourceHeight;
+
+        const scaledMarks = marksArray.map(mark => ({
+            x: mark.x * widthRatio,
+            y: mark.y * heightRatio
+        }));
+
+        redrawDamageMarks(printCanvas, scaledMarks);
+        window.print();
+    };
+
+    if (printImage.complete) {
+        drawMarksAndPrint();
+    } else {
+        printImage.onload = drawMarksAndPrint;
+    }
+}
 
 		function downloadReport() {
             const isAdminScreenActive = document.getElementById('admin-screens').classList.contains('active-screen');
