@@ -857,19 +857,16 @@
         </div>
 
         <div class="pt-2">
-            <h4 class="font-bold text-gray-700 mb-2">Customer Complaints</h4>
-            <div id="inspector-modal-complaints" class="space-y-1 text-sm text-gray-600 bg-gray-50 p-3 rounded-lg"></div>
+    <h4 class="font-bold text-gray-700 mb-2">Customer Approved Repairs</h4>
+    <div id="inspector-modal-approved-list" class="space-y-1 text-sm text-gray-600 bg-green-50 p-3 rounded-lg">
         </div>
-        
-        <div class="pt-2">
-            <h4 class="font-bold text-gray-700 mb-2">Mechanic's Suggested Repairs</h4>
-            <div id="inspector-modal-suggestions" class="space-y-1 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg"></div>
-        </div>
+</div>
 
         <div id="inspector-modal-actions" class="flex flex-col sm:flex-row sm:justify-end gap-3 pt-4 border-t">
             </div>
     </div>
 </div>
+    
     
     <!-- Customer Approval Screen -->
     <div id="customer-approval-screen" class="screen">
@@ -2047,45 +2044,30 @@ function populateDueDateScreen() {
         }
 		
 
-// REPLACE this function
 function showInspectionDetails(report) {
     document.getElementById('inspector-modal-vehicle-no').textContent = report.vehicles.vehicle_no;
     document.getElementById('inspector-modal-executive').textContent = report.executive?.username || 'N/A';
 
-    const complaintsList = document.getElementById('inspector-modal-complaints');
-    complaintsList.innerHTML = '';
-    const complaints = JSON.parse(report.complaint || '[]');
-    if (complaints.length > 0) {
-        const ul = document.createElement('ul');
-        ul.className = 'list-disc list-inside space-y-1';
-        complaints.forEach(c => {
-            const li = document.createElement('li');
-            li.textContent = c.text || c;
-            ul.appendChild(li);
-        });
-        complaintsList.appendChild(ul);
-    } else {
-        complaintsList.innerHTML = '<p class="italic">No complaints registered.</p>';
-    }
+    const approvedListContainer = document.getElementById('inspector-modal-approved-list');
+    approvedListContainer.innerHTML = ''; // Clear previous content
 
-    const suggestionsList = document.getElementById('inspector-modal-suggestions');
-    suggestionsList.innerHTML = '';
-    const suggestions = JSON.parse(report.suggested || '[]');
-     if (suggestions.length > 0) {
+    const approvedItems = JSON.parse(report.approved || '[]');
+
+    if (approvedItems && approvedItems.length > 0) {
         const ul = document.createElement('ul');
         ul.className = 'list-disc list-inside space-y-1';
-        suggestions.forEach(s => {
+        approvedItems.forEach(item => {
             const li = document.createElement('li');
-            li.textContent = `${s.text} (₹${s.amount || 0})`;
+            // Display the text and amount for each approved item
+            li.textContent = `${item.text} (₹${(item.amount || 0).toFixed(2)})`;
             ul.appendChild(li);
         });
-        suggestionsList.appendChild(ul);
+        approvedListContainer.appendChild(ul);
     } else {
-        suggestionsList.innerHTML = '<p class="italic">No mechanic suggestions added yet.</p>';
+        approvedListContainer.innerHTML = '<p class="italic">No services were approved by the customer for this job.</p>';
     }
 
     const actionsContainer = document.getElementById('inspector-modal-actions');
-    // THE FIX: Added w-full sm:w-auto to make buttons responsive
     actionsContainer.innerHTML = `
         <button onclick="handleInspection('${report.id}', 'rejected', '${report.vehicles.vehicle_no}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">
             Reject
@@ -2097,7 +2079,6 @@ function showInspectionDetails(report) {
     
     showModal('inspector-details-modal');
 }
-
 
 // Add this new function anywhere in your <script> tag
 // REPLACE this function
