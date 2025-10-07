@@ -2180,15 +2180,17 @@ async function resendForInspection(reportId) {
 
 // New functions for the inspector workflow
 // REPLACE this function
+// REPLACE your existing 'populateInspectionQueue' function with this new version
 async function populateInspectionQueue() {
     const listContainer = document.getElementById('inspection-queue-list');
     const noJobsMsg = document.getElementById('no-inspection-jobs-message');
     listContainer.innerHTML = '';
     noJobsMsg.classList.add('hidden');
 
-    // THE FIX: Added 'inspection_remarks' to the query
+    // THE FIX: The 'query' variable is now correctly defined only once.
+    // This query now correctly selects 'approved' and 'inspection_remarks' for the modal.
     const query = sb.from('reports')
-        .select(`id, complaint, suggested, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
+        .select(`id, complaint, suggested, approved, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
         .eq('status', 'pending_inspection')
         .order('created_at', { ascending: true });
     
@@ -2202,7 +2204,6 @@ async function populateInspectionQueue() {
         const card = document.createElement('div');
         card.className = 'p-4 border border-gray-200 rounded-lg flex justify-between items-center';
 
-        // THE FIX: Check for remarks and create the badge if they exist
         const isReinspection = report.inspection_remarks && report.inspection_remarks.trim() !== '';
         const reinspectionBadge = isReinspection 
             ? '<span class="ml-2 text-xs font-semibold text-orange-800 bg-orange-200 px-2 py-0.5 rounded-full">Re-inspection</span>' 
