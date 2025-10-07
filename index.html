@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoFix Application</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,153 +10,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-    <!-- Critical: Load Tailwind BEFORE other scripts -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-        // Force Tailwind to initialize immediately
-        tailwind.config = {
-            darkMode: 'media',
-            theme: {
-                extend: {}
-            }
-        }
-    </script>
-
-    <!-- Load Supabase AFTER Tailwind -->
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-    <!-- Polyfill for ResizeObserver -->
-    <script>
-        if (!window.ResizeObserver) {
-            window.ResizeObserver = class ResizeObserver {
-                constructor(callback) {}
-                observe() {}
-                unobserve() {}
-                disconnect() {}
-            };
-        }
-    </script>
     <style type="text/tailwindcss">
-	/* CRITICAL: Force proper box sizing */
-    *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    html {
-        font-size: 16px;
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        width: 100%;
-        overflow-x: hidden;
-    }
-
-    /* Force mobile styles on all devices */
-    @media (min-width: 768px) and (max-width: 1024px) {
-        body {
-            max-width: 768px !important;
-            margin: 0 auto !important;
+        :root {
+            --primary-color: #2563eb; /* Blue 600 */
+            --primary-hover: #1d4ed8; /* Blue 700 */
+            --background-color: #f9fafb; /* Gray 50 */
+            --card-background: #ffffff;
+            --border-color: #e5e7eb; /* Gray 200 */
+            --text-primary: #111827; /* Gray 900 */
+            --text-secondary: #6b7280; /* Gray 500 */
+            --text-on-primary: #ffffff;
         }
-    }
-
-    * {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-    }
-
-    body {
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-    }
-    
-    :root {
-        --primary-color: #2563eb;
-        --primary-hover: #1d4ed8;
-        --background-color: #f9fafb;
-        --card-background: #ffffff;
-        --border-color: #e5e7eb;
-        --text-primary: #111827;
-        --text-secondary: #6b7280;
-        --text-on-primary: #ffffff;
-    }
-    /* Fallback for older browsers */
-    * {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-    
-    input, textarea, select {
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        user-select: text;
-    }
-
-    body {
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-    }
-
-    :root {
-        --primary-color: #2563eb;
-        --primary-hover: #1d4ed8;
-        --background-color: #f9fafb;
-        --card-background: #ffffff;
-        --border-color: #e5e7eb;
-        --text-primary: #111827;
-        --text-secondary: #6b7280;
-        --text-on-primary: #ffffff;
-    }
-    
-    /* Fallback colors for browsers that don't support CSS variables */
-    body {
-        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #f9fafb;
-        background-color: var(--background-color);
-        color: #111827;
-        color: var(--text-primary);
-        min-height: 100vh;
-        overflow-x: hidden;
-    } 
-	/* Mobile-specific fixes */
-@supports (-webkit-overflow-scrolling: touch) {
-    /* iOS-specific fixes */
-    body {
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    .form-input {
-        -webkit-appearance: none;
-        appearance: none;
-    }
-}
-
-/* Ensure content is always visible */
-.screen {
-    min-height: 100vh;
-    width: 100%;
-    position: relative;
-}
-
-/* Fix for very small screens */
-@media (max-width: 320px) {
-    .text-3xl { font-size: 1.5rem; }
-    .text-2xl { font-size: 1.25rem; }
-    .text-xl { font-size: 1.125rem; }
-}
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
         .screen { display: none; }
         .active-screen { display: block; }
         .modal-hidden { display: none; }
@@ -288,105 +160,8 @@
             }
         }
     </style>
-	<style>
-        /* Prevent FOUC (Flash of Unstyled Content) */
-        html {
-            visibility: hidden;
-            opacity: 0;
-        }
-        
-        html.loaded {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-    </style>
-    
-    <script>
-        // Remove loading state after all styles load
-        window.addEventListener('DOMContentLoaded', function() {
-            document.documentElement.classList.add('loaded');
-        });
-    </script>
 </head>
 <body>
-<script>
-// Force mobile viewport on Android WebView
-(function() {
-    if (window.innerWidth > 768 && /Android/.test(navigator.userAgent)) {
-        const viewport = document.querySelector('meta[name="viewport"]');
-        if (viewport) {
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-            // Force reflow
-            window.location.reload();
-        }
-    }
-})();
-</script>
-<!-- Add this diagnostic overlay -->
-<div id="device-diagnostic" style="position: fixed; top: 0; left: 0; right: 0; background: #000; color: #0f0; padding: 10px; z-index: 999999; font-size: 11px; font-family: monospace; display: none;">
-    <button onclick="this.parentElement.style.display='none'" style="float: right; background: red; color: white; border: none; padding: 5px;">Close</button>
-    <div id="diagnostic-content"></div>
-</div>
-
-<script>
-// Show diagnostic on triple-tap
-let tapCount = 0;
-let tapTimer;
-document.addEventListener('touchstart', function() {
-    tapCount++;
-    clearTimeout(tapTimer);
-    if (tapCount === 3) {
-        document.getElementById('device-diagnostic').style.display = 'block';
-        const diag = document.getElementById('diagnostic-content');
-        diag.innerHTML = `
-            <strong>Device Info:</strong><br>
-            User Agent: ${navigator.userAgent}<br>
-            Screen: ${window.screen.width}x${window.screen.height}<br>
-            Viewport: ${window.innerWidth}x${window.innerHeight}<br>
-            Pixel Ratio: ${window.devicePixelRatio}<br>
-            Touch Support: ${('ontouchstart' in window)}<br>
-            Local Storage: ${typeof(Storage) !== "undefined"}<br>
-            IndexedDB: ${typeof(indexedDB) !== "undefined"}<br>
-            Service Worker: ${('serviceWorker' in navigator)}<br>
-            <br><strong>Feature Detection:</strong><br>
-            Fetch API: ${typeof fetch !== 'undefined'}<br>
-            Promise: ${typeof Promise !== 'undefined'}<br>
-            Arrow Functions: ${(() => true)() === true}<br>
-            <br><strong>Loaded Libraries:</strong><br>
-            Supabase: ${typeof supabase !== 'undefined'}<br>
-            Tailwind: ${typeof tailwind !== 'undefined' ? 'Loaded' : 'CDN Mode'}<br>
-            GAPI: ${typeof gapi !== 'undefined'}<br>
-        `;
-        tapCount = 0;
-    }
-    tapTimer = setTimeout(() => tapCount = 0, 500);
-});
-</script>
-
-
-
-<!-- ADD THIS ENTIRE BLOCK HERE: -->
-<div id="browser-warning" style="display:none; position: fixed; top: 0; left: 0; right: 0; background: #f59e0b; color: white; padding: 16px; text-align: center; z-index: 9999;">
-    <strong>Compatibility Issue:</strong> This browser may not support all features. Please use Chrome, Firefox, or Safari.
-</div>
-
-<script>
-(function() {
-    const isCompatible = 
-        window.Promise && 
-        window.fetch && 
-        Array.prototype.includes &&
-        Object.assign &&
-        window.sessionStorage;
-    
-    if (!isCompatible) {
-        document.getElementById('browser-warning').style.display = 'block';
-    }
-})();
-</script>
-
-
     <div id="login-screen" class="screen active-screen">
         <div class="flex flex-col min-h-screen justify-center items-center p-4 bg-gray-50">
             <div class="w-full max-w-sm">
@@ -825,37 +600,32 @@ document.addEventListener('touchstart', function() {
         
         <div id="customer-complaints-update-section">
             <h3 class="text-base font-bold mb-2">Customer's Registered Complaints</h3>
+            <p class="text-xs text-gray-500 -mt-2 mb-3">Add the estimated cost for each complaint registered by the customer.</p>
             <div id="customer-complaints-list" class="space-y-2">
-                <p class="text-sm text-gray-500">No original complaints were registered.</p>
+                </div>
+        </div>
+        
+        <div class="border-t pt-4">
+            <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
+                
+                <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
+                
+                <div class="flex items-center justify-end gap-2 shrink-0">
+                    <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
+                    <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost" oninput="updateApproxTotalInRealTime()">
+                    <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
             </div>
+            <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
         </div>
-        
-        <!-- The new, cleaner layout for adding mechanic suggestions -->
-<!-- This new layout ensures the repair input is always wide enough -->
-<div  class="border-t pt-4">
-    <label class="form-label">Add New Suggested Repair (from Mechanic)</label>
-    <!-- This container will now stack its children vertically on small screens -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 p-3 bg-gray-100 rounded-lg">
-        
-        <!-- The complaint input will take full width on all screen sizes -->
-        <input id="suggestion-input" type="text" class="form-input !py-1 !px-2 flex-grow" placeholder="e.g., Change engine oil">
-        
-        <!-- This group contains the amount and button, and will appear below the input on small screens -->
-        <div class="flex items-center justify-end gap-2 shrink-0">
-            <label for="suggestion-amount-input" class="font-bold text-gray-500">₹</label>
-            <input id="suggestion-amount-input" type="number" class="form-input !py-1 !px-2 w-24 text-right" placeholder="Cost">
-            <button type="button" onclick="addSuggestion()" class="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200">
-                <span class="material-symbols-outlined">add</span>
-            </button>
-        </div>
-    </div>
-    <div id="executive-suggestions-list" class="mt-3 space-y-2"></div>
-</div>
 
         <div>
             <h3 class="text-base font-bold mb-2 border-t pt-4">Customer Approved suggestions</h3>
             <div id="customer-approval-list" class="space-y-2">
-                <p class="text-sm text-gray-500">Add mechanic suggestions above to see them here for approval.</p>
+                <p class="text-sm text-gray-500">Add suggestions to see them here for approval.</p>
             </div>
         </div>
         
@@ -864,8 +634,6 @@ document.addEventListener('touchstart', function() {
             <p id="approx-total-amount" class="text-2xl font-bold text-gray-800">₹ 0.00</p>
             <p class="text-xs text-gray-500">This is an estimated total based on all customer complaints and suggested repairs.</p>
         </div>
-
-        
 
         <div>
             <label for="delivery-date" class="form-label border-t pt-4">Expected Delivery Date <span class="text-red-500">*</span></label>
@@ -877,9 +645,7 @@ document.addEventListener('touchstart', function() {
                 <span class="material-symbols-outlined">save</span>Save Update
             </button>
             <button type="button" id="send-whatsapp-btn" onclick="sendApprovalLink()" class="btn-whatsapp">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.003-5.462-4.415-9.89-9.881-9.894-5.462-.004-9.89 4.415-9.894 9.881-.002 2.225.651 3.891 1.746 5.634l-.999 3.648 3.747-.976zm11.387-5.464c-.074-.124-.272-.198-.568-.347-.297-.149-1.758-.868-2.03-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.149-.173.198-.297.297-.495.099-.198.05-.372-.025-.521-.074-.149-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"></path></svg>
                 Send Approval via WhatsApp
             </button>
         </div>
@@ -1494,33 +1260,10 @@ document.addEventListener('touchstart', function() {
 </div>
     
     <script>
-	
-    // ADD THESE TWO BLOCKS FIRST, BEFORE ANY OTHER CODE:
-    window.onerror = function(msg, url, lineNo, columnNo, error) {
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; background: red; color: white; padding: 10px; z-index: 99999; font-size: 12px; max-height: 200px; overflow: auto;';
-        errorDiv.innerHTML = `<strong>Error:</strong> ${msg}<br><small>Line: ${lineNo}, Column: ${columnNo}</small>`;
-        document.body.appendChild(errorDiv);
-        return false;
-    };
-
-    console.log('Browser Info:', {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform,
-        cookieEnabled: navigator.cookieEnabled,
-        onLine: navigator.onLine
-    });
         const { createClient } = supabase;
         const supabaseUrl = 'https://gfylsjfljnwyomfouwvs.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmeWxzamZsam53eW9tZm91d3ZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0MDc5MTYsImV4cCI6MjA3Mjk4MzkxNn0.hMvLvCDVaFtq0rXToHGOJPSFe-QnJ6_S-MYsI0d5zOs';
-        let sb;
-try {
-    const { createClient } = supabase;
-    sb = createClient(supabaseUrl, supabaseKey);
-} catch (error) {
-    console.error('Supabase initialization failed:', error);
-    alert('App initialization failed. Please reload the page.');
-}
+        const sb = createClient(supabaseUrl, supabaseKey);
 
         // --- Google Drive API Configuration ---
         const CLIENT_ID = '903962440902-olb0km18p980o04na5hi4ah4f6lanms1.apps.googleusercontent.com'; // Paste your OAuth 2.0 Client ID here
@@ -1560,36 +1303,26 @@ try {
 		
 
         // --- Google API Client Loader Functions ---
-        // REPLACE your gapiLoaded and gisLoaded functions with:
-function gapiLoaded() {
-    try {
-        gapi.load('client', initializeGapiClient);
-    } catch (error) {
-        console.error('GAPI load failed:', error);
-        document.querySelectorAll('[id*="gdrive"]').forEach(el => el.style.display = 'none');
-    }
-}
+        function gapiLoaded() {
+            gapi.load('client', initializeGapiClient);
+        }
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (resp) => { // Centralized callback
+                    if (resp.error !== undefined) {
+                        showError('Authorization failed. Please try again.');
+                        throw (resp);
+                    }
+                    updateAuthUI(true);
+                    showSuccessMessage('Google Drive access authorized.');
+                },
+            });
+            gisInited = true;
+            checkInitialAuth();
+        }
 
-function gisLoaded() {
-    try {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: (resp) => {
-                if (resp.error !== undefined) {
-                    showError('Authorization failed. Please try again.');
-                    throw (resp);
-                }
-                updateAuthUI(true);
-                showSuccessMessage('Google Drive access authorized.');
-            },
-        });
-        gisInited = true;
-        checkInitialAuth();
-    } catch (error) {
-        console.error('GIS load failed:', error);
-    }
-}
 
 
         // --- Global State ---
@@ -3529,44 +3262,81 @@ function updateCustomerTotal() {
     }
 }
 // ADD THIS NEW FUNCTION
-// Updates the cost of a complaint in the state array when the executive types in the input field.
 function updateComplaintCost(text, newAmount) {
+    // Find the specific complaint in the state array and update its amount
     const complaint = originalComplaintsForUpdate.find(c => c.text === text);
     if (complaint) {
         complaint.amount = parseFloat(newAmount) || 0;
     }
-    recalculateAndUpdateTotal();
-}
 
+    // To maintain the user's selections, we need to read which items are currently checked
+    const approvedItems = [];
+    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
+        try {
+            // The checkbox value is a JSON string of the item object
+            approvedItems.push(JSON.parse(checkbox.value));
+        } catch (e) {
+             console.error("Could not parse checkbox value during cost update:", e);
+        }
+    });
+    
+    // Now, re-render the entire suggestions and approval section.
+    // This will update the displayed cost for the item in the "Customer Approved suggestions" list
+    // and also recalculate the total amount correctly.
+    renderSuggestions(originalComplaintsForUpdate, newSuggestions, approvedItems);
+}
 // ADD THIS NEW FUNCTION
 // Calculates the total cost from both original complaints and new suggestions and updates the UI.
 function recalculateAndUpdateTotal() {
     const totalAmountEl = document.getElementById('approx-total-amount');
+    if (!totalAmountEl) return;
+    
     let totalAmount = 0;
-    // Find all checked checkboxes in the list and sum their values
-    document.querySelectorAll('#customer-approval-list input[type="checkbox"]:checked').forEach(checkbox => {
-        try {
-            // The checkbox value is a stringified JSON object, so we parse it
-            const item = JSON.parse(checkbox.value);
-            if (item && typeof item.amount === 'number') {
-                totalAmount += item.amount;
-            }
-        } catch (e) {
-            console.error("Could not parse checkbox value for total calculation:", checkbox.value);
-        }
+    
+    // 1. Sum amounts from the original customer complaints array
+    originalComplaintsForUpdate.forEach(complaint => {
+        totalAmount += parseFloat(complaint.amount) || 0;
     });
+    
+    // 2. Sum amounts from the new mechanic suggestions array
+    newSuggestions.forEach(suggestion => {
+        totalAmount += parseFloat(suggestion.amount) || 0;
+    });
+    
     totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
 }
+function updateApproxTotalInRealTime() {
+    const totalAmountEl = document.getElementById('approx-total-amount');
+    if (!totalAmountEl) return;
 
+    let totalAmount = 0;
+
+    // 1. Sum amounts from original customer complaint inputs
+    document.querySelectorAll('#customer-complaints-list input[type="number"]').forEach(input => {
+        totalAmount += parseFloat(input.value) || 0;
+    });
+    
+    // 2. Sum amounts from already-added new mechanic suggestions
+    newSuggestions.forEach(suggestion => {
+        totalAmount += parseFloat(suggestion.amount) || 0;
+    });
+
+    // 3. Add the current, not-yet-saved amount from the "Add New" input field
+    const currentSuggestionAmountInput = document.getElementById('suggestion-amount-input');
+    if (currentSuggestionAmountInput) {
+        totalAmount += parseFloat(currentSuggestionAmountInput.value) || 0;
+    }
+    
+    totalAmountEl.textContent = `₹ ${totalAmount.toFixed(2)}`;
+}
 function renderSuggestions(complaints = [], suggestions = [], approved = []) {
     const executiveList = document.getElementById('executive-suggestions-list');
     const customerComplaintsList = document.getElementById('customer-complaints-list');
     const customerApprovalList = document.getElementById('customer-approval-list');
 
-    // ADD THIS LINE: Check which tab is currently active.
     const isPendingTabActive = document.getElementById('tab-btn-pending').classList.contains('active-tab');
 
-    // 1. Render editable customer complaints
+    // --- 1. Render editable customer complaints ---
     customerComplaintsList.innerHTML = '';
     if (complaints.length > 0) {
         complaints.forEach((item) => {
@@ -3577,11 +3347,12 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
                 <div class="flex-1">
                     <span class="font-medium break-words">${item.text}</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1 shrink-0">
                     <span class="font-bold text-gray-500">₹</span>
-                    <input type="number" class="form-input !py-1 !px-2 w-20 text-right" 
+                    <input type="number" class="form-input !py-1 !px-2 w-24 text-right" 
                            value="${item.amount || 0}" placeholder="Cost"
-                           data-text="${sanitizedText}" oninput="updateComplaintCost(this.dataset.text, this.value)">
+                           data-text="${sanitizedText}" 
+                           oninput="updateComplaintCost(this.dataset.text, this.value)">
                 </div>
             `;
             customerComplaintsList.appendChild(complaintItem);
@@ -3590,14 +3361,14 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         customerComplaintsList.innerHTML = '<p class="text-sm text-gray-500">No original complaints were registered.</p>';
     }
     
-    // 2. Render NEW mechanic suggestions
+    // --- 2. Render NEW mechanic suggestions ---
     executiveList.innerHTML = '';
     if (suggestions.length > 0) {
         suggestions.forEach((item, index) => {
             const execItem = document.createElement('div');
-            execItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded-lg text-sm';
+            execItem.className = 'flex items-center justify-between bg-blue-50 p-2 rounded-lg text-sm';
             execItem.innerHTML = `
-                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${item.amount.toFixed(2)}</span></p>
+                <p class="flex-1 mr-2">${item.text} - <span class="font-bold">₹${(item.amount || 0).toFixed(2)}</span></p>
                 <button type="button" onclick="deleteSuggestion(${index})" class="text-red-500 hover:text-red-700 shrink-0">
                     <span class="material-symbols-outlined">delete</span>
                 </button>
@@ -3606,7 +3377,8 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
         });
     }
 
-    // 3. Render the COMBINED list for the final approval checklist
+    // --- 3. Render the COMBINED list for the final approval checklist ---
+    // (This logic remains the same to handle approved jobs correctly)
     customerApprovalList.innerHTML = '';
     const allItemsForApproval = [...complaints, ...suggestions]; 
 
@@ -3620,7 +3392,6 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             const checkboxValue = `'${JSON.stringify(item)}'`;
             const sanitizedText = item.text.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const materialsValue = item.materials || '';
             
             const isOriginalComplaint = item.type === 'complaint';
             const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
@@ -3633,60 +3404,26 @@ function renderSuggestions(complaints = [], suggestions = [], approved = []) {
 
             let materialsInputHtml = '';
             
-            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
-            // The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
-            // MODIFIED THIS LINE: Added a check for 'isPendingTabActive'.
-// The materials input will now only show if the customer has responded AND we are NOT on the pending tab.
-if (hasCustomerResponded && isChecked && !isPendingTabActive) {
-    // Parse existing materials into an array (split by comma or newline)
-    const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
-    
-    materialsInputHtml = `
-        <div class="mt-2 pt-2 border-t border-gray-300/50">
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
-                <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                </button>
-            </div>
-            <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
-                ${existingMaterials.length > 0 
-                    ? existingMaterials.map((material, index) => `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
-                                   value="${material}"
-                                   placeholder="e.g., Oil filter, 4L synthetic oil"
-                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
-                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
+            if (hasCustomerResponded && isChecked && !isPendingTabActive) {
+                const existingMaterials = (item.materials || '').split(/[,\n]/).map(m => m.trim()).filter(m => m);
+                
+                materialsInputHtml = `
+                    <div class="mt-2 pt-2 border-t border-gray-300/50">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-medium text-gray-600">Material Requirements</label>
+                            <button type="button" onclick="addMaterialField('${sanitizedText}')" class="p-1 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 shrink-0"><span class="material-symbols-outlined text-sm">add</span></button>
                         </div>
-                      `).join('')
-                    : `
-                        <div class="flex items-center gap-2">
-                            <input type="text" class="form-input !py-1 !px-2 text-sm flex-1" 
-                                   value=""
-                                   placeholder="e.g., Oil filter, 4L synthetic oil"
-                                   oninput="updateMaterialsFromInputs('${sanitizedText}')">
-                            <button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0">
-                                <span class="material-symbols-outlined text-sm">remove</span>
-                            </button>
+                        <div id="materials-container-${sanitizedText.replace(/\s+/g, '-')}" class="space-y-1">
+                            ${existingMaterials.map((material, index) => `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="${material}" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`).join('') || `<div class="flex items-center gap-2"><input type="text" class="form-input !py-1 !px-2 text-sm flex-1" value="" oninput="updateMaterialsFromInputs('${sanitizedText}')"><button type="button" onclick="removeMaterialField(this, '${sanitizedText}')" class="p-1 text-red-500 hover:text-red-700 shrink-0"><span class="material-symbols-outlined text-sm">remove</span></button></div>`}
                         </div>
-                      `
-                }
-            </div>
-        </div>
-    `;
-}
+                    </div>`;
+            }
 
             approvalItemContainer.innerHTML = `
                 <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                           value=${checkboxValue} 
-                           ${isChecked ? 'checked' : ''}
-                           onchange="handleCheckboxChange(this)">
+                    <input type="checkbox" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" value=${checkboxValue} ${isChecked ? 'checked' : ''} onchange="handleCheckboxChange(this)">
                     <div class="flex-1 flex justify-between items-center">
-                       <span class="font-medium break-all">${item.text}</span>
+                       <span class="font-medium">${item.text}</span>
                         <span class="font-bold text-gray-800">₹${(item.amount || 0).toFixed(2)}</span>
                     </div>
                     ${tag}
@@ -3699,6 +3436,7 @@ if (hasCustomerResponded && isChecked && !isPendingTabActive) {
         customerApprovalList.innerHTML = '<p class="text-sm text-gray-500">No complaints or suggestions available for approval.</p>';
     }
     
+    // Recalculate total at the end of every render
     recalculateAndUpdateTotal();
 }
 function addMaterialField(itemText) {
@@ -5170,26 +4908,12 @@ function showError(message, errorObject = null) {
     document.getElementById('approval-success-message').classList.remove('hidden');
 }
 
-// Wrap your DOMContentLoaded listener more defensively:
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}
 
-async function initializeApp() {
+// REPLACE the entire existing 'DOMContentLoaded' listener with this one
+document.addEventListener('DOMContentLoaded', async () => {
     const params = new URLSearchParams(window.location.search);
     const reportId = params.get('report_id');
     const feedbackId = params.get('feedback_id');
-
-    if (reportId) {
-        return loadApprovalScreen(reportId);
-    }
-    if (feedbackId) {
-        return loadFeedbackScreen(feedbackId);
-    }
-	    
-
 
     if (reportId) {
         return loadApprovalScreen(reportId);
@@ -5255,8 +4979,8 @@ async function initializeApp() {
             }
         });
     }
-
-	}
+});
+		
 		
         function printJobCardById(reportId) {
             const reportData = reportsDataStore[reportId];
