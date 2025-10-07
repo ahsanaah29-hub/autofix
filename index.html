@@ -2,33 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <!-- Replace your existing viewport meta tag with: -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>AutoFix Application</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-<!-- Add this BEFORE the Tailwind script tag: -->
-<script>
-    // Polyfill for older browsers
-    if (!window.ResizeObserver) {
-        window.ResizeObserver = class ResizeObserver {
-            constructor(callback) {}
-            observe() {}
-            unobserve() {}
-            disconnect() {}
-        };
-    }
-</script>
+
+    <!-- Critical: Load Tailwind BEFORE other scripts -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    
+    <script>
+        // Force Tailwind to initialize immediately
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+
+    <!-- Load Supabase AFTER Tailwind -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+    <!-- Polyfill for ResizeObserver -->
+    <script>
+        if (!window.ResizeObserver) {
+            window.ResizeObserver = class ResizeObserver {
+                constructor(callback) {}
+                observe() {}
+                unobserve() {}
+                disconnect() {}
+            };
+        }
+    </script>
     <style type="text/tailwindcss">
+	/* CRITICAL: Force proper box sizing */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html {
+        font-size: 16px;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Force mobile styles on all devices */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        body {
+            max-width: 768px !important;
+            margin: 0 auto !important;
+        }
+    }
+
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+    }
+
+    body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    }
+    
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --background-color: #f9fafb;
+        --card-background: #ffffff;
+        --border-color: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-on-primary: #ffffff;
+    }
     /* Fallback for older browsers */
     * {
         -webkit-tap-highlight-color: transparent;
@@ -227,9 +288,41 @@
             }
         }
     </style>
+	<style>
+        /* Prevent FOUC (Flash of Unstyled Content) */
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+        
+        html.loaded {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.3s;
+        }
+    </style>
+    
+    <script>
+        // Remove loading state after all styles load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('loaded');
+        });
+    </script>
 </head>
 <body>
-
+<script>
+// Force mobile viewport on Android WebView
+(function() {
+    if (window.innerWidth > 768 && /Android/.test(navigator.userAgent)) {
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            // Force reflow
+            window.location.reload();
+        }
+    }
+})();
+</script>
 <!-- Add this diagnostic overlay -->
 <div id="device-diagnostic" style="position: fixed; top: 0; left: 0; right: 0; background: #000; color: #0f0; padding: 10px; z-index: 999999; font-size: 11px; font-family: monospace; display: none;">
     <button onclick="this.parentElement.style.display='none'" style="float: right; background: red; color: white; border: none; padding: 5px;">Close</button>
