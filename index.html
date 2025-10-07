@@ -29,30 +29,76 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style type="text/tailwindcss">
-	* {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-	}
+    /* Fallback for older browsers */
+    * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    input, textarea, select {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
 
-	body {
-    -webkit-text-size-adjust: 100%;
-    -ms-text-size-adjust: 100%;
-	}
-        :root {
-            --primary-color: #2563eb; /* Blue 600 */
-            --primary-hover: #1d4ed8; /* Blue 700 */
-            --background-color: #f9fafb; /* Gray 50 */
-            --card-background: #ffffff;
-            --border-color: #e5e7eb; /* Gray 200 */
-            --text-primary: #111827; /* Gray 900 */
-            --text-secondary: #6b7280; /* Gray 500 */
-            --text-on-primary: #ffffff;
-        }
-        body {
-            font-family: 'Manrope', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-primary);
-        }
+    body {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --background-color: #f9fafb;
+        --card-background: #ffffff;
+        --border-color: #e5e7eb;
+        --text-primary: #111827;
+        --text-secondary: #6b7280;
+        --text-on-primary: #ffffff;
+    }
+    
+    /* Fallback colors for browsers that don't support CSS variables */
+    body {
+        font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f9fafb;
+        background-color: var(--background-color);
+        color: #111827;
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+    } 
+	/* Mobile-specific fixes */
+@supports (-webkit-overflow-scrolling: touch) {
+    /* iOS-specific fixes */
+    body {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .form-input {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+}
+
+/* Ensure content is always visible */
+.screen {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+}
+
+/* Fix for very small screens */
+@media (max-width: 320px) {
+    .text-3xl { font-size: 1.5rem; }
+    .text-2xl { font-size: 1.25rem; }
+    .text-xl { font-size: 1.125rem; }
+}
         .screen { display: none; }
         .active-screen { display: block; }
         .modal-hidden { display: none; }
@@ -183,6 +229,49 @@
     </style>
 </head>
 <body>
+
+<!-- Add this diagnostic overlay -->
+<div id="device-diagnostic" style="position: fixed; top: 0; left: 0; right: 0; background: #000; color: #0f0; padding: 10px; z-index: 999999; font-size: 11px; font-family: monospace; display: none;">
+    <button onclick="this.parentElement.style.display='none'" style="float: right; background: red; color: white; border: none; padding: 5px;">Close</button>
+    <div id="diagnostic-content"></div>
+</div>
+
+<script>
+// Show diagnostic on triple-tap
+let tapCount = 0;
+let tapTimer;
+document.addEventListener('touchstart', function() {
+    tapCount++;
+    clearTimeout(tapTimer);
+    if (tapCount === 3) {
+        document.getElementById('device-diagnostic').style.display = 'block';
+        const diag = document.getElementById('diagnostic-content');
+        diag.innerHTML = `
+            <strong>Device Info:</strong><br>
+            User Agent: ${navigator.userAgent}<br>
+            Screen: ${window.screen.width}x${window.screen.height}<br>
+            Viewport: ${window.innerWidth}x${window.innerHeight}<br>
+            Pixel Ratio: ${window.devicePixelRatio}<br>
+            Touch Support: ${('ontouchstart' in window)}<br>
+            Local Storage: ${typeof(Storage) !== "undefined"}<br>
+            IndexedDB: ${typeof(indexedDB) !== "undefined"}<br>
+            Service Worker: ${('serviceWorker' in navigator)}<br>
+            <br><strong>Feature Detection:</strong><br>
+            Fetch API: ${typeof fetch !== 'undefined'}<br>
+            Promise: ${typeof Promise !== 'undefined'}<br>
+            Arrow Functions: ${(() => true)() === true}<br>
+            <br><strong>Loaded Libraries:</strong><br>
+            Supabase: ${typeof supabase !== 'undefined'}<br>
+            Tailwind: ${typeof tailwind !== 'undefined' ? 'Loaded' : 'CDN Mode'}<br>
+            GAPI: ${typeof gapi !== 'undefined'}<br>
+        `;
+        tapCount = 0;
+    }
+    tapTimer = setTimeout(() => tapCount = 0, 500);
+});
+</script>
+
+
 
 <!-- ADD THIS ENTIRE BLOCK HERE: -->
 <div id="browser-warning" style="display:none; position: fixed; top: 0; left: 0; right: 0; background: #f59e0b; color: white; padding: 16px; text-align: center; z-index: 9999;">
