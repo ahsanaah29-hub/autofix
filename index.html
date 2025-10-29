@@ -952,41 +952,16 @@
                     <p class="text-[var(--text-secondary)] mt-1">For Vehicle: <span id="feedback-vehicle-no" class="font-bold"></span></p>
                 </div>
                 <div id="feedback-form-content" class="space-y-4">
-    <div class="border-t pt-4">
-        <label class="form-label text-center">How was your service experience?</label>
-        
-        <div id="emoji-rating-container" class="flex justify-around items-center py-4">
-            <div class="text-center cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-110" data-rating="Very Unhappy">
-                <span class="text-5xl grayscale transition-all duration-300">😡</span>
-                <p class="text-xs font-semibold text-gray-500 transition-all duration-300">Very Unhappy</p>
-            </div>
-            <div class="text-center cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-110" data-rating="Unhappy">
-                <span class="text-5xl grayscale transition-all duration-300">😕</span>
-                <p class="text-xs font-semibold text-gray-500 transition-all duration-300">Unhappy</p>
-            </div>
-            <div class="text-center cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-110" data-rating="Neutral">
-                <span class="text-5xl grayscale transition-all duration-300">😐</span>
-                <p class="text-xs font-semibold text-gray-500 transition-all duration-300">Neutral</p>
-            </div>
-            <div class="text-center cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-110" data-rating="Happy">
-                <span class="text-5xl grayscale transition-all duration-300">😊</span>
-                <p class="text-xs font-semibold text-gray-500 transition-all duration-300">Happy</p>
-            </div>
-            <div class="text-center cursor-pointer p-2 rounded-lg transition-transform transform hover:scale-110" data-rating="Very Happy">
-                <span class="text-5xl grayscale transition-all duration-300">🥰</span>
-                <p class="text-xs font-semibold text-gray-500 transition-all duration-300">Very Happy</p>
-            </div>
-        </div>
-        
-        <input type="hidden" id="customer-feedback-input">
-    </div>
-    
-    <div class="mt-2">
-         <button id="submit-feedback-btn" onclick="submitCustomerTextFeedback()" class="btn-primary opacity-50 cursor-not-allowed" disabled>
-            <span class="material-symbols-outlined">send</span> Submit Feedback
-        </button>
-    </div>
-</div>
+                    <div class="border-t pt-4">
+                        <label for="customer-feedback-input" class="form-label">Please share your experience with us:</label>
+                        <textarea id="customer-feedback-input" class="form-input" rows="4" placeholder="Your feedback is important to us..."></textarea>
+                    </div>
+                    <div class="mt-6">
+                         <button onclick="submitCustomerTextFeedback()" class="btn-primary">
+                            <span class="material-symbols-outlined">send</span> Submit Feedback
+                        </button>
+                    </div>
+                </div>
                  <div id="feedback-success-message" class="hidden text-center p-4 bg-green-100 text-green-800 rounded-lg">
                     <h3 class="font-bold text-xl">Thank You!</h3>
                     <p>Your feedback has been submitted successfully. We appreciate you taking the time to help us improve.</p>
@@ -3150,6 +3125,10 @@ function updateCustomerTotal() {
         }
     });
     
+    // Add labour cost to the total
+    const labourCost = window.currentLabourCost || 0;
+    total += labourCost;
+    
     totalAmountEl.textContent = `₹ ${total.toFixed(2)}`;
 }
 // ADD THIS NEW FUNCTION to your  tag
@@ -4104,76 +4083,44 @@ Your feedback helps us improve our service.`;
 }
 
 // START: Add these two new functions
-// REPLACE your existing 'loadFeedbackScreen' function with this
 async function loadFeedbackScreen(feedbackId) {
+    // Hide all other screens and show the feedback screen
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
     document.getElementById('customer-feedback-screen').classList.add('active-screen');
-    
+    // Fetch the vehicle number to display it on the page for context
     const { data, error } = await sb
         .from('reports')
         .select('vehicles(vehicle_no)')
         .eq('id', feedbackId)
         .single();
-
     if (error || !data) {
         console.error('Error fetching report for feedback:', error);
         document.getElementById('feedback-form-content').innerHTML = '<p class="text-center text-red-600">Could not load report details. The link may be invalid.</p>';
         return;
     }
-    
     document.getElementById('feedback-vehicle-no').textContent = data.vehicles.vehicle_no;
-
-    // --- NEW LOGIC FOR EMOJI INTERACTION ---
-    const ratingContainer = document.getElementById('emoji-rating-container');
-    const feedbackInput = document.getElementById('customer-feedback-input');
-    const submitBtn = document.getElementById('submit-feedback-btn');
-    const emojis = ratingContainer.querySelectorAll('.text-center');
-
-    emojis.forEach(emojiWrapper => {
-        emojiWrapper.addEventListener('click', () => {
-            // Remove selection from all others
-            emojis.forEach(ew => {
-                ew.querySelector('span').classList.add('grayscale');
-                ew.querySelector('p').classList.remove('text-blue-600');
-                ew.classList.remove('bg-blue-50');
-            });
-
-            // Apply selection to the clicked one
-            emojiWrapper.querySelector('span').classList.remove('grayscale');
-            emojiWrapper.querySelector('p').classList.add('text-blue-600');
-            emojiWrapper.classList.add('bg-blue-50');
-            
-            // Store the rating and enable the button
-            feedbackInput.value = emojiWrapper.dataset.rating;
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        });
-    });
 }
 
-// REPLACE your existing 'submitCustomerTextFeedback' function with this
 async function submitCustomerTextFeedback() {
     const params = new URLSearchParams(window.location.search);
     const feedbackId = params.get('feedback_id');
     if (!feedbackId) {
         return alert("Error: Report ID not found. Your session may be invalid.");
     }
-
     const feedbackText = document.getElementById('customer-feedback-input').value.trim();
     if (!feedbackText) {
-        return alert('Please select a rating before submitting.');
+        return alert('Please enter your feedback before submitting.');
     }
-
+    // Update the 'customer_feedback_text' column in the 'reports' table
     const { error } = await sb
         .from('reports')
         .update({ customer_feedback_text: feedbackText })
         .eq('id', feedbackId);
-
     if (error) {
         console.error('Error submitting feedback:', error);
         return alert('Sorry, there was an error submitting your feedback. Please try again.');
     }
-    
+    // On success, hide the form and show the thank you message
     document.getElementById('feedback-form-content').classList.add('hidden');
     document.getElementById('feedback-success-message').classList.remove('hidden');
 }
@@ -4714,7 +4661,7 @@ async function loadApprovalScreen(reportId) {
     try {
         const { data: report, error } = await sb
             .from('reports')
-            .select('id, suggested, approved, vehicles!inner(vehicle_no)')
+            .select('id, suggested, approved, labour_cost, vehicles!inner(vehicle_no)')
             .eq('id', reportId)
             .single();
 
@@ -4764,7 +4711,7 @@ async function loadApprovalScreen(reportId) {
 
         allItems.forEach((item) => {
             const isOriginalComplaint = item.type === 'complaint';
-            const label = document.createElement('label');
+            const itemDiv = document.createElement('div');
             const bgColor = isOriginalComplaint ? 'bg-gray-100' : 'bg-blue-50';
             const tag = isOriginalComplaint 
                 ? `<span class="text-xs text-gray-500">(Your Request)</span>` 
@@ -4780,22 +4727,54 @@ async function loadApprovalScreen(reportId) {
             };
             const checkboxValue = JSON.stringify(itemForCheckbox).replace(/"/g, '&quot;');
             
-            // **THE FIX: Conditionally add the 'checked' attribute**
             // Original customer complaints are checked by default, mechanic suggestions are not.
             const isChecked = isOriginalComplaint ? 'checked' : '';
 
-            label.className = `flex items-center gap-3 p-3 ${bgColor} rounded-lg cursor-pointer hover:bg-gray-200 transition-colors`;
+            // Build materials list if available
+            const materials = item.materials || [];
+            let materialsHtml = '';
+            if (Array.isArray(materials) && materials.length > 0) {
+                materialsHtml = `
+                    <div class="mt-2 pl-8 text-xs text-gray-600">
+                        <span class="font-medium">Materials:</span>
+                        <ul class="list-disc list-inside ml-2">
+                            ${materials.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+
+            itemDiv.className = `${bgColor} rounded-lg p-3 mb-2`;
             
-            label.innerHTML = `
-                <input type="checkbox" value="${checkboxValue}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()" ${isChecked}>
-                <div class="flex-1 flex justify-between items-center gap-3">
-                     <span class="text-sm font-medium">${item.text}</span>
-                     ${amountDisplay}
-                </div>
-                ${tag}
+            itemDiv.innerHTML = `
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" value="${checkboxValue}" class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" onchange="updateCustomerTotal()" ${isChecked}>
+                    <div class="flex-1 flex justify-between items-center gap-3">
+                         <span class="text-sm font-medium">${item.text}</span>
+                         ${amountDisplay}
+                    </div>
+                    ${tag}
+                </label>
+                ${materialsHtml}
             `;
-            suggestionsList.appendChild(label);
+            suggestionsList.appendChild(itemDiv);
         });
+        
+        // Store labour cost for total calculation
+        window.currentLabourCost = report.labour_cost || 0;
+        
+        // Display labour cost if present
+        if (window.currentLabourCost > 0) {
+            const labourCostDiv = document.createElement('div');
+            labourCostDiv.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3';
+            labourCostDiv.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium text-gray-700">Labour Cost</span>
+                    <span class="font-bold text-gray-800">₹${window.currentLabourCost.toFixed(2)}</span>
+                </div>
+            `;
+            suggestionsList.appendChild(labourCostDiv);
+        }
         
         // This function will now correctly calculate the initial total based on the pre-checked items.
         updateCustomerTotal();
@@ -5056,4 +5035,3 @@ document.addEventListener('DOMContentLoaded', async () => { // Make this async
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 </body>
 </html>
-
