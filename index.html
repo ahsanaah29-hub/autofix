@@ -874,112 +874,78 @@
     
     <!-- Customer Approval Screen -->
     <div id="customer-approval-screen" class="screen">
-        <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        <div class="min-h-screen bg-gray-50">
             <!-- Header -->
-            <div class="bg-white shadow-sm border-b border-gray-200">
-                <div class="max-w-3xl mx-auto px-4 py-6">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <span class="material-symbols-outlined text-3xl text-blue-600">build_circle</span>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">AutoFix Service</h1>
-                            <p class="text-sm text-gray-600">Repair Approval Request</p>
-                        </div>
-                    </div>
+            <div class="bg-white border-b">
+                <div class="max-w-2xl mx-auto px-4 py-4">
+                    <h1 class="text-xl font-bold text-gray-900">AutoFix Service</h1>
+                    <p class="text-sm text-gray-600">Repair Approval</p>
                 </div>
             </div>
 
             <!-- Main Content -->
-            <div class="max-w-3xl mx-auto px-4 py-6">
-                <div id="customer-approval-card" class="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <!-- Vehicle Info Header -->
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5">
-                        <div class="flex items-center gap-3">
-                            <span class="material-symbols-outlined text-white text-3xl">directions_car</span>
-                            <div>
-                                <p class="text-blue-100 text-sm font-medium">Vehicle Number</p>
-                                <p id="approval-vehicle-no" class="text-white text-2xl font-bold tracking-wide"></p>
-                            </div>
-                        </div>
+            <div class="max-w-2xl mx-auto px-4 py-6">
+                <div id="customer-approval-card" class="bg-white rounded-lg shadow-sm border">
+                    <!-- Vehicle Info -->
+                    <div class="px-6 py-4 border-b bg-gray-50">
+                        <p class="text-xs text-gray-600 mb-1">Vehicle Number</p>
+                        <p id="approval-vehicle-no" class="text-xl font-bold text-gray-900"></p>
                     </div>
                     
-                    <div id="approval-content" class="p-6 space-y-6">
+                    <div id="approval-content" class="p-6 space-y-4">
                         <!-- Instructions -->
-                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                            <div class="flex items-start gap-3">
-                                <span class="material-symbols-outlined text-blue-600 mt-0.5">info</span>
-                                <div>
-                                    <h3 class="font-bold text-blue-900 text-sm">Review Repairs</h3>
-                                    <p class="text-sm text-blue-800 mt-1">Please review the repairs below. Select the ones you approve and submit your response.</p>
-                                </div>
-                            </div>
+                        <div class="bg-blue-50 p-3 rounded text-sm text-gray-700">
+                            Please review and select the repairs you approve.
                         </div>
 
                         <!-- Repairs List -->
                         <div>
-                            <h3 class="font-bold text-gray-900 text-lg mb-3 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-blue-600">checklist</span>
-                                Repair Items
-                            </h3>
-                            <div id="approval-suggestions-list" class="space-y-3">
+                            <h3 class="font-semibold text-gray-900 mb-3">Repair Items</h3>
+                            <div id="approval-suggestions-list" class="space-y-2">
                                 <!-- Suggestions will be populated here -->
                             </div>
                         </div>
 
                         <!-- Total Section -->
-                        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-5 border-2 border-blue-200">
+                        <div class="bg-gray-50 rounded-lg p-4 border">
                             <div class="flex justify-between items-center">
-                                <div>
-                                    <p class="text-sm text-gray-600 font-medium">Estimated Total Cost</p>
-                                    <p class="text-xs text-gray-500 mt-0.5">Based on selected services</p>
-                                </div>
-                                <p id="cust-total-amount" class="text-3xl font-bold text-blue-600">₹ 0.00</p>
+                                <span class="text-sm font-medium text-gray-700">Total Cost</span>
+                                <p id="cust-total-amount" class="text-2xl font-bold text-gray-900">₹ 0.00</p>
                             </div>
                         </div>
 
                         <!-- Feedback Section -->
-                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                            <h3 class="font-bold text-gray-900 text-base mb-3 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-600">comment</span>
-                                Additional Comments (Optional)
-                            </h3>
-                            <textarea id="customer-feedback-text" class="form-input" rows="3" placeholder="Share any additional comments or concerns..."></textarea>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">Comments (Optional)</label>
+                            <textarea id="customer-feedback-text" class="form-input" rows="3" placeholder="Any additional comments..."></textarea>
                         </div>
                         
                         <!-- Voice Note Section -->
-                        <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                            <h3 class="font-bold text-gray-900 text-base mb-3 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-gray-600">mic</span>
-                                Voice Message (Optional)
-                            </h3>
-                            <div class="flex items-center gap-3">
-                                <button id="cust-approval-record-btn" type="button" onclick="handleCustomerApprovalRecordingToggle()" class="record-button inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white font-semibold py-2.5 px-4 shadow-sm hover:bg-blue-700 transition-all duration-300">
-                                    <span id="cust-approval-record-icon" class="material-symbols-outlined">mic</span>
-                                    <span id="cust-approval-record-text">Start Recording</span>
-                                </button>
-                            </div>
-                            <div id="customer-audio-playback" class="mt-3"></div>
-                            <p id="customer-recording-status" class="text-sm text-gray-600 mt-2"></p>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700 mb-2 block">Voice Note (Optional)</label>
+                            <button id="cust-approval-record-btn" type="button" onclick="handleCustomerApprovalRecordingToggle()" class="record-button inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white font-medium py-2 px-4 hover:bg-blue-700 transition-colors">
+                                <span id="cust-approval-record-icon" class="material-symbols-outlined text-lg">mic</span>
+                                <span id="cust-approval-record-text">Record</span>
+                            </button>
+                            <div id="customer-audio-playback" class="mt-2"></div>
+                            <p id="customer-recording-status" class="text-sm text-gray-600 mt-1"></p>
                         </div>
 
                         <!-- Submit Button -->
                         <div class="pt-2">
-                            <button onclick="submitCustomerFeedback()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 text-lg">
-                                <span class="material-symbols-outlined text-2xl">check_circle</span>
-                                <span>Submit Approval</span>
+                            <button onclick="submitCustomerFeedback()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                                Submit Approval
                             </button>
-                            <p class="text-center text-xs text-gray-500 mt-3">By submitting, you approve the selected repairs</p>
                         </div>
                     </div>
 
                     <!-- Success Message -->
                     <div id="approval-success-message" class="hidden p-8 text-center">
-                        <div class="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                            <span class="material-symbols-outlined text-5xl text-green-600">check_circle</span>
+                        <div class="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                            <span class="material-symbols-outlined text-4xl text-green-600">check_circle</span>
                         </div>
-                        <h3 class="font-bold text-2xl text-gray-900 mb-2">Thank You!</h3>
-                        <p class="text-gray-600">Your approval has been submitted successfully. We'll proceed with the selected repairs.</p>
+                        <h3 class="font-bold text-xl text-gray-900 mb-2">Thank You!</h3>
+                        <p class="text-gray-600">Your approval has been submitted successfully.</p>
                     </div>
                 </div>
             </div>
@@ -4763,12 +4729,8 @@ async function loadApprovalScreen(reportId) {
             const isOriginalComplaint = item.type === 'complaint';
             const itemDiv = document.createElement('div');
             
-            // Modern card styling
-            const borderColor = isOriginalComplaint ? 'border-gray-300' : 'border-blue-300';
-            const bgColor = isOriginalComplaint ? 'bg-white' : 'bg-blue-50';
+            const badgeText = isOriginalComplaint ? 'Your Request' : 'Suggested';
             const badgeColor = isOriginalComplaint ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700';
-            const badgeText = isOriginalComplaint ? 'Your Request' : 'Recommended';
-            const badgeIcon = isOriginalComplaint ? 'person' : 'build';
             
             const itemForCheckbox = {
                 text: item.text,
@@ -4786,46 +4748,27 @@ async function loadApprovalScreen(reportId) {
             let materialsHtml = '';
             if (Array.isArray(materials) && materials.length > 0) {
                 materialsHtml = `
-                    <div class="mt-3 pt-3 border-t border-gray-200">
-                        <div class="flex items-start gap-2">
-                            <span class="material-symbols-outlined text-gray-500 text-sm mt-0.5">inventory_2</span>
-                            <div class="flex-1">
-                                <p class="text-xs font-semibold text-gray-700 mb-1">Materials Required:</p>
-                                <ul class="space-y-1">
-                                    ${materials.map(m => `<li class="text-xs text-gray-600 flex items-center gap-1">
-                                        <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
-                                        <span>${m}</span>
-                                    </li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="mt-2 pt-2 border-t">
+                        <p class="text-xs text-gray-600 mb-1">Materials:</p>
+                        <ul class="text-xs text-gray-600 space-y-0.5">
+                            ${materials.map(m => `<li>• ${m}</li>`).join('')}
+                        </ul>
                     </div>
                 `;
             }
 
-            itemDiv.className = `${bgColor} border-2 ${borderColor} rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow`;
+            itemDiv.className = 'bg-white border rounded-lg p-3 hover:border-blue-300 transition-colors';
             
             itemDiv.innerHTML = `
-                <label class="cursor-pointer">
-                    <div class="flex items-start gap-3">
-                        <input type="checkbox" value="${checkboxValue}" class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500" onchange="updateCustomerTotal()" ${isChecked}>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between gap-3 mb-2">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-900 text-base leading-snug">${item.text}</p>
-                                </div>
-                                <div class="text-right shrink-0">
-                                    <p class="text-2xl font-bold text-blue-600">₹${(item.amount || 0).toFixed(2)}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badgeColor}">
-                                    <span class="material-symbols-outlined" style="font-size: 14px;">${badgeIcon}</span>
-                                    ${badgeText}
-                                </span>
-                            </div>
-                            ${materialsHtml}
+                <label class="cursor-pointer flex items-start gap-3">
+                    <input type="checkbox" value="${checkboxValue}" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600" onchange="updateCustomerTotal()" ${isChecked}>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2 mb-1">
+                            <p class="font-medium text-gray-900 text-sm">${item.text}</p>
+                            <p class="font-bold text-gray-900 shrink-0">₹${(item.amount || 0).toFixed(2)}</p>
                         </div>
+                        <span class="inline-block px-2 py-0.5 rounded text-xs ${badgeColor}">${badgeText}</span>
+                        ${materialsHtml}
                     </div>
                 </label>
             `;
@@ -4838,17 +4781,11 @@ async function loadApprovalScreen(reportId) {
         // Display labour cost if present
         if (window.currentLabourCost > 0) {
             const labourCostDiv = document.createElement('div');
-            labourCostDiv.className = 'bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-xl p-4 shadow-sm';
+            labourCostDiv.className = 'bg-amber-50 border border-amber-200 rounded-lg p-3';
             labourCostDiv.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-orange-600">engineering</span>
-                        <div>
-                            <p class="font-semibold text-gray-900">Labour Charges</p>
-                            <p class="text-xs text-gray-600">Professional service fee</p>
-                        </div>
-                    </div>
-                    <p class="text-2xl font-bold text-orange-600">₹${window.currentLabourCost.toFixed(2)}</p>
+                    <span class="text-sm font-medium text-gray-700">Labour Charges</span>
+                    <p class="font-bold text-gray-900">₹${window.currentLabourCost.toFixed(2)}</p>
                 </div>
             `;
             suggestionsList.appendChild(labourCostDiv);
