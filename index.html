@@ -1787,7 +1787,7 @@ async function populateWashList() {
     const query = sb.from('reports')
         .select(`
             id,
-            vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model)),
+            vehicles!inner("Vehicle Number", vehicle_name, "Color", vehicle_models(brand, "Model name")),
             executive:executive_id(username)
         `)
         .eq('status', 'Sent To Wash')
@@ -1807,13 +1807,13 @@ async function populateWashList() {
         
         // **THE FIX IS HERE:** This line now safely checks if 'vehicle_models' exists.
         // If it doesn't, it will show an empty string instead of crashing.
-        const brandAndModel = `${vehicle.vehicle_models?.brand || ''} ${vehicle.vehicle_models?.model || ''}`.trim();
+        const brandAndModel = `${vehicle.vehicle_models?.brand || ''} ${vehicle.vehicle_models?.["Model name"] || ''}`.trim();
         
         card.className = 'p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3';
         
         card.innerHTML = `
             <div class="w-full sm:w-auto text-left">
-                <p class="font-bold text-gray-800">${vehicle.vehicle_no}</p>
+                <p class="font-bold text-gray-800">${vehicle["Vehicle Number"]}</p>
                 <p class="text-sm text-gray-600 mt-1">${brandAndModel || 'Brand/Model not specified'}</p>
                 <p class="text-xs text-gray-500 mt-1">From: ${executive?.username || 'N/A'}</p>
             </div>
@@ -4677,7 +4677,7 @@ async function loadApprovalScreen(reportId) {
     try {
         const { data: report, error } = await sb
             .from('reports')
-            .select('id, suggested, approved, labour_cost, vehicles!inner(vehicle_no)')
+            .select('id, suggested, approved, labour_cost, vehicles!inner("Vehicle Number")')
             .eq('id', reportId)
             .single();
 
@@ -4692,7 +4692,9 @@ async function loadApprovalScreen(reportId) {
             return;
         }
 
-        document.getElementById('approval-vehicle-no').textContent = report.vehicles?.vehicle_no || 'Unknown';
+        // Vehicle number now comes from the "Vehicle Number" column in vehicles
+        document.getElementById('approval-vehicle-no').textContent =
+            report.vehicles?.["Vehicle Number"] || 'Unknown';
 
         if (report.approved && report.approved !== '[]') {
             document.getElementById('approval-content').classList.add('hidden');
