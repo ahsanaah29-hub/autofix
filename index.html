@@ -1787,7 +1787,7 @@ async function populateWashList() {
     const query = sb.from('reports')
         .select(`
             id,
-            vehicles!inner("Vehicle Number", vehicle_name, "Color", vehicle_models(brand, "Model name")),
+            vehicles!reports_vehicle_fk("Guid", "Vehicle Number", vehicle_name, "Color", vehicle_models(brand, "Model name")),
             executive:executive_id(username)
         `)
         .eq('status', 'Sent To Wash')
@@ -1932,7 +1932,7 @@ async function populateReadyToCloseJobs() {
     noJobsMsg.classList.add('hidden');
 
     const { data: reports, error } = await sb.from('reports')
-        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .select(`id, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'Ongoing')
         .not('approved', 'is', null)
@@ -2035,7 +2035,7 @@ async function populateInspectionPendingJobs() {
     noPendingMsg.classList.add('hidden');
 
     const { data: rejectedReports, error: rejectedError } = await sb.from('reports')
-        .select(`id, inspection_remarks, vehicles!inner(vehicle_no, vehicle_models(brand, model)), inspector:inspector_id(username)`)
+        .select(`id, inspection_remarks, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_models(brand, model)), inspector:inspector_id(username)`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'rejected');
     
@@ -2069,7 +2069,7 @@ async function populateInspectionPendingJobs() {
     }
 
     const { data: pendingReports, error: pendingError } = await sb.from('reports')
-        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .select(`id, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'pending_inspection');
     
@@ -2126,7 +2126,7 @@ async function populateInspectionQueue() {
     // THE FIX: The 'query' variable is now correctly defined only once.
     // This query now correctly selects 'approved' and 'inspection_remarks' for the modal.
     const query = sb.from('reports')
-        .select(`id, complaint, suggested, approved, inspection_remarks, vehicles!inner(vehicle_no, vehicle_name), executive:executive_id(username)`)
+        .select(`id, complaint, suggested, approved, inspection_remarks, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_name), executive:executive_id(username)`)
         .eq('status', 'pending_inspection')
         .order('created_at', { ascending: true });
     
@@ -2243,7 +2243,7 @@ async function populateWashPendingJobs() {
     noJobsMsg.classList.add('hidden');
 
     const { data: reports, error } = await sb.from('reports')
-        .select(`id, status, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .select(`id, status, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .in('status', ['inspection_approved', 'Sent To Wash']);
 
@@ -2306,7 +2306,7 @@ async function populateCompletedWashJobs() {
     noJobsMsg.classList.add('hidden');
     
     const { data: reports, error } = await sb.from('reports')
-        .select(`id, vehicles!inner(vehicle_no, vehicle_models(brand, model))`)
+        .select(`id, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_models(brand, model))`)
         .eq('executive_id', currentUser.id)
         .eq('status', 'Wash Completed')
         .order('created_at', { ascending: true });
@@ -2545,8 +2545,8 @@ async function fetchAndPopulateReports(isAdmin = false) {
         id, created_at, status, complaint, suggested, approved, marks,
         odometer_reading, client_name, client_phone,
         gdrive_folder_url, customer_feedback_text, customer_feedback_audio,
-        vehicles!inner(
-          id, vehicle_no, vehicle_name, color, engine_no, chassis_no,
+        vehicles!reports_vehicle_fk(
+          "Guid", id, vehicle_no, vehicle_name, color, engine_no, chassis_no,
           vehicle_models!inner(brand, model)
         ),
         executive:executive_id(username, id),
@@ -3850,7 +3850,7 @@ async function sendApprovalLink() {
             noJobsMsg.classList.add('hidden');
 
             const { data: reports, error } = await sb.from('reports')
-                .select(`id, created_at, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
+                .select(`id, created_at, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
                 .eq('executive_id', currentUser.id)
                 .eq('status', 'Not Started')
                 .order('created_at', { ascending: false });
@@ -3923,7 +3923,7 @@ async function sendApprovalLink() {
             noJobsMsg.classList.add('hidden');
 
             const { data: reports, error } = await sb.from('reports')
-                .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
+                .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
                 .eq('executive_id', currentUser.id)
                 .eq('status', 'Ongoing')
                 .not('approved', 'is', null)
@@ -3981,7 +3981,7 @@ async function sendApprovalLink() {
             noJobsMsg.classList.add('hidden');
 
             const { data: reports, error } = await sb.from('reports')
-                .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!inner(vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
+                .select(`id, complaint, approved, suggested, customer_feedback_text, customer_feedback_audio, vehicles!reports_vehicle_fk("Guid", vehicle_no, vehicle_name, color, vehicle_models(brand, model))`)
                 .eq('executive_id', currentUser.id)
                 .eq('status', 'Ongoing')
                 .not('suggested', 'is', null)
@@ -4677,7 +4677,7 @@ async function loadApprovalScreen(reportId) {
     try {
         const { data: report, error } = await sb
             .from('reports')
-            .select('id, suggested, approved, labour_cost, vehicles!inner("Vehicle Number")')
+            .select('id, suggested, approved, labour_cost, vehicles!reports_vehicle_fk("Guid", "Vehicle Number")')
             .eq('id', reportId)
             .single();
 
